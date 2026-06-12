@@ -14,6 +14,9 @@ export default defineConfig({
     passWithNoTests: true,
     projects: [
       {
+        resolve: {
+          tsconfigPaths: true,
+        },
         test: {
           name: "unit",
           include: ["src/**/*.test.{ts,tsx}"],

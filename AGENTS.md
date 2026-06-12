@@ -83,6 +83,13 @@
 - Co-locate feature-specific components in `src/features/{domain}/components/`. Only put truly shared/reusable components in `src/components/ui/`.
 - Prefer Server Actions over API routes. Do not create files under `src/app/api/` — the auth `[...nextauth]` route is the only exception (required by NextAuth).
 
+### Testing
+
+- Test files live in `__tests__/` directories co-located with their feature/component (Next.js convention).
+  Example: `src/features/users/__tests__/queries.test.ts`
+- Naming: `*.test.ts` for logic, `*.test.tsx` for components.
+- Mock `@/lib/prisma` via `vi.mock` for data-layer tests. Use Prisma types for mock values (no `as any`).
+
 ### General
 
 - Named exports only — no default exports, except for Next.js special files (`page.tsx`, `layout.tsx`, `error.tsx`, `global-error.tsx`, `not-found.tsx`, `loading.tsx`, `route.tsx` etc.) which require a default export. Use inline `export default function` for these files.
