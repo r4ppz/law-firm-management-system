@@ -4,13 +4,19 @@ import clsx from "clsx";
 import {
   ListBox as AriaListBox,
   ListBoxItem as AriaListBoxItem,
+  ListBoxLoadMoreItem as AriaListBoxLoadMoreItem,
+  ListBoxSection as AriaListBoxSection,
   composeRenderProps,
+  Header,
   type ListBoxItemProps as AriaListBoxItemProps,
+  type ListBoxLoadMoreItemProps as AriaListBoxLoadMoreItemProps,
   type ListBoxProps as AriaListBoxProps,
+  type ListBoxSectionProps as AriaListBoxSectionProps,
 } from "react-aria-components";
 import { FaCheck } from "react-icons/fa6";
 
 import { Text } from "@/components/ui/Content/Content";
+import { ProgressCircle } from "@/components/ui/ProgressCircle/ProgressCircle";
 
 import styles from "./ListBox.module.css";
 
@@ -35,6 +41,18 @@ export function ListBoxItem({ className, ...props }: AriaListBoxItemProps) {
         typeof children === "string" ? <Text slot="label">{children}</Text> : children,
       )}
     </AriaListBoxItem>
+  );
+}
+
+export function ListBoxSection<T extends object>(props: AriaListBoxSectionProps<T>) {
+  return <AriaListBoxSection {...props} />;
+}
+
+export function ListBoxLoadMoreItem(props: AriaListBoxLoadMoreItemProps) {
+  return (
+    <AriaListBoxLoadMoreItem {...props}>
+      <ProgressCircle aria-label="Loading more..." />
+    </AriaListBoxLoadMoreItem>
   );
 }
 
@@ -68,3 +86,5 @@ export function DropdownItem({ className, ...props }: AriaListBoxItemProps) {
     </AriaListBoxItem>
   );
 }
+
+export { Header };

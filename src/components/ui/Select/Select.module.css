@@ -23,33 +23,38 @@
     border-radius: var(--radius-sm);
     cursor: default;
     outline: none;
+    box-shadow: none;
     transition: border-color var(--transition-base);
 
     &[data-hovered] {
+      transform: none;
+      box-shadow: none;
       border-color: var(--color-border-strong);
     }
 
-    &[data-focused] {
+    &[data-pressed] {
+      transform: none;
+      background-color: var(--color-surface-bg);
+    }
+
+    &[data-focus-visible] {
       border-color: var(--color-brand-accent);
       outline: 2px solid var(--color-brand-accent--focus);
       outline-offset: -1px;
-    }
-
-    &[data-pressed] {
-      scale: 1;
     }
 
     &[data-disabled] {
       color: var(--color-text-muted);
       opacity: 0.6;
       cursor: not-allowed;
+      pointer-events: none;
     }
 
     &[data-invalid] {
       border-color: var(--color-danger);
     }
 
-    &[data-focused][data-invalid] {
+    &[data-focus-visible][data-invalid] {
       outline-color: var(--color-danger);
     }
   }

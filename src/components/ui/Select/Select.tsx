@@ -2,7 +2,6 @@
 
 import clsx from "clsx";
 import {
-  Button as AriaButton,
   FieldError as AriaFieldError,
   Label as AriaLabel,
   Popover as AriaPopover,
@@ -14,6 +13,7 @@ import {
 } from "react-aria-components";
 import { FaChevronDown } from "react-icons/fa6";
 
+import { Button } from "@/components/ui/Button/Button";
 import { Text } from "@/components/ui/Content/Content";
 import { DropdownItem, DropdownListBox } from "@/components/ui/ListBox/ListBox";
 
@@ -42,10 +42,10 @@ export function Select<T extends object, M extends "single" | "multiple" = "sing
   return (
     <AriaSelect {...props} className={clsx(styles.select, className)}>
       {label && <AriaLabel className={styles.label}>{label}</AriaLabel>}
-      <AriaButton className={styles.trigger}>
+      <Button variant="ghost" className={styles.trigger}>
         <AriaSelectValue className={styles.value} />
         <FaChevronDown className={styles.chevron} />
-      </AriaButton>
+      </Button>
       {description && (
         <Text slot="description" className={styles.description}>
           {description}

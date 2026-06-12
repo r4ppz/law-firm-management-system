@@ -56,7 +56,7 @@
 
 .icon {
   color: var(--raw-white);
-  font-size: 0.625rem;
+  font-size: var(--icon-size-xs);
 }
 
 .field [slot="description"] {
