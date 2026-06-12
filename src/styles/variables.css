@@ -8,6 +8,7 @@
   --raw-gold: #c9a227;
   --raw-gold-light: #e0c46b;
   --raw-gold-dark: #9a791c;
+  --raw-gold-lightest: #ecd28b;
 
   --raw-white: #ffffff;
   --raw-cream: #f7f5ef;
@@ -46,7 +47,7 @@
 
   --color-brand-accent: var(--raw-gold);
   --color-brand-accent--hover: var(--raw-gold-dark);
-  --color-brand-accent--soft: var(--raw-gold-light);
+  --color-brand-accent--focus: var(--raw-gold-lightest);
 
   /* Border colors */
   --color-border-subtle: var(--raw-gray-200);

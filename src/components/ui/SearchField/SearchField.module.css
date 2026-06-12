@@ -61,7 +61,7 @@
 
     &[data-focused] {
       border-color: var(--color-brand-accent);
-      outline: 2px solid var(--color-brand-accent--soft);
+      outline: 2px solid var(--color-brand-accent--focus);
       outline-offset: -1px;
     }
 

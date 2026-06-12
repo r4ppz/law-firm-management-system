@@ -9,7 +9,7 @@
   font-size: var(--font-size-sm);
 
   &[data-focus-visible] {
-    outline: 2px solid var(--color-brand-accent--soft);
+    outline: 2px solid var(--color-brand-accent--focus);
     outline-offset: -1px;
   }
 
@@ -54,7 +54,7 @@
   }
 
   &[data-focus-visible] {
-    outline: 2px solid var(--color-brand-accent--soft);
+    outline: 2px solid var(--color-brand-accent--focus);
     outline-offset: -2px;
   }
 
@@ -123,7 +123,7 @@
   }
 
   &[data-focus-visible] {
-    outline: 2px solid var(--color-brand-accent--soft);
+    outline: 2px solid var(--color-brand-accent--focus);
     outline-offset: -2px;
   }
 
