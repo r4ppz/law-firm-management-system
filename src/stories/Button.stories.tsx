@@ -11,7 +11,8 @@ const meta: Meta<typeof Button> = {
       options: ["primary", "secondary", "navigation", "ghost"],
     },
     children: { control: "text" },
-    "aria-disabled": { control: "boolean" },
+    isDisabled: { control: "boolean" },
+    isPending: { control: "boolean" },
   },
 };
 export default meta;
@@ -43,5 +44,21 @@ export const Ghost: Story = {
   args: {
     variant: "ghost",
     children: "Ghost Button",
+  },
+};
+
+export const Disabled: Story = {
+  args: {
+    variant: "primary",
+    children: "Disabled Button",
+    isDisabled: true,
+  },
+};
+
+export const Loading: Story = {
+  args: {
+    variant: "primary",
+    children: "Saving...",
+    isPending: true,
   },
 };

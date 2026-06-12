@@ -2,12 +2,12 @@
   /* --------------------------------------------- */
   /* Primitives (raw values) */
   --raw-black: #0b0b0b;
-  --raw-black-strong: #000000;
-  --raw-black-soft: #262626;
+  --raw-black-dark: #000000;
+  --raw-black-light: #262626;
 
   --raw-gold: #c9a227;
-  --raw-gold-light: #e0c46b;
   --raw-gold-dark: #9a791c;
+  --raw-gold-light: #d6b24e;
   --raw-gold-lightest: #ecd28b;
 
   --raw-white: #ffffff;
@@ -43,10 +43,12 @@
 
   /* Brand colors */
   --color-brand-primary: var(--raw-black);
-  --color-brand-primary--hover: var(--raw-black-soft);
+  --color-brand-primary--hover: var(--raw-black-light);
+  --color-brand-primary--active: var(--raw-black-dark);
 
   --color-brand-accent: var(--raw-gold);
-  --color-brand-accent--hover: var(--raw-gold-dark);
+  --color-brand-accent--hover: var(--raw-gold-light);
+  --color-brand-accent--active: var(--raw-gold-dark);
   --color-brand-accent--focus: var(--raw-gold-lightest);
 
   /* Border colors */
