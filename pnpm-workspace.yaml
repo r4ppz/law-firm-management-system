@@ -1,5 +1,10 @@
+# Supply chain attacks protections
+
 blockExoticSubdeps: true
-minimumReleaseAge: 4320
+minimumReleaseAge: 10080
+minimumReleaseAgeExclude:
+  - "@types/node@20.19.42"
+  - "@types/react@19.2.17"
 
 allowBuilds:
   "@prisma/engines": true
