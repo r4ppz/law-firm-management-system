@@ -1,6 +1,6 @@
 .container {
   border: 1px solid var(--color-border-strong);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   background: var(--color-surface-bg);
   overflow: auto;
   width: 100%;

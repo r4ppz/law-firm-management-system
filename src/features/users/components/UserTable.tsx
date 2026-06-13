@@ -1,9 +1,11 @@
 "use client";
 
-import { FaPenToSquare, FaTrashCan } from "react-icons/fa6";
+import { useMemo, useState } from "react";
+import { FaPenToSquare, FaPlus, FaTrashCan } from "react-icons/fa6";
 
 import { Button } from "@/components/ui/Button/Button";
 import { DataTable, type ColumnDef } from "@/components/ui/DataTable/DataTable";
+import { SearchField } from "@/components/ui/SearchField/SearchField";
 import type { Role } from "@/generated/prisma/client";
 
 import styles from "./UserTable.module.css";
@@ -86,5 +88,32 @@ const columns: ColumnDef<UserRow>[] = [
 ];
 
 export function UserTable({ users, fill }: UserTableProps) {
-  return <DataTable columns={columns} rows={users} fill={fill} />;
+  const [search, setSearch] = useState("");
+
+  const filtered = useMemo(() => {
+    if (!search) return users;
+    const q = search.toLowerCase();
+    return users.filter(
+      (u) => u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q),
+    );
+  }, [users, search]);
+
+  return (
+    <div className={styles.wrapper}>
+      <div className={styles.toolbar}>
+        <div className={styles.searchWrapper}>
+          <SearchField
+            value={search}
+            onChange={setSearch}
+            placeholder="Search users..."
+            aria-label="Search users"
+          />
+        </div>
+        <Button variant="primary" className={styles.addButton} aria-label="Add user">
+          <FaPlus /> Add User
+        </Button>
+      </div>
+      <DataTable columns={columns} rows={filtered} fill={fill} />
+    </div>
+  );
 }

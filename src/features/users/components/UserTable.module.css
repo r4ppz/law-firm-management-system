@@ -1,3 +1,28 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  flex: 1;
+  min-height: 0;
+}
+
+.toolbar {
+  display: flex;
+  gap: var(--space-md);
+  align-items: center;
+}
+
+.searchWrapper {
+  flex: 1;
+  min-width: 0;
+}
+
+.addButton {
+  width: auto;
+  font-size: var(--font-size-md);
+  padding: var(--space-sm) var(--space-xl);
+}
+
 .roleBadge {
   font-weight: var(--font-weight-semi-bold);
   font-size: var(--font-size-sm);
