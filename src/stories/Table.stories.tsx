@@ -31,6 +31,21 @@ const data: StoryItem[] = [
 const meta = {
   component: Table,
   tags: ["autodocs"],
+  argTypes: {
+    selectionMode: {
+      control: "select",
+      options: ["none", "single", "multiple"],
+    },
+    selectionBehavior: {
+      control: "select",
+      options: ["toggle", "replace"],
+      if: { arg: "selectionMode", neq: "none" },
+    },
+    disabledBehavior: {
+      control: "select",
+      options: ["selection", "all"],
+    },
+  },
 } as Meta<typeof Table>;
 
 export default meta;
@@ -57,6 +72,90 @@ export const WithData: Story = {
       </TableBody>
     </Table>
   ),
+};
+
+export const Playground: Story = {
+  argTypes: {
+    selectionMode: {
+      control: "select",
+      options: ["none", "single", "multiple"],
+    },
+    selectionBehavior: {
+      control: "select",
+      options: ["toggle", "replace"],
+      if: { arg: "selectionMode", neq: "none" },
+    },
+    disabledBehavior: {
+      control: "select",
+      options: ["selection", "all"],
+    },
+  },
+  args: {
+    selectionMode: "none",
+    selectionBehavior: "toggle",
+    disabledBehavior: "selection",
+  },
+  render: (args) => {
+    function PlaygroundExample() {
+      const [selected, setSelected] = useState<Selection>(new Set());
+
+      const selectionProps =
+        args.selectionMode !== "none"
+          ? {
+              selectionMode: args.selectionMode,
+              selectionBehavior: args.selectionBehavior,
+              disabledBehavior: args.disabledBehavior,
+              selectedKeys: selected,
+              onSelectionChange: setSelected,
+            }
+          : {};
+
+      return (
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 12,
+          }}
+        >
+          <Table aria-label="Playground" {...selectionProps}>
+            <TableHeader>
+              <Column id="name" isRowHeader>
+                Name
+              </Column>
+              <Column id="role">Role</Column>
+              <Column id="status">Status</Column>
+            </TableHeader>
+            <TableBody items={data}>
+              {(item) => (
+                <Row id={item.id}>
+                  <Cell>{item.name}</Cell>
+                  <Cell>{item.role}</Cell>
+                  <Cell>{item.status}</Cell>
+                </Row>
+              )}
+            </TableBody>
+          </Table>
+          {args.selectionMode !== "none" && (
+            <p
+              style={{
+                margin: 0,
+                fontSize: "0.875rem",
+                color: "#5f5a4b",
+              }}
+            >
+              Selected:{" "}
+              {selected === "all"
+                ? "all"
+                : Array.from(selected as Set<string>).join(", ") || "none"}
+            </p>
+          )}
+        </div>
+      );
+    }
+
+    return <PlaygroundExample />;
+  },
 };
 
 export const Empty: Story = {
