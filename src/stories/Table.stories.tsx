@@ -81,7 +81,13 @@ export const WithSelection: Story = {
       const [selected, setSelected] = useState<Selection>(new Set());
 
       return (
-        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 12,
+          }}
+        >
           <Table
             aria-label="Selectable table"
             selectionMode="multiple"
@@ -105,7 +111,13 @@ export const WithSelection: Story = {
               )}
             </TableBody>
           </Table>
-          <p style={{ margin: 0, fontSize: "0.875rem", color: "#5f5a4b" }}>
+          <p
+            style={{
+              margin: 0,
+              fontSize: "0.875rem",
+              color: "#5f5a4b",
+            }}
+          >
             Selected:{" "}
             {selected === "all" ? "all" : Array.from(selected as Set<string>).join(", ") || "none"}
           </p>

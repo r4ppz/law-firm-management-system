@@ -77,14 +77,6 @@
         background: var(--color-surface-bg-alt);
       }
 
-      &[data-sort-direction] {
-        color: var(--color-brand-accent);
-
-        &[data-pressed] {
-          background: var(--color-brand-accent--focus);
-        }
-      }
-
       &[data-focus-visible] {
         outline: 2px solid var(--color-brand-accent--focus);
         outline-offset: -2px;
@@ -181,10 +173,8 @@
       transition: background-color var(--transition-fast);
       -webkit-tap-highlight-color: transparent;
 
-      &:not(:first-child):not(:last-child) {
-        .cell {
-          border-bottom: 0.5px solid var(--color-border-subtle);
-        }
+      .cell {
+        border-bottom: 0.5px solid var(--color-border-subtle);
       }
 
       &:last-child {
@@ -207,7 +197,7 @@
       }
 
       &:nth-child(even) {
-        background: var(--color-surface-bg-alt);
+        background: var(--color-surface-bg);
 
         &[data-pressed] {
           background: var(--color-border-subtle);
