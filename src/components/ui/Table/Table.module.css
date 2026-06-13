@@ -205,12 +205,20 @@
         outline-offset: -2px;
       }
 
+      &[data-hovered] {
+        background: var(--color-surface-hover);
+      }
+
       &[data-pressed] {
         background: var(--color-surface-bg-alt);
       }
 
       &:nth-child(even) {
         background: var(--color-surface-bg);
+
+        &[data-hovered] {
+          background: var(--color-surface-hover);
+        }
 
         &[data-pressed] {
           background: var(--color-border-subtle);
@@ -223,6 +231,10 @@
 
         &[data-focus-visible] {
           outline-offset: -4px;
+        }
+
+        &[data-hovered] {
+          background: var(--color-brand-accent--hover);
         }
 
         &[data-pressed] {

@@ -32,6 +32,7 @@
   --color-app-bg: var(--raw-cream);
   --color-surface-bg: var(--raw-white);
   --color-surface-bg-alt: var(--raw-sand);
+  --color-surface-hover: var(--raw-gray-100);
   --color-bg-inverse: var(--raw-black);
   --color-modal-overlay: rgba(11, 11, 11, var(--opacity-overlay));
 
