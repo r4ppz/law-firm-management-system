@@ -20,12 +20,6 @@
     top: 0;
     z-index: 10;
   }
-
-  .cell {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
 }
 
 .table {
@@ -124,7 +118,7 @@
           padding: 0 var(--space-sm);
           translate: var(--space-lg) 0;
           height: 32px;
-          margin: -16px 0;
+          margin: -16px 0 0 calc(-2 * var(--space-sm));
           flex: 0 0 auto;
           touch-action: none;
           box-sizing: content-box;
