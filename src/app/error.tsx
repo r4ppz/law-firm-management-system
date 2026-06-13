@@ -1,7 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect } from "react";
+
+import { Link } from "@/components/ui/Link/Link";
 
 import styles from "./error.module.css";
 
@@ -21,12 +22,8 @@ export default function Error({ error, unstable_retry }: ErrorProps) {
         <h1 className={styles.title}>Something went wrong</h1>
         <p className={styles.message}>{error.message}</p>
         <div className={styles.actions}>
-          <button type="button" onClick={unstable_retry} className={styles.link}>
-            Try again
-          </button>
-          <Link href="/dashboard" className={styles.link}>
-            Go to Dashboard
-          </Link>
+          <Link onPress={unstable_retry}>Try again</Link>
+          <Link href="/dashboard">Go to Dashboard</Link>
         </div>
       </div>
     </main>

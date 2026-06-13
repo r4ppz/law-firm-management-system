@@ -2,6 +2,8 @@
 
 import { useEffect } from "react";
 
+import { Link } from "@/components/ui/Link/Link";
+
 import styles from "./global-error.module.css";
 
 interface GlobalErrorProps {
@@ -21,9 +23,7 @@ export default function GlobalError({ error, unstable_retry }: GlobalErrorProps)
           <div className={styles.content}>
             <h1 className={styles.title}>Something went wrong</h1>
             <p className={styles.message}>A critical error occurred. Please try again.</p>
-            <button type="button" onClick={unstable_retry} className={styles.link}>
-              Try again
-            </button>
+            <Link onPress={unstable_retry}>Try again</Link>
           </div>
         </main>
       </body>

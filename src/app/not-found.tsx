@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/components/ui/Link/Link";
 
 import styles from "./not-found.module.css";
 
@@ -11,9 +11,7 @@ export default function NotFound() {
         <p className={styles.message}>
           The page you are looking for does not exist or has been moved.
         </p>
-        <Link href="/dashboard" className={styles.link}>
-          Go to Dashboard
-        </Link>
+        <Link href="/dashboard">Go to Dashboard</Link>
       </div>
     </main>
   );

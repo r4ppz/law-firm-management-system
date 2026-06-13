@@ -1,7 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+
+import { Link } from "@/components/ui/Link/Link";
 
 import styles from "./AuthErrorPage.module.css";
 
@@ -49,9 +50,7 @@ export function AuthErrorContent() {
     <div className={styles.content}>
       <h1 className={styles.title}>{title}</h1>
       <p className={styles.message}>{message}</p>
-      <Link href="/" className={styles.link}>
-        Back to Sign In
-      </Link>
+      <Link href="/">Back to Sign In</Link>
     </div>
   );
 }

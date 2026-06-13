@@ -31,21 +31,4 @@
     line-height: var(--line-height-relaxed);
     margin-bottom: var(--space-xl);
   }
-
-  .link {
-    color: var(--color-brand-primary);
-    text-decoration: underline;
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-medium);
-    outline: none;
-
-    &:hover {
-      color: var(--color-brand-accent);
-    }
-
-    &[data-focus-visible] {
-      outline: 2px solid var(--color-brand-accent--focus);
-      outline-offset: 2px;
-    }
-  }
 }

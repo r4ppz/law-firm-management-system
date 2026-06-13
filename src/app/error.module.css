@@ -32,26 +32,4 @@
     align-items: center;
     gap: var(--space-md);
   }
-
-  .link {
-    color: var(--color-brand-primary);
-    text-decoration: underline;
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-medium);
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-family: inherit;
-    padding: 0;
-    outline: none;
-
-    &:hover {
-      color: var(--color-brand-accent);
-    }
-
-    &[data-focus-visible] {
-      outline: 2px solid var(--color-brand-accent--focus);
-      outline-offset: 2px;
-    }
-  }
 }
