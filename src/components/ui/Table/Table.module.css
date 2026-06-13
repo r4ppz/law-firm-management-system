@@ -1,10 +1,10 @@
 .resizableTableContainer {
   width: 100%;
+  box-sizing: border-box;
   overflow: auto;
   position: relative;
   border: 1px solid var(--color-border-strong);
   border-radius: var(--radius-md);
-  background: var(--color-surface-bg);
 
   .table {
     border: none;
@@ -30,6 +30,8 @@
 
 .table {
   width: 100%;
+  table-layout: fixed;
+  box-sizing: border-box;
   border-collapse: separate;
   border-spacing: 0;
   border: 1px solid var(--color-border-strong);
@@ -60,7 +62,7 @@
     color: var(--color-text-primary);
 
     .column {
-      padding: var(--space-md);
+      padding: var(--space-sm);
       text-align: left;
       outline: none;
       cursor: default;
@@ -71,6 +73,10 @@
 
       &:last-child {
         border-right: none;
+
+        .columnResizer {
+          display: none;
+        }
       }
 
       &[data-pressed] {
@@ -89,7 +95,6 @@
       .columnHeader {
         display: flex;
         align-items: center;
-        gap: var(--space-sm);
 
         .columnName {
           flex: 1;
@@ -114,37 +119,41 @@
         }
 
         .columnResizer {
-          position: absolute;
-          top: 0;
-          bottom: 0;
-          right: calc(-1 * var(--space-sm));
-          width: var(--space-sm);
+          border-radius: var(--radius-sm);
+          background-color: var(--color-border-strong);
+          padding: 0 var(--space-sm);
+          translate: var(--space-lg) 0;
+          height: 32px;
+          margin: -16px 0;
+          flex: 0 0 auto;
           touch-action: none;
-          cursor: ew-resize;
-          outline: none;
+          box-sizing: content-box;
+          background-clip: content-box;
 
-          &::before {
-            content: "";
-            position: absolute;
-            top: 4px;
-            bottom: 4px;
-            left: 0;
-            width: 1px;
-            background-color: var(--color-border-strong);
-            border-radius: var(--radius-sm);
+          &[data-resizable-direction="both"],
+          &[data-resizable-direction="left"],
+          &[data-resizable-direction="right"] {
+            cursor: ew-resize;
           }
 
           &[data-focus-visible] {
+            background-color: var(--color-brand-accent);
             outline: 2px solid var(--color-brand-accent--focus);
             outline-offset: -2px;
           }
 
-          &[data-resizing]::before {
-            width: 2px;
+          &[data-resizing] {
             background-color: var(--color-brand-accent);
           }
         }
       }
+    }
+
+    .selectionColumn,
+    .dragColumn {
+      padding: 0;
+      text-align: center;
+      vertical-align: middle;
     }
 
     .selectionColumn {
@@ -155,6 +164,10 @@
     .dragColumn {
       width: 20px;
       min-width: 20px;
+    }
+
+    .selectionColumn [slot="selection"] {
+      display: inline-flex;
     }
   }
 
@@ -237,15 +250,32 @@
       }
 
       .cell {
-        padding: var(--space-md);
+        padding: var(--space-sm);
         text-align: left;
         outline: none;
+        border-right: 0.5px solid var(--color-border-subtle);
         word-break: break-word;
         -webkit-tap-highlight-color: transparent;
+
+        &:last-child {
+          border-right: none;
+        }
 
         &[data-focus-visible] {
           outline: 2px solid var(--color-brand-accent--focus);
           outline-offset: -2px;
+        }
+
+        &.selectionCell,
+        &.dragCell {
+          padding: 0;
+          text-align: center;
+          vertical-align: middle;
+        }
+
+        &.selectionCell [slot="selection"],
+        &.dragCell [slot="drag"] {
+          display: inline-flex;
         }
 
         &[data-tree-column] {
@@ -280,7 +310,7 @@
 
           &[data-focus-visible] {
             border-radius: var(--radius-sm);
-            outline: 2px solid var(--color-brand-accent--focus);
+            outline: 1px solid var(--color-brand-accent--focus);
           }
         }
 
@@ -300,11 +330,14 @@
             border-radius: var(--radius-sm);
             outline: 2px solid var(--color-brand-accent--focus);
           }
+
+          svg {
+            transition: transform var(--transition-fast);
+          }
         }
 
         &[data-expanded] .chevronButton svg {
           transform: rotate(90deg);
-          transition: transform var(--transition-fast);
         }
       }
     }

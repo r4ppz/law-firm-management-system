@@ -101,14 +101,14 @@ export function Row<T extends object>({
   return (
     <AriaRow id={id} className={clsx(styles.row, className)} {...props}>
       {allowsDragging && (
-        <Cell>
+        <Cell className={styles.dragCell}>
           <AriaButton slot="drag" className={styles.dragButton}>
             <FaGripVertical />
           </AriaButton>
         </Cell>
       )}
       {selectionBehavior === "toggle" && (
-        <Cell>
+        <Cell className={styles.selectionCell}>
           <Checkbox slot="selection" />
         </Cell>
       )}
