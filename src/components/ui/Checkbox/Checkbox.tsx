@@ -3,19 +3,21 @@
 import clsx from "clsx";
 import type { ReactNode } from "react";
 import {
-  Checkbox as AriaCheckbox,
-  type CheckboxProps as AriaCheckboxProps,
+  CheckboxButton,
+  CheckboxField,
+  type CheckboxFieldProps,
+  type ValidationResult,
 } from "react-aria-components";
 import { FaCheck, FaMinus } from "react-icons/fa6";
 
-import { Text } from "@/components/ui/Content/Content";
+import { Description, FieldError } from "@/components/ui/Form/Form";
 
 import styles from "./Checkbox.module.css";
 
-interface CheckboxProps extends AriaCheckboxProps {
+interface CheckboxProps extends CheckboxFieldProps {
   children?: ReactNode;
   description?: string;
-  errorMessage?: string;
+  errorMessage?: string | ((validation: ValidationResult) => string);
 }
 
 export function Checkbox({
@@ -26,8 +28,8 @@ export function Checkbox({
   ...props
 }: CheckboxProps) {
   return (
-    <div className={clsx(styles.field, className)}>
-      <AriaCheckbox className={styles.button} {...props}>
+    <CheckboxField {...props} className={clsx(styles.field, className)}>
+      <CheckboxButton className={styles.button}>
         {({ isSelected, isIndeterminate }) => (
           <>
             <div className={styles.indicator}>
@@ -40,13 +42,9 @@ export function Checkbox({
             {children}
           </>
         )}
-      </AriaCheckbox>
-      {description && <Text slot="description">{description}</Text>}
-      {errorMessage && (
-        <span className={styles.error} role="alert">
-          {errorMessage}
-        </span>
-      )}
-    </div>
+      </CheckboxButton>
+      {description && <Description>{description}</Description>}
+      <FieldError className={styles.error}>{errorMessage}</FieldError>
+    </CheckboxField>
   );
 }
