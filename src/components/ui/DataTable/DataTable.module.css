@@ -1,0 +1,13 @@
+.container {
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-bg);
+  overflow: auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.fill {
+  flex: 1;
+  min-height: 0;
+}

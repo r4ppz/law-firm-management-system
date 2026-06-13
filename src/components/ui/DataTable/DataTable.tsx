@@ -1,0 +1,120 @@
+"use client";
+
+import clsx from "clsx";
+import { useMemo, useState } from "react";
+import { Collection, type Selection, type SortDescriptor } from "react-aria-components";
+
+import {
+  Cell,
+  Column,
+  Row,
+  Table,
+  TableBody,
+  TableHeader,
+  TableLoadMoreItem,
+} from "@/components/ui/Table/Table";
+
+import styles from "./DataTable.module.css";
+
+export interface ColumnDef<T> {
+  id: keyof T;
+  name: string;
+  isRowHeader?: boolean;
+  allowsSorting?: boolean;
+  render?: (value: T[keyof T], row: T) => React.ReactNode;
+}
+
+export interface DataTableProps<T extends { id: string }> {
+  columns: ColumnDef<T>[];
+  rows: T[];
+  sortDescriptor?: SortDescriptor;
+  onSortChange?: (descriptor: SortDescriptor) => void;
+  selectionMode?: "none" | "single" | "multiple";
+  onSelectionChange?: (keys: Selection) => void;
+  onLoadMore?: () => void;
+  hasMore?: boolean;
+  isLoading?: boolean;
+  loadMoreContent?: React.ReactNode;
+  fill?: boolean;
+  className?: string;
+}
+
+export function DataTable<T extends { id: string }>({
+  columns,
+  rows,
+  sortDescriptor: externalSortDescriptor,
+  onSortChange: externalOnSortChange,
+  selectionMode = "none",
+  onSelectionChange,
+  onLoadMore,
+  hasMore,
+  isLoading,
+  loadMoreContent,
+  fill,
+  className,
+}: DataTableProps<T>) {
+  const [internalSortDescriptor, setInternalSortDescriptor] = useState<
+    SortDescriptor | undefined
+  >();
+
+  const sortDescriptor = externalSortDescriptor ?? internalSortDescriptor;
+  const setSortDescriptor = externalOnSortChange ?? setInternalSortDescriptor;
+
+  const sortedRows = useMemo(() => {
+    if (!sortDescriptor?.column) return rows;
+    const col = sortDescriptor.column as keyof T;
+    return [...rows].sort((a, b) => {
+      const aVal = a[col];
+      const bVal = b[col];
+      const aStr = aVal == null ? "" : String(aVal);
+      const bStr = bVal == null ? "" : String(bVal);
+      const cmp = aStr.localeCompare(bStr);
+      return sortDescriptor.direction === "descending" ? -cmp : cmp;
+    });
+  }, [rows, sortDescriptor]);
+
+  return (
+    <div className={clsx(styles.container, fill && styles.fill, className)}>
+      <Table
+        aria-label="Data table"
+        selectionMode={selectionMode}
+        onSelectionChange={onSelectionChange}
+        sortDescriptor={sortDescriptor}
+        onSortChange={setSortDescriptor}
+      >
+        <TableHeader>
+          {columns.map((col) => (
+            <Column
+              key={String(col.id)}
+              id={String(col.id)}
+              isRowHeader={col.isRowHeader}
+              allowsSorting={col.allowsSorting}
+            >
+              {col.name}
+            </Column>
+          ))}
+        </TableHeader>
+        <TableBody>
+          <Collection items={sortedRows}>
+            {(item: T) => (
+              <Row key={item.id} id={item.id} columns={columns}>
+                {(column: ColumnDef<T>) => (
+                  <Cell>
+                    {column.render
+                      ? column.render(item[column.id], item)
+                      : String(item[column.id] ?? "")}
+                  </Cell>
+                )}
+              </Row>
+            )}
+          </Collection>
+          {hasMore && (
+            <TableLoadMoreItem onLoadMore={onLoadMore} isLoading={isLoading}>
+              {loadMoreContent ?? "Loading..."}
+            </TableLoadMoreItem>
+          )}
+        </TableBody>
+      </Table>
+    </div>
+  );
+}

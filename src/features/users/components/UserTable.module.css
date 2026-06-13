@@ -1,0 +1,9 @@
+.roleBadge {
+  font-weight: var(--font-weight-semi-bold);
+  font-size: var(--font-size-sm);
+}
+
+.actions {
+  display: flex;
+  gap: var(--space-xs);
+}
