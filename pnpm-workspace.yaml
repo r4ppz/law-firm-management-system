@@ -1,7 +1,7 @@
 # Supply chain attacks protections
 
 blockExoticSubdeps: true
-minimumReleaseAge: 10080
+minimumReleaseAge: 4320
 minimumReleaseAgeExclude:
   - "@types/node@20.19.42"
   - "@types/react@19.2.17"
