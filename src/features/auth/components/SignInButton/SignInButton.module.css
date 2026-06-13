@@ -3,7 +3,8 @@
   width: 100%;
 
   .button {
-    padding: var(--space-md);
+    /* THIS IS INTENTIONAL :( */
+    padding: 0.625rem;
     font-size: var(--font-size-sm);
     margin-top: var(--space-md);
 
