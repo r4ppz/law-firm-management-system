@@ -117,8 +117,18 @@ export function Row<T extends object>({
   );
 }
 
-export function TableBody<T extends object>({ className, ...props }: AriaTableBodyProps<T>) {
-  return <AriaTableBody className={clsx(styles.tableBody, className)} {...props} />;
+export function TableBody<T extends object>({
+  className,
+  renderEmptyState,
+  ...props
+}: AriaTableBodyProps<T> & { renderEmptyState?: () => React.ReactNode }) {
+  return (
+    <AriaTableBody
+      className={clsx(styles.tableBody, className)}
+      renderEmptyState={renderEmptyState}
+      {...props}
+    />
+  );
 }
 
 export function Cell({ className, ...props }: React.ComponentProps<typeof AriaCell>) {

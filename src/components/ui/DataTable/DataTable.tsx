@@ -37,6 +37,7 @@ export interface DataTableProps<T extends { id: string }> {
   hasMore?: boolean;
   isLoading?: boolean;
   loadMoreContent?: React.ReactNode;
+  emptyContent?: React.ReactNode;
   fill?: boolean;
   className?: string;
 }
@@ -52,6 +53,7 @@ export function DataTable<T extends { id: string }>({
   hasMore,
   isLoading,
   loadMoreContent,
+  emptyContent,
   fill,
   className,
 }: DataTableProps<T>) {
@@ -97,7 +99,7 @@ export function DataTable<T extends { id: string }>({
             </Column>
           ))}
         </TableHeader>
-        <TableBody>
+        <TableBody renderEmptyState={emptyContent ? () => <>{emptyContent}</> : undefined}>
           <Collection items={sortedRows}>
             {(item: T) => (
               <Row key={item.id} id={item.id} columns={columns}>

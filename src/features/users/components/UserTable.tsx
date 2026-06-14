@@ -139,6 +139,11 @@ export function UserTable({ fill, users: staticUsers }: UserTableProps) {
     }
   }, [useServerFetch, isLoading, hasMore, cursor, debouncedSearch]);
 
+  const emptyContent =
+    debouncedSearch && items.length === 0 && !isLoading
+      ? `No users matching "${debouncedSearch}"`
+      : undefined;
+
   return (
     <div className={styles.wrapper}>
       <div className={styles.toolbar}>
@@ -161,6 +166,7 @@ export function UserTable({ fill, users: staticUsers }: UserTableProps) {
         hasMore={hasMore}
         onLoadMore={handleLoadMore}
         isLoading={isLoading}
+        emptyContent={emptyContent}
       />
     </div>
   );
