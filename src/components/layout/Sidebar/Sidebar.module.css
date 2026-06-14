@@ -8,7 +8,6 @@
   padding: var(--space-xl) var(--space-3xl);
   color: var(--color-text-inverse);
   gap: var(--space-3xl);
-  text-align: center;
   font-size: var(--font-size-md);
 
   .topRow {
@@ -91,6 +90,10 @@
       flex-direction: column;
       align-items: center;
       gap: var(--space-xl);
+
+      .logo {
+        display: none;
+      }
 
       .toggleButton {
         margin-left: 0;

@@ -15,7 +15,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
     <div className={styles.layout}>
       <Sidebar initialCollapsed={initialCollapsed} />
       <div className={styles.main}>
-        <Header userImage={session?.user?.image ?? null} />
+        <Header userImage={session?.user?.image ?? null} userName={session?.user?.name} />
         <main className={styles.content}>{children}</main>
       </div>
     </div>

@@ -2,12 +2,19 @@
 
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { FaUser } from "react-icons/fa6";
 
 import { SignOutButton } from "@/features/auth/components/SignOutButton/SignOutButton";
 
 import styles from "./Header.module.css";
 
-export function Header({ userImage }: { userImage: string | null }) {
+export function Header({
+  userImage,
+  userName,
+}: {
+  userImage: string | null;
+  userName?: string | null;
+}) {
   const pathname = usePathname();
 
   const getPageTitle = (path: string) => {
@@ -26,9 +33,10 @@ export function Header({ userImage }: { userImage: string | null }) {
           {userImage ? (
             <Image src={userImage} alt="Profile" width={32} height={32} className={styles.avatar} />
           ) : (
-            "None"
+            <FaUser className={styles.userIcon} />
           )}
         </div>
+        {userName && <span className={styles.userName}>{userName}</span>}
         <SignOutButton />
       </div>
     </header>

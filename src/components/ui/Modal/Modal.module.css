@@ -19,7 +19,6 @@
   .modal {
     outline: none;
     max-width: var(--modal-max-width);
-    width: 100%;
 
     &[data-entering] {
       animation: slide-up var(--transition-fast);

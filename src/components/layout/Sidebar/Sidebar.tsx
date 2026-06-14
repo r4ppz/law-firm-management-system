@@ -54,9 +54,10 @@ export function Sidebar({ initialCollapsed = false }: { initialCollapsed?: boole
             variant="navigation"
             className={styles.navButton}
             onPress={() => router.push(item.href)}
-            data-active={pathname === item.href}
+            data-active={pathname.startsWith(item.href)}
+            title={collapsed ? item.label : undefined}
           >
-            <span title={collapsed ? item.label : undefined}>
+            <span>
               <item.icon />
             </span>
             <span className={styles.navLabel}>{item.label}</span>
