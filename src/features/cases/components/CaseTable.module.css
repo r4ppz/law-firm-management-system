@@ -26,6 +26,7 @@
 }
 
 .statusBadge {
+  opacity: 0.7;
   display: inline-flex;
   align-items: center;
   padding: var(--space-xs) var(--space-md);
@@ -33,44 +34,17 @@
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   line-height: var(--line-height-normal);
-}
-
-.statusOpen {
-  background-color: var(--color-info);
   color: var(--raw-white);
 }
 
-.statusOngoing {
+.statusPending {
   background-color: var(--color-warning);
-  color: var(--raw-white);
 }
 
-.statusClosed {
+.statusDone {
   background-color: var(--color-success);
-  color: var(--raw-white);
 }
 
-.statusTerminated {
-  background-color: var(--color-danger);
-  color: var(--raw-white);
-}
-
-.statusSettled {
+.statusCancelled {
   background-color: var(--color-border-strong);
-  color: var(--color-text-muted);
-}
-
-.milestoneStatusPending {
-  background-color: var(--color-warning);
-  color: var(--raw-white);
-}
-
-.milestoneStatusDone {
-  background-color: var(--color-success);
-  color: var(--raw-white);
-}
-
-.milestoneStatusCancelled {
-  background-color: var(--color-border-strong);
-  color: var(--color-text-muted);
 }

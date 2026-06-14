@@ -1,5 +1,6 @@
 "use client";
 
+import clsx from "clsx";
 import { useCallback, useEffect, useState, useTransition } from "react";
 import { FaPlus } from "react-icons/fa6";
 
@@ -16,16 +17,10 @@ interface CaseTableProps {
   fill?: boolean;
 }
 
-const statusLabels: Record<string, string> = {
-  Pending: "Pending",
-  Done: "Done",
-  Cancelled: "Cancelled",
-};
-
-const statusColors: Record<string, string> = {
-  Pending: "var(--color-warning)",
-  Done: "var(--color-success)",
-  Cancelled: "var(--color-text-muted)",
+const statusClassMap: Record<string, string> = {
+  Pending: styles.statusPending,
+  Done: styles.statusDone,
+  Cancelled: styles.statusCancelled,
 };
 
 const columns: ColumnDef<CaseRow>[] = [
@@ -59,14 +54,7 @@ const columns: ColumnDef<CaseRow>[] = [
     render: (value) => {
       const status = value as string | null;
       if (!status) return null;
-      return (
-        <span
-          className={styles.statusBadge}
-          style={{ backgroundColor: statusColors[status] ?? "var(--color-border-strong)" }}
-        >
-          {statusLabels[status] ?? status}
-        </span>
-      );
+      return <span className={clsx(styles.statusBadge, statusClassMap[status])}>{status}</span>;
     },
   },
 ];
