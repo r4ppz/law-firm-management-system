@@ -1,5 +1,6 @@
 "use client";
 
+import clsx from "clsx";
 import { useCallback, useEffect, useState, useTransition } from "react";
 import { FaPenToSquare, FaPlus, FaTrashCan } from "react-icons/fa6";
 
@@ -35,13 +36,13 @@ const roleLabels: Record<string, string> = {
   ProcessServer: "Process Server",
 };
 
-const roleColors: Record<string, string> = {
-  Dev: "var(--color-text-muted)",
-  Admin: "var(--color-info)",
-  BranchManager: "var(--color-info)",
-  Lawyer: "var(--color-success)",
-  Paralegal: "var(--color-warning)",
-  ProcessServer: "var(--color-warning)",
+const roleClassMap: Record<Role, string> = {
+  Dev: styles.roleDev,
+  Admin: styles.roleAdmin,
+  BranchManager: styles.roleBranchManager,
+  Lawyer: styles.roleLawyer,
+  Paralegal: styles.roleParalegal,
+  ProcessServer: styles.roleProcessServer,
 };
 
 const columns: ColumnDef<UserRow>[] = [
@@ -64,10 +65,7 @@ const columns: ColumnDef<UserRow>[] = [
       const role = value as Role | null;
       if (!role) return null;
       return (
-        <span
-          className={styles.roleBadge}
-          style={{ color: roleColors[role] ?? "var(--color-text-primary)" }}
-        >
+        <span className={clsx(styles.roleBadge, roleClassMap[role])}>
           {roleLabels[role] ?? role}
         </span>
       );
@@ -79,10 +77,10 @@ const columns: ColumnDef<UserRow>[] = [
     render: () => (
       <div className={styles.actions}>
         <Button variant="ghost" aria-label="Edit user">
-          <FaPenToSquare />
+          <FaPenToSquare className={styles.icon} />
         </Button>
         <Button variant="ghost" aria-label="Delete user">
-          <FaTrashCan />
+          <FaTrashCan className={styles.icon} />
         </Button>
       </div>
     ),
@@ -155,7 +153,7 @@ export function UserTable({ fill, users: staticUsers }: UserTableProps) {
             aria-label="Search users"
           />
         </div>
-        <Button variant="primary" className={styles.addButton} aria-label="Add user">
+        <Button variant="secondary" className={styles.addButton} aria-label="Add user">
           <FaPlus /> Add User
         </Button>
       </div>

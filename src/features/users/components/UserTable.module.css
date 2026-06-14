@@ -20,15 +20,53 @@
 .addButton {
   width: auto;
   font-size: var(--font-size-md);
-  padding: var(--space-sm) var(--space-xl);
+  font-weight: var(--font-weight-medium);
+  padding: var(--space-sm) var(--space-2xl);
+  border: var(--color-border-subtle);
 }
 
 .roleBadge {
-  font-weight: var(--font-weight-semi-bold);
+  opacity: 0.7;
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-xs) var(--space-md);
+  border-radius: var(--radius-pill);
   font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-normal);
+  color: var(--raw-white);
+}
+
+.roleDev {
+  background-color: var(--role-dev);
+}
+
+.roleAdmin {
+  background-color: var(--role-admin);
+}
+
+.roleBranchManager {
+  background-color: var(--role-branch-manager);
+}
+
+.roleLawyer {
+  background-color: var(--role-lawyer);
+}
+
+.roleParalegal {
+  background-color: var(--role-paralegal);
+}
+
+.roleProcessServer {
+  background-color: var(--role-process-server);
 }
 
 .actions {
   display: flex;
   gap: var(--space-xs);
+
+  .icon {
+    width: var(--icon-size-sm);
+    height: auto;
+  }
 }
