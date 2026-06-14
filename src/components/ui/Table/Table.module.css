@@ -48,6 +48,7 @@
     position: sticky;
     top: 0;
     z-index: 10;
+    background: var(--color-surface-bg);
     color: var(--color-text-primary);
 
     .column {
