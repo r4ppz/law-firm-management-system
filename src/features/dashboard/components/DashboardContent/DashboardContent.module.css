@@ -1,22 +1,35 @@
 .dashboard {
   display: flex;
   flex-direction: column;
+  max-width: 100%;
   gap: var(--space-3xl);
+  height: 100%;
+  min-height: 0;
 }
 
 .statsRow {
   display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
   gap: var(--space-xl);
 }
 
-.tablesRow {
+.tablesWrapper {
   display: flex;
-  gap: var(--space-xl);
+  flex-direction: row;
+  gap: var(--space-2xl);
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+}
 
-  > * {
-    flex: 1;
-    min-width: 0;
-  }
+.leftTable {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
 }
 
 .caseStatusBadge {

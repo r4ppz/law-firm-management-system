@@ -97,19 +97,21 @@ export function DashboardContent({
         <StatCard label="Total Users" value={stats.totalUsers} accent="users" />
         <StatCard label="Overdue Milestones" value={stats.overdueMilestones} accent="overdue" />
       </div>
-      <div className={styles.tablesRow}>
+      <div className={styles.tablesWrapper}>
         <MiniTable columns={recentCaseColumns} rows={recentCases} heading="Recent Cases" />
-        <MiniTable
-          columns={upcomingConsultationColumns}
-          rows={upcomingConsultations}
-          heading="Upcoming Consultations"
-        />
+        <div className={styles.leftTable}>
+          <MiniTable
+            columns={overdueMilestoneColumns}
+            rows={overdueMilestones}
+            heading="Overdue Milestones"
+          />
+          <MiniTable
+            columns={upcomingConsultationColumns}
+            rows={upcomingConsultations}
+            heading="Upcoming Consultations"
+          />
+        </div>
       </div>
-      <MiniTable
-        columns={overdueMilestoneColumns}
-        rows={overdueMilestones}
-        heading="Overdue Milestones"
-      />
     </div>
   );
 }
