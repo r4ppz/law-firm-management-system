@@ -2,7 +2,7 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 
-import { upsertDeveloperUser } from "@/features/users/mutations";
+import { syncUserFromGoogle, upsertDeveloperUser } from "@/features/users/mutations";
 import { getUserByEmail } from "@/features/users/queries";
 import { Role } from "@/generated/prisma/client";
 import { parseDeveloperEmails } from "@/lib/developer-emails";
@@ -50,6 +50,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (existingUser.role === Role.Dev) {
         return false;
       }
+
+      await syncUserFromGoogle(email, user.name ?? email, user.image);
 
       return true;
     },
