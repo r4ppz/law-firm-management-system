@@ -50,19 +50,16 @@ const columns: ColumnDef<UserRow>[] = [
     name: "Name",
     isRowHeader: true,
     allowsSorting: true,
-    allowsResizing: true,
   },
   {
     id: "email",
     name: "Email",
     allowsSorting: true,
-    allowsResizing: true,
   },
   {
     id: "role",
     name: "Role",
     allowsSorting: true,
-    allowsResizing: true,
     render: (value) => {
       const role = value as Role | null;
       if (!role) return null;
