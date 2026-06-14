@@ -38,7 +38,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       const existingUser = await getUserByEmail(email);
 
       if (developerWhitelist.includes(email)) {
-        await upsertDeveloperUser(email, user.name ?? "Developer Account");
+        await upsertDeveloperUser(email, user.name ?? "Developer Account", user.image);
         return true;
       }
 
@@ -69,6 +69,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (session.user && token) {
         session.user.role = token.role ?? null;
         session.user.id = token.id as string;
+        session.user.image = token.picture as string | null;
       }
       return session;
     },
