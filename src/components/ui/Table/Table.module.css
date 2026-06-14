@@ -52,7 +52,7 @@
     color: var(--color-text-primary);
 
     .column {
-      padding: var(--space-sm);
+      padding: var(--space-md);
       text-align: left;
       outline: none;
       cursor: default;
