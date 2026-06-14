@@ -10,7 +10,13 @@ import { prisma } from "@/lib/prisma";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(prisma),
-  providers: [Google],
+  // providers: [Google],
+  providers: [
+    Google({
+      // Bypasses the OAuthAccountNotLinked block dynamically in dev environment
+      allowDangerousEmailAccountLinking: process.env.NODE_ENV === "development",
+    }),
+  ],
   session: {
     strategy: "jwt",
   },
