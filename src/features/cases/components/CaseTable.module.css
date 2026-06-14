@@ -1,0 +1,50 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+  flex: 1;
+  min-height: 0;
+}
+
+.toolbar {
+  display: flex;
+  gap: var(--space-xl);
+  align-items: center;
+
+  .searchWrapper {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .addButton {
+    width: auto;
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-medium);
+    padding: var(--space-sm) var(--space-2xl);
+    border: var(--color-border-subtle);
+  }
+}
+
+.statusBadge {
+  opacity: 0.7;
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-xs) var(--space-md);
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-normal);
+  color: var(--raw-white);
+}
+
+.statusPending {
+  background-color: var(--color-warning);
+}
+
+.statusDone {
+  background-color: var(--color-success);
+}
+
+.statusCancelled {
+  background-color: var(--color-border-strong);
+}
