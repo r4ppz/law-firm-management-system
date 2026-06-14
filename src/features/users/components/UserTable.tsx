@@ -1,12 +1,14 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useState, useTransition } from "react";
 import { FaPenToSquare, FaPlus, FaTrashCan } from "react-icons/fa6";
 
 import { Button } from "@/components/ui/Button/Button";
 import { DataTable, type ColumnDef } from "@/components/ui/DataTable/DataTable";
 import { SearchField } from "@/components/ui/SearchField/SearchField";
+import { getUsersPaginatedAction } from "@/features/users/actions";
 import type { Role } from "@/generated/prisma/client";
+import { useDebounce } from "@/lib/useDebounce";
 
 import styles from "./UserTable.module.css";
 
@@ -20,8 +22,8 @@ export interface UserRow {
 }
 
 interface UserTableProps {
-  users: UserRow[];
   fill?: boolean;
+  users?: UserRow[];
 }
 
 const roleLabels: Record<string, string> = {
@@ -87,16 +89,55 @@ const columns: ColumnDef<UserRow>[] = [
   },
 ];
 
-export function UserTable({ users, fill }: UserTableProps) {
+export function UserTable({ fill, users: staticUsers }: UserTableProps) {
+  const [items, setItems] = useState<UserRow[]>(staticUsers ?? []);
+  const [cursor, setCursor] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [search, setSearch] = useState("");
+  const [isPending, startTransition] = useTransition();
 
-  const filtered = useMemo(() => {
-    if (!search) return users;
-    const q = search.toLowerCase();
-    return users.filter(
-      (u) => u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q),
-    );
-  }, [users, search]);
+  const isLoading = isPending || isLoadingMore;
+  const useServerFetch = staticUsers === undefined;
+
+  const debouncedSearch = useDebounce(search, 300);
+
+  useEffect(() => {
+    if (!useServerFetch) return;
+
+    let cancelled = false;
+
+    startTransition(async () => {
+      const result = await getUsersPaginatedAction({ search: debouncedSearch, pageSize: 10 });
+      if (cancelled) return;
+      setItems(result.users);
+      setCursor(result.nextCursor);
+      setHasMore(result.nextCursor !== null);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [debouncedSearch, startTransition, useServerFetch]);
+
+  const handleLoadMore = useCallback(async () => {
+    if (!useServerFetch || isLoading || !hasMore || !cursor) return;
+
+    setIsLoadingMore(true);
+
+    try {
+      const result = await getUsersPaginatedAction({
+        search: debouncedSearch,
+        cursor,
+        pageSize: 10,
+      });
+      setItems((prev) => [...prev, ...result.users]);
+      setCursor(result.nextCursor);
+      setHasMore(result.nextCursor !== null);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  }, [useServerFetch, isLoading, hasMore, cursor, debouncedSearch]);
 
   return (
     <div className={styles.wrapper}>
@@ -113,7 +154,14 @@ export function UserTable({ users, fill }: UserTableProps) {
           <FaPlus /> Add User
         </Button>
       </div>
-      <DataTable columns={columns} rows={filtered} fill={fill} />
+      <DataTable
+        columns={columns}
+        rows={items}
+        fill={fill}
+        hasMore={hasMore}
+        onLoadMore={handleLoadMore}
+        isLoading={isLoading}
+      />
     </div>
   );
 }
