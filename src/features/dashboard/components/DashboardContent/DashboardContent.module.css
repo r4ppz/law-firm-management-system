@@ -1,0 +1,52 @@
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3xl);
+}
+
+.statsRow {
+  display: flex;
+  gap: var(--space-xl);
+}
+
+.tablesRow {
+  display: flex;
+  gap: var(--space-xl);
+
+  > * {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+.caseStatusBadge {
+  opacity: 0.7;
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-xs) var(--space-md);
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-normal);
+  color: var(--raw-white);
+}
+
+.caseStatusOpen {
+  background-color: var(--color-info);
+}
+
+.caseStatusOngoing {
+  background-color: var(--color-warning);
+}
+
+.caseStatusClosed {
+  background-color: var(--color-success);
+}
+
+.caseStatusTerminated {
+  background-color: var(--color-danger);
+}
+
+.caseStatusSettled {
+  background-color: var(--color-border-strong);
+}

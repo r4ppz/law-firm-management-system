@@ -18,13 +18,21 @@ interface ModalProps extends Omit<ModalOverlayProps, "className"> {
   title: string;
   children: React.ReactNode;
   className?: string;
+  role?: "dialog" | "alertdialog";
 }
 
-export function Modal({ title, children, className, onOpenChange, ...props }: ModalProps) {
+export function Modal({
+  title,
+  children,
+  className,
+  onOpenChange,
+  role = "dialog",
+  ...props
+}: ModalProps) {
   return (
     <ModalOverlay isDismissable onOpenChange={onOpenChange} {...props} className={styles.overlay}>
       <AriaModal className={clsx(styles.modal, className)}>
-        <AriaDialog className={styles.dialog}>
+        <AriaDialog role={role} className={styles.dialog}>
           <Heading slot="title" className={styles.title}>
             {title}
           </Heading>

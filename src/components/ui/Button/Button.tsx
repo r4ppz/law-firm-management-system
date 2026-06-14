@@ -13,6 +13,7 @@ import styles from "./Button.module.css";
 
 interface ButtonProps extends AriaButtonProps {
   variant?: "primary" | "secondary" | "navigation" | "ghost";
+  title?: string;
   children: React.ReactNode;
 }
 

@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/Button/Button";
 import { DataTable, type ColumnDef } from "@/components/ui/DataTable/DataTable";
 import { SearchField } from "@/components/ui/SearchField/SearchField";
 import { getUsersPaginatedAction } from "@/features/users/actions";
+import { AddUserModal } from "@/features/users/components/AddUserModal/AddUserModal";
+import { roleLabels } from "@/features/users/constants";
 import type { Role } from "@/generated/prisma/client";
 import { useDebounce } from "@/lib/useDebounce";
 
@@ -26,15 +28,6 @@ interface UserTableProps {
   fill?: boolean;
   users?: UserRow[];
 }
-
-const roleLabels: Record<string, string> = {
-  Dev: "Dev",
-  Admin: "Admin",
-  BranchManager: "Branch Manager",
-  Lawyer: "Lawyer",
-  Paralegal: "Paralegal",
-  ProcessServer: "Process Server",
-};
 
 const roleClassMap: Record<Role, string> = {
   Dev: styles.roleDev,
@@ -93,6 +86,8 @@ export function UserTable({ fill, users: staticUsers }: UserTableProps) {
   const [hasMore, setHasMore] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [search, setSearch] = useState("");
+  const [isAddOpen, setAddOpen] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
   const [isPending, startTransition] = useTransition();
 
   const isLoading = isPending || isLoadingMore;
@@ -116,7 +111,7 @@ export function UserTable({ fill, users: staticUsers }: UserTableProps) {
     return () => {
       cancelled = true;
     };
-  }, [debouncedSearch, startTransition, useServerFetch]);
+  }, [debouncedSearch, startTransition, useServerFetch, refreshKey]);
 
   const handleLoadMore = useCallback(async () => {
     if (!useServerFetch || isLoading || !hasMore || !cursor) return;
@@ -155,7 +150,12 @@ export function UserTable({ fill, users: staticUsers }: UserTableProps) {
             aria-label="Search users"
           />
         </div>
-        <Button variant="secondary" className={styles.addButton} aria-label="Add user">
+        <Button
+          variant="secondary"
+          className={styles.addButton}
+          aria-label="Add user"
+          onPress={() => setAddOpen(true)}
+        >
           <FaPlus /> Add User
         </Button>
       </div>
@@ -169,6 +169,11 @@ export function UserTable({ fill, users: staticUsers }: UserTableProps) {
         onLoadMore={handleLoadMore}
         isLoading={isLoading}
         emptyContent={emptyContent}
+      />
+      <AddUserModal
+        isOpen={isAddOpen}
+        onOpenChange={setAddOpen}
+        onSuccess={() => setRefreshKey((k) => k + 1)}
       />
     </div>
   );
