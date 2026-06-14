@@ -1,0 +1,76 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+  flex: 1;
+  min-height: 0;
+}
+
+.toolbar {
+  display: flex;
+  gap: var(--space-xl);
+  align-items: center;
+
+  .searchWrapper {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .addButton {
+    width: auto;
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-medium);
+    padding: var(--space-sm) var(--space-2xl);
+    border: var(--color-border-subtle);
+  }
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-xs) var(--space-md);
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-normal);
+}
+
+.statusOpen {
+  background-color: var(--color-info);
+  color: var(--raw-white);
+}
+
+.statusOngoing {
+  background-color: var(--color-warning);
+  color: var(--raw-white);
+}
+
+.statusClosed {
+  background-color: var(--color-success);
+  color: var(--raw-white);
+}
+
+.statusTerminated {
+  background-color: var(--color-danger);
+  color: var(--raw-white);
+}
+
+.statusSettled {
+  background-color: var(--color-border-strong);
+  color: var(--color-text-muted);
+}
+
+.milestoneStatusPending {
+  background-color: var(--color-warning);
+  color: var(--raw-white);
+}
+
+.milestoneStatusDone {
+  background-color: var(--color-success);
+  color: var(--raw-white);
+}
+
+.milestoneStatusCancelled {
+  background-color: var(--color-border-strong);
+  color: var(--color-text-muted);
+}
