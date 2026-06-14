@@ -14,40 +14,59 @@
     margin: 0;
   }
 
-  .userSection {
+  .leftSection {
     display: flex;
     align-items: center;
-    gap: var(--space-md);
-  }
+    gap: var(--space-2xl);
 
-  .userProfile {
-    width: 2rem;
-    height: 2rem;
-    border-radius: var(--radius-pill);
-    background-color: var(--color-brand-accent);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--color-text-inverse);
-    font-weight: var(--font-weight-bold);
-    font-size: var(--font-size-sm);
-    overflow: hidden;
-  }
+    .userSection {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
 
-  .avatar {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
+      .userProfile {
+        width: 2rem;
+        height: 2rem;
+        border-radius: var(--radius-pill);
+        background-color: var(--color-brand-accent);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--color-text-inverse);
+        font-weight: var(--font-weight-bold);
+        font-size: var(--font-size-sm);
+        overflow: hidden;
 
-  .userIcon {
-    width: var(--icon-size-sm);
-    height: var(--icon-size-sm);
-  }
+        .avatar {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
 
-  .userName {
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-medium);
-    color: var(--color-text-secondary);
+        .userIcon {
+          width: var(--icon-size-sm);
+          height: var(--icon-size-sm);
+        }
+      }
+
+      .nameRoleContainer {
+        display: flex;
+        flex-direction: column;
+        line-height: var(--line-height-tight);
+        gap: 0px;
+
+        .userName {
+          font-size: var(--font-size-sm);
+          font-weight: var(--font-weight-medium);
+          color: var(--color-text-secondary);
+        }
+
+        .userRole {
+          font-size: var(--font-size-xs);
+          font-weight: var(--font-weight-regular);
+          color: var(--color-text-muted);
+        }
+      }
+    }
   }
 }
