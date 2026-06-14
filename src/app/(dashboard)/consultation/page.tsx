@@ -1,3 +1,11 @@
+import { ConsultationTable } from "@/features/consultations/components/ConsultationTable";
+
+import styles from "./page.module.css";
+
 export default function ConsultationPage() {
-  return <div>Consultation Page</div>;
+  return (
+    <div className={styles.wrapper}>
+      <ConsultationTable fill />
+    </div>
+  );
 }

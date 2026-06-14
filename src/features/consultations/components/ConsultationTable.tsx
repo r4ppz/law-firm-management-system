@@ -7,46 +7,55 @@ import { FaPlus } from "react-icons/fa6";
 import { Button } from "@/components/ui/Button/Button";
 import { DataTable, type ColumnDef } from "@/components/ui/DataTable/DataTable";
 import { SearchField } from "@/components/ui/SearchField/SearchField";
-import { getCasesPaginatedAction } from "@/features/cases/actions";
-import type { CaseRow } from "@/features/cases/queries";
+import { getConsultationsPaginatedAction } from "@/features/consultations/actions";
+import type { ConsultationRow } from "@/features/consultations/queries";
 import { useDebounce } from "@/lib/useDebounce";
 
-import styles from "./CaseTable.module.css";
+import styles from "./ConsultationTable.module.css";
 
-interface CaseTableProps {
+interface ConsultationTableProps {
   fill?: boolean;
 }
 
 const statusClassMap: Record<string, string> = {
-  Pending: styles.statusPending,
-  Done: styles.statusDone,
+  Scheduled: styles.statusScheduled,
+  Completed: styles.statusCompleted,
+  Accepted: styles.statusAccepted,
+  Rejected: styles.statusRejected,
   Cancelled: styles.statusCancelled,
 };
 
-const columns: ColumnDef<CaseRow>[] = [
+const columns: ColumnDef<ConsultationRow>[] = [
   {
-    id: "case_title",
-    name: "Case Title",
+    id: "clientName",
+    name: "Client Name",
     isRowHeader: true,
     allowsSorting: true,
   },
   {
-    id: "clientName",
-    name: "Client Name",
+    id: "concern",
+    name: "Concern",
     allowsSorting: true,
   },
   {
-    id: "case_type",
-    name: "Type",
+    id: "createdByName",
+    name: "Created By",
     allowsSorting: true,
   },
   {
-    id: "assignTo",
-    name: "Assign To",
-  },
-  {
-    id: "latestMilestone",
-    name: "Latest Milestone",
+    id: "booking_datetime",
+    name: "Date & Time",
+    allowsSorting: true,
+    render: (value) => {
+      const date = value as Date;
+      return date.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+      });
+    },
   },
   {
     id: "status",
@@ -59,8 +68,8 @@ const columns: ColumnDef<CaseRow>[] = [
   },
 ];
 
-export function CaseTable({ fill }: CaseTableProps) {
-  const [items, setItems] = useState<CaseRow[]>([]);
+export function ConsultationTable({ fill }: ConsultationTableProps) {
+  const [items, setItems] = useState<ConsultationRow[]>([]);
   const [cursor, setCursor] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -75,9 +84,12 @@ export function CaseTable({ fill }: CaseTableProps) {
     let cancelled = false;
 
     startTransition(async () => {
-      const result = await getCasesPaginatedAction({ search: debouncedSearch, pageSize: 10 });
+      const result = await getConsultationsPaginatedAction({
+        search: debouncedSearch,
+        pageSize: 10,
+      });
       if (cancelled) return;
-      setItems(result.cases);
+      setItems(result.consultations);
       setCursor(result.nextCursor);
       setHasMore(result.nextCursor !== null);
     });
@@ -93,12 +105,12 @@ export function CaseTable({ fill }: CaseTableProps) {
     setIsLoadingMore(true);
 
     try {
-      const result = await getCasesPaginatedAction({
+      const result = await getConsultationsPaginatedAction({
         search: debouncedSearch,
         cursor,
         pageSize: 10,
       });
-      setItems((prev) => [...prev, ...result.cases]);
+      setItems((prev) => [...prev, ...result.consultations]);
       setCursor(result.nextCursor);
       setHasMore(result.nextCursor !== null);
     } finally {
@@ -108,7 +120,7 @@ export function CaseTable({ fill }: CaseTableProps) {
 
   const emptyContent =
     debouncedSearch && items.length === 0 && !isLoading
-      ? `No cases matching "${debouncedSearch}"`
+      ? `No consultations matching "${debouncedSearch}"`
       : undefined;
 
   return (
@@ -118,12 +130,12 @@ export function CaseTable({ fill }: CaseTableProps) {
           <SearchField
             value={search}
             onChange={setSearch}
-            placeholder="Search cases..."
-            aria-label="Search cases"
+            placeholder="Search consultations..."
+            aria-label="Search consultations"
           />
         </div>
-        <Button variant="secondary" className={styles.addButton} aria-label="Add case">
-          <FaPlus /> Add Case
+        <Button variant="secondary" className={styles.addButton} aria-label="Add consultation">
+          <FaPlus /> Add Consultation
         </Button>
       </div>
       <DataTable

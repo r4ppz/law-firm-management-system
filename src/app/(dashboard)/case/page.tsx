@@ -1,5 +1,11 @@
 import { CaseTable } from "@/features/cases/components/CaseTable";
 
+import styles from "./page.module.css";
+
 export default function CasePage() {
-  return <CaseTable fill />;
+  return (
+    <div className={styles.wrapper}>
+      <CaseTable fill />
+    </div>
+  );
 }
