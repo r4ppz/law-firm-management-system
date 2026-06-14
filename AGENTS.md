@@ -92,6 +92,7 @@
 
 ### General
 
+- Idiomatic, modular code is the top priority in this project, not a collection of hacks and workarounds.
 - Named exports only — no default exports, except for Next.js special files (`page.tsx`, `layout.tsx`, `error.tsx`, `global-error.tsx`, `not-found.tsx`, `loading.tsx`, `route.tsx` etc.) which require a default export. Use inline `export default function` for these files.
 - PascalCase components/types; camelCase variables/functions/files (component dirs are PascalCase).
 - No comments unless explaining a non-obvious decision.
