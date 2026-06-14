@@ -109,7 +109,9 @@ export function CaseTable({ fill }: CaseTableProps) {
   const emptyContent =
     debouncedSearch && items.length === 0 && !isLoading
       ? `No cases matching "${debouncedSearch}"`
-      : undefined;
+      : !debouncedSearch && items.length === 0 && !isLoading
+        ? "No cases yet"
+        : undefined;
 
   return (
     <div className={styles.wrapper}>

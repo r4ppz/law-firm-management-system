@@ -121,7 +121,9 @@ export function ConsultationTable({ fill }: ConsultationTableProps) {
   const emptyContent =
     debouncedSearch && items.length === 0 && !isLoading
       ? `No consultations matching "${debouncedSearch}"`
-      : undefined;
+      : !debouncedSearch && items.length === 0 && !isLoading
+        ? "No consultations yet"
+        : undefined;
 
   return (
     <div className={styles.wrapper}>

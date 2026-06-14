@@ -140,7 +140,9 @@ export function UserTable({ fill, users: staticUsers }: UserTableProps) {
   const emptyContent =
     debouncedSearch && items.length === 0 && !isLoading
       ? `No users matching "${debouncedSearch}"`
-      : undefined;
+      : !debouncedSearch && items.length === 0 && !isLoading
+        ? "No users yet"
+        : undefined;
 
   return (
     <div className={styles.wrapper}>
