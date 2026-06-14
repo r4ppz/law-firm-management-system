@@ -161,8 +161,6 @@ export function UserTable({ users: staticUsers }: UserTableProps) {
       <DataTable
         columns={columns}
         rows={items}
-        selectionMode="single"
-        selectionBehavior="replace"
         hasMore={hasMore}
         onLoadMore={handleLoadMore}
         isLoading={isLoading}
