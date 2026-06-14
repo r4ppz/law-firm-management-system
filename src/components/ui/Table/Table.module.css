@@ -203,19 +203,18 @@
       }
 
       &[data-selected] {
-        background: var(--color-brand-accent);
-        color: var(--color-text-inverse);
+        background: var(--color-surface-bg-alt);
 
         &[data-focus-visible] {
           outline-offset: -4px;
         }
 
         &[data-hovered] {
-          background: var(--color-brand-accent--hover);
+          background: var(--color-surface-bg-alt);
         }
 
         &[data-pressed] {
-          background: var(--color-brand-accent--hover);
+          background: var(--color-surface-bg-alt);
         }
       }
 

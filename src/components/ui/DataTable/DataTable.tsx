@@ -32,6 +32,7 @@ export interface DataTableProps<T extends { id: string }> {
   sortDescriptor?: SortDescriptor;
   onSortChange?: (descriptor: SortDescriptor) => void;
   selectionMode?: "none" | "single" | "multiple";
+  selectionBehavior?: "toggle" | "replace";
   onSelectionChange?: (keys: Selection) => void;
   onLoadMore?: () => void;
   hasMore?: boolean;
@@ -48,6 +49,7 @@ export function DataTable<T extends { id: string }>({
   sortDescriptor: externalSortDescriptor,
   onSortChange: externalOnSortChange,
   selectionMode = "none",
+  selectionBehavior = "toggle",
   onSelectionChange,
   onLoadMore,
   hasMore,
@@ -82,6 +84,7 @@ export function DataTable<T extends { id: string }>({
       <Table
         aria-label="Data table"
         selectionMode={selectionMode}
+        selectionBehavior={selectionBehavior}
         onSelectionChange={onSelectionChange}
         sortDescriptor={sortDescriptor}
         onSortChange={setSortDescriptor}
