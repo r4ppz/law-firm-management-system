@@ -7,6 +7,7 @@ import { Collection, type Selection, type SortDescriptor } from "react-aria-comp
 import {
   Cell,
   Column,
+  ResizableTableContainer,
   Row,
   Table,
   TableBody,
@@ -21,6 +22,7 @@ export interface ColumnDef<T> {
   name: string;
   isRowHeader?: boolean;
   allowsSorting?: boolean;
+  allowsResizing?: boolean;
   render?: (value: T[keyof T], row: T) => React.ReactNode;
 }
 
@@ -74,7 +76,7 @@ export function DataTable<T extends { id: string }>({
   }, [rows, sortDescriptor]);
 
   return (
-    <div className={clsx(styles.container, fill && styles.fill, className)}>
+    <ResizableTableContainer className={clsx(styles.container, fill && styles.fill, className)}>
       <Table
         aria-label="Data table"
         selectionMode={selectionMode}
@@ -89,6 +91,7 @@ export function DataTable<T extends { id: string }>({
               id={String(col.id)}
               isRowHeader={col.isRowHeader}
               allowsSorting={col.allowsSorting}
+              allowsResizing={col.allowsResizing}
             >
               {col.name}
             </Column>
@@ -115,6 +118,6 @@ export function DataTable<T extends { id: string }>({
           )}
         </TableBody>
       </Table>
-    </div>
+    </ResizableTableContainer>
   );
 }
