@@ -13,3 +13,10 @@
   color: var(--color-text-primary);
   line-height: var(--line-height-tight);
 }
+
+.loadingContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+}
