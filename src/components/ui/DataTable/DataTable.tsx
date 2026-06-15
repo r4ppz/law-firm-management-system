@@ -15,6 +15,7 @@ import {
   TableLoadMoreItem,
 } from "@/components/ui/Table/Table";
 
+import { ProgressCircle } from "../ProgressCircle/ProgressCircle";
 import styles from "./DataTable.module.css";
 
 export interface ColumnDef<T> {
@@ -131,7 +132,7 @@ export function DataTable<T extends { id: string }>({
           </Collection>
           {hasMore && (
             <TableLoadMoreItem onLoadMore={onLoadMore} isLoading={isLoading}>
-              {loadMoreContent ?? "Loading..."}
+              {loadMoreContent ?? <ProgressCircle aria-label="Loading..." />}
             </TableLoadMoreItem>
           )}
         </TableBody>
