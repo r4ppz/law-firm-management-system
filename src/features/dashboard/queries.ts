@@ -1,3 +1,5 @@
+import { cache } from "react";
+
 import { prisma } from "@/lib/prisma";
 
 export type DashboardStats = {
@@ -29,7 +31,7 @@ export type OverdueMilestoneRow = {
   due_date: Date;
 };
 
-export async function getDashboardStats(): Promise<DashboardStats> {
+export const getDashboardStats = cache(async (): Promise<DashboardStats> => {
   const now = new Date();
   const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const endOfDay = new Date(startOfDay.getTime() + 24 * 60 * 60 * 1000);
@@ -49,9 +51,9 @@ export async function getDashboardStats(): Promise<DashboardStats> {
   ]);
 
   return { openCases, todayConsultations, totalUsers, overdueMilestones };
-}
+});
 
-export async function getRecentCases(limit = 5): Promise<RecentCaseRow[]> {
+export const getRecentCases = cache(async (limit = 5): Promise<RecentCaseRow[]> => {
   const cases = await prisma.case.findMany({
     take: limit,
     orderBy: { created_at: "desc" },
@@ -69,32 +71,34 @@ export async function getRecentCases(limit = 5): Promise<RecentCaseRow[]> {
     clientName: c.client.name,
     status: c.status,
   }));
-}
+});
 
-export async function getUpcomingConsultations(limit = 5): Promise<UpcomingConsultationRow[]> {
-  const consultations = await prisma.consultation.findMany({
-    take: limit,
-    where: { booking_datetime: { gte: new Date() }, status: "Scheduled" },
-    orderBy: { booking_datetime: "asc" },
-    select: {
-      id: true,
-      concern: true,
-      booking_datetime: true,
-      status: true,
-      client: { select: { name: true } },
-    },
-  });
+export const getUpcomingConsultations = cache(
+  async (limit = 5): Promise<UpcomingConsultationRow[]> => {
+    const consultations = await prisma.consultation.findMany({
+      take: limit,
+      where: { booking_datetime: { gte: new Date() }, status: "Scheduled" },
+      orderBy: { booking_datetime: "asc" },
+      select: {
+        id: true,
+        concern: true,
+        booking_datetime: true,
+        status: true,
+        client: { select: { name: true } },
+      },
+    });
 
-  return consultations.map((c) => ({
-    id: c.id,
-    clientName: c.client.name,
-    concern: c.concern,
-    booking_datetime: c.booking_datetime,
-    status: c.status,
-  }));
-}
+    return consultations.map((c) => ({
+      id: c.id,
+      clientName: c.client.name,
+      concern: c.concern,
+      booking_datetime: c.booking_datetime,
+      status: c.status,
+    }));
+  },
+);
 
-export async function getOverdueMilestones(limit = 5): Promise<OverdueMilestoneRow[]> {
+export const getOverdueMilestones = cache(async (limit = 5): Promise<OverdueMilestoneRow[]> => {
   const milestones = await prisma.caseMilestone.findMany({
     take: limit,
     where: { status: "Pending", due_date: { lt: new Date() } },
@@ -113,4 +117,4 @@ export async function getOverdueMilestones(limit = 5): Promise<OverdueMilestoneR
     milestoneTitle: m.title,
     due_date: m.due_date,
   }));
-}
+});

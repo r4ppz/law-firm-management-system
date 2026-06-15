@@ -1,3 +1,5 @@
+import { cache } from "react";
+
 import { prisma } from "@/lib/prisma";
 
 const consultationSelect = {
@@ -18,47 +20,49 @@ export type ConsultationRow = {
   status: string;
 };
 
-export async function getConsultationsPaginated({
-  search = "",
-  cursor,
-  pageSize = 10,
-}: {
-  search?: string;
-  cursor?: string;
-  pageSize?: number;
-}) {
-  const where = search
-    ? {
-        OR: [
-          { concern: { contains: search, mode: "insensitive" as const } },
-          { client: { name: { contains: search, mode: "insensitive" as const } } },
-        ],
-      }
-    : undefined;
+export const getConsultationsPaginated = cache(
+  async ({
+    search = "",
+    cursor,
+    pageSize = 20,
+  }: {
+    search?: string;
+    cursor?: string;
+    pageSize?: number;
+  }) => {
+    const where = search
+      ? {
+          OR: [
+            { concern: { contains: search, mode: "insensitive" as const } },
+            { client: { name: { contains: search, mode: "insensitive" as const } } },
+          ],
+        }
+      : undefined;
 
-  const consultations = await prisma.consultation.findMany({
-    take: pageSize + 1,
-    skip: cursor ? 1 : 0,
-    ...(cursor ? { cursor: { id: cursor } } : {}),
-    where,
-    orderBy: { booking_datetime: "desc" },
-    select: consultationSelect,
-  });
+    const consultations = await prisma.consultation.findMany({
+      take: pageSize + 1,
+      skip: cursor ? 1 : 0,
+      ...(cursor ? { cursor: { id: cursor } } : {}),
+      where,
+      orderBy: { booking_datetime: "desc" },
+      select: consultationSelect,
+    });
 
-  const hasMore = consultations.length > pageSize;
-  if (hasMore) consultations.pop();
+    const hasMore = consultations.length > pageSize;
+    if (hasMore) consultations.pop();
 
-  const rows: ConsultationRow[] = consultations.map((c) => ({
-    id: c.id,
-    clientName: c.client.name,
-    concern: c.concern,
-    createdByName: c.createdBy.name,
-    booking_datetime: c.booking_datetime,
-    status: c.status,
-  }));
+    const rows: ConsultationRow[] = consultations.map((c) => ({
+      id: c.id,
+      clientName: c.client.name,
+      concern: c.concern,
+      createdByName: c.createdBy.name,
+      booking_datetime: c.booking_datetime,
+      status: c.status,
+    }));
 
-  return {
-    consultations: rows,
-    nextCursor: hasMore ? consultations[consultations.length - 1].id : null,
-  };
-}
+    return {
+      consultations: rows,
+      nextCursor: hasMore ? consultations[consultations.length - 1].id : null,
+    };
+  },
+);
