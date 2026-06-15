@@ -98,10 +98,11 @@
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
+          outline: none;
 
           &[data-focus-visible] {
             outline: 2px solid var(--color-brand-accent--focus);
-            outline-offset: 2px;
+            outline-offset: -2px;
           }
         }
 
@@ -183,11 +184,6 @@
         border-bottom: 0.5px solid var(--color-border-subtle);
       }
 
-      &[data-focus-visible] {
-        outline: 2px solid var(--color-brand-accent--focus);
-        outline-offset: -2px;
-      }
-
       &[data-hovered] {
         background: var(--color-surface-hover);
       }
@@ -208,10 +204,6 @@
 
       &[data-selected] {
         background: var(--color-surface-bg-alt);
-
-        &[data-focus-visible] {
-          outline-offset: -4px;
-        }
 
         &[data-hovered] {
           background: var(--color-surface-bg-alt);
