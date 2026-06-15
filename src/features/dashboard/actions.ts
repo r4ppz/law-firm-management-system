@@ -6,11 +6,11 @@ import {
   getUpcomingConsultations,
 } from "@/features/dashboard/queries";
 
-export async function getRecentCasesAction(limit = 5) {
+export async function getRecentCasesAction(limit = 10) {
   return getRecentCases(limit);
 }
 
-export async function getUpcomingConsultationsAction(limit = 5) {
+export async function getUpcomingConsultationsAction(limit = 10) {
   return getUpcomingConsultations(limit);
 }
 

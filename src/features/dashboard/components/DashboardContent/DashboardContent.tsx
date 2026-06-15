@@ -28,8 +28,8 @@ export function DashboardContent({ stats }: DashboardContentProps) {
       <div className={styles.tablesWrapper}>
         <RecentCasesTable />
         <div className={styles.leftTable}>
-          <OverdueMilestonesTable />
           <UpcomingConsultationsTable />
+          <OverdueMilestonesTable />
         </div>
       </div>
     </div>

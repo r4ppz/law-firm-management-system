@@ -34,7 +34,7 @@ export function UpcomingConsultationsTable() {
   useEffect(() => {
     let cancelled = false;
 
-    getUpcomingConsultationsAction(5).then((result) => {
+    getUpcomingConsultationsAction().then((result) => {
       if (cancelled) return;
       setItems(result);
       setIsLoading(false);

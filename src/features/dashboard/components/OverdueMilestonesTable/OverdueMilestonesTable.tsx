@@ -33,7 +33,7 @@ export function OverdueMilestonesTable() {
   useEffect(() => {
     let cancelled = false;
 
-    getOverdueMilestonesAction(5).then((result) => {
+    getOverdueMilestonesAction().then((result) => {
       if (cancelled) return;
       setItems(result);
       setIsLoading(false);
