@@ -332,10 +332,8 @@
       }
     }
 
-    .loadMoreItem {
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    .loadMoreItem td {
+      text-align: center;
       padding: var(--space-md);
     }
   }

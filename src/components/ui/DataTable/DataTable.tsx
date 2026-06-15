@@ -132,7 +132,9 @@ export function DataTable<T extends { id: string }>({
           </Collection>
           {hasMore && (
             <TableLoadMoreItem onLoadMore={onLoadMore} isLoading={isLoading}>
-              {loadMoreContent ?? <ProgressCircle aria-label="Loading..." />}
+              <span className={styles.loadMoreWrapper}>
+                {loadMoreContent ?? <ProgressCircle aria-label="Loading..." />}
+              </span>
             </TableLoadMoreItem>
           )}
         </TableBody>

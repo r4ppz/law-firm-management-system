@@ -6,6 +6,7 @@ import { FaPlus } from "react-icons/fa6";
 
 import { Button } from "@/components/ui/Button/Button";
 import { DataTable, type ColumnDef } from "@/components/ui/DataTable/DataTable";
+import { ProgressCircle } from "@/components/ui/ProgressCircle/ProgressCircle";
 import { SearchField } from "@/components/ui/SearchField/SearchField";
 import { getCasesPaginatedAction } from "@/features/cases/actions";
 import type { CaseRow } from "@/features/cases/queries";
@@ -59,6 +60,7 @@ export function CaseTable() {
   const [items, setItems] = useState<CaseRow[]>([]);
   const [cursor, setCursor] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [search, setSearch] = useState("");
   const [isPending, startTransition] = useTransition();
@@ -76,6 +78,7 @@ export function CaseTable() {
       setItems(result.cases);
       setCursor(result.nextCursor);
       setHasMore(result.nextCursor !== null);
+      setIsInitialLoad(false);
     });
 
     return () => {
@@ -124,16 +127,22 @@ export function CaseTable() {
           <FaPlus /> Add Case
         </Button>
       </div>
-      <DataTable
-        columns={columns}
-        rows={items}
-        selectionMode="single"
-        selectionBehavior="replace"
-        hasMore={hasMore}
-        onLoadMore={handleLoadMore}
-        isLoading={isLoading}
-        emptyContent={emptyContent}
-      />
+      {isInitialLoad ? (
+        <div className={styles.loadingContainer}>
+          <ProgressCircle aria-label="Loading cases..." />
+        </div>
+      ) : (
+        <DataTable
+          columns={columns}
+          rows={items}
+          selectionMode="single"
+          selectionBehavior="replace"
+          hasMore={hasMore}
+          onLoadMore={handleLoadMore}
+          isLoading={isLoading}
+          emptyContent={emptyContent}
+        />
+      )}
     </div>
   );
 }

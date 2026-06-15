@@ -6,3 +6,8 @@
   border-radius: var(--radius-sm);
   box-shadow: var(--shadow-sm);
 }
+
+.loadMoreWrapper {
+  display: inline-flex;
+  align-items: center;
+}
