@@ -15,6 +15,7 @@ import {
   TableLoadMoreItem,
 } from "@/components/ui/Table/Table";
 
+import { ProgressCircle } from "../ProgressCircle/ProgressCircle";
 import styles from "./DataTable.module.css";
 
 export interface ColumnDef<T> {
@@ -87,6 +88,21 @@ export function DataTable<T extends { id: string }>({
     }
   }, []);
 
+  if (rows.length === 0) {
+    if (isLoading) {
+      return (
+        <div className={clsx(styles.container, styles.loadingContainer, className)}>
+          <ProgressCircle aria-label="Loading data..." />
+        </div>
+      );
+    }
+    return (
+      <div className={clsx(styles.container, styles.loadingContainer, className)}>
+        {emptyContent ?? null}
+      </div>
+    );
+  }
+
   return (
     <ResizableTableContainer
       ref={containerRef}
@@ -131,7 +147,9 @@ export function DataTable<T extends { id: string }>({
           </Collection>
           {hasMore && (
             <TableLoadMoreItem onLoadMore={onLoadMore} isLoading={isLoading}>
-              {loadMoreContent ?? "Loading..."}
+              <span className={styles.loadMoreWrapper}>
+                {loadMoreContent ?? <ProgressCircle aria-label="Loading..." />}
+              </span>
             </TableLoadMoreItem>
           )}
         </TableBody>

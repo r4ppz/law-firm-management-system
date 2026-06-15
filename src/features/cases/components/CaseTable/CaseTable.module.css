@@ -46,3 +46,10 @@
 .statusCancelled {
   background-color: var(--color-border-strong);
 }
+
+.loadingContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+}
