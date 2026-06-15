@@ -12,8 +12,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(prisma),
   providers: [
     Google({
-      // Bypasses the OAuthAccountNotLinked block dynamically in dev environment
-      allowDangerousEmailAccountLinking: process.env.NODE_ENV === "development",
+      // Bypasses the OAuthAccountNotLinked block dynamically in both dev and prod environment
+      allowDangerousEmailAccountLinking: true,
     }),
   ],
   session: {
