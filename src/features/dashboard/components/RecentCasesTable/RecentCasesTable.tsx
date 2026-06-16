@@ -66,7 +66,7 @@ export function RecentCasesTable() {
   return (
     <div className={styles.wrapper}>
       <h3 className={styles.heading}>Recent Cases</h3>
-      <DataTable columns={columns} rows={items} />
+      <DataTable columns={columns} rows={items} emptyContent={"No data yet"} />
     </div>
   );
 }

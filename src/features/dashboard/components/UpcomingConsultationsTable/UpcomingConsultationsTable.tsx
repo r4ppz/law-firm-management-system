@@ -59,7 +59,7 @@ export function UpcomingConsultationsTable() {
   return (
     <div className={styles.wrapper}>
       <h3 className={styles.heading}>Upcoming Consultations</h3>
-      <DataTable columns={columns} rows={items} />
+      <DataTable columns={columns} rows={items} emptyContent={"No data yet"} />
     </div>
   );
 }
