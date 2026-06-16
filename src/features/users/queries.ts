@@ -11,6 +11,17 @@ const userSelect = {
   created_at: true,
 } as const;
 
+export const getUserById = cache(async (id: string) => {
+  return prisma.user.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      role: true,
+      is_active: true,
+    },
+  });
+});
+
 export const getUserByEmail = cache(async (email: string) => {
   return prisma.user.findUnique({
     where: { email },

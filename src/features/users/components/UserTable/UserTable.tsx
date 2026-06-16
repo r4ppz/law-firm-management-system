@@ -20,6 +20,8 @@ import styles from "./UserTable.module.css";
 
 interface UserTableProps {
   users?: UserRow[];
+  sessionUserId?: string;
+  sessionUserRole?: string;
 }
 
 const roleClassMap: Record<Role, string> = {
@@ -31,7 +33,8 @@ const roleClassMap: Record<Role, string> = {
   ProcessServer: styles.roleProcessServer,
 };
 
-export function UserTable({ users: staticUsers }: UserTableProps) {
+export function UserTable({ users: staticUsers, sessionUserId, sessionUserRole }: UserTableProps) {
+  const canManage = sessionUserRole === "Admin" || sessionUserRole === "Dev";
   const [items, setItems] = useState<UserRow[]>(staticUsers ?? []);
   const [cursor, setCursor] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
@@ -114,28 +117,40 @@ export function UserTable({ users: staticUsers }: UserTableProps) {
         );
       },
     },
-    {
-      id: "is_active",
-      name: "Action",
-      render: (_value, row) => (
-        <div className={styles.actions}>
-          <Button
-            variant="ghost"
-            aria-label={`Edit ${row.name}`}
-            onPress={() => setModalTarget({ type: "edit", user: row as UserRow })}
-          >
-            <FaPenToSquare className={styles.icon} />
-          </Button>
-          <Button
-            variant="ghost"
-            aria-label={`Delete ${row.name}`}
-            onPress={() => setDeletingUser(row as UserRow)}
-          >
-            <FaTrashCan className={styles.icon} />
-          </Button>
-        </div>
-      ),
-    },
+    ...(canManage
+      ? [
+          {
+            id: "is_active" as const,
+            name: "Action" as const,
+            render: (_value: unknown, row: unknown) => {
+              const user = row as UserRow;
+              const isOwnDevRow = sessionUserRole === "Dev" && sessionUserId === user.id;
+              return (
+                <div className={styles.actions}>
+                  {user.role !== "Dev" && (
+                    <Button
+                      variant="ghost"
+                      aria-label={`Edit ${user.name}`}
+                      onPress={() => setModalTarget({ type: "edit", user })}
+                    >
+                      <FaPenToSquare className={styles.icon} />
+                    </Button>
+                  )}
+                  {!isOwnDevRow && (
+                    <Button
+                      variant="ghost"
+                      aria-label={`Deactivate ${user.name}`}
+                      onPress={() => setDeletingUser(user)}
+                    >
+                      <FaTrashCan className={styles.icon} />
+                    </Button>
+                  )}
+                </div>
+              );
+            },
+          } as ColumnDef<UserRow>,
+        ]
+      : []),
   ];
 
   const emptyContent =
@@ -156,14 +171,16 @@ export function UserTable({ users: staticUsers }: UserTableProps) {
             aria-label="Search users"
           />
         </div>
-        <Button
-          variant="secondary"
-          className={styles.addButton}
-          aria-label="Add user"
-          onPress={() => setModalTarget({ type: "add" })}
-        >
-          <FaPlus /> Add User
-        </Button>
+        {canManage && (
+          <Button
+            variant="secondary"
+            className={styles.addButton}
+            aria-label="Add user"
+            onPress={() => setModalTarget({ type: "add" })}
+          >
+            <FaPlus /> Add User
+          </Button>
+        )}
       </div>
       {isInitialLoad ? (
         <div className={styles.loadingContainer}>
@@ -198,7 +215,11 @@ export function UserTable({ users: staticUsers }: UserTableProps) {
         confirmLabel="Deactivate"
         onConfirm={async () => {
           if (!deletingUser) return;
-          await deactivateUserAction(deletingUser.id);
+          const result = await deactivateUserAction(deletingUser.id);
+          if (result.error) {
+            queue.add({ title: result.error });
+            return;
+          }
           setDeletingUser(null);
           setRefreshKey((k) => k + 1);
           queue.add(
