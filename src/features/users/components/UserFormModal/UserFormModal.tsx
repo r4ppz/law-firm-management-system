@@ -8,18 +8,20 @@ import { Modal } from "@/components/ui/Modal/Modal";
 import { Select, SelectItem } from "@/components/ui/Select/Select";
 import { TextField } from "@/components/ui/TextField/TextField";
 import { queue } from "@/components/ui/Toast/Toast";
-import { createUserAction } from "@/features/users/actions";
-import { CREATABLE_ROLES, roleLabels } from "@/features/users/constants";
+import { createUserAction, updateUserAction } from "@/features/users/actions";
+import { CREATABLE_ROLES, roleLabels, type UserRow } from "@/features/users/constants";
 
-import styles from "./AddUserModal.module.css";
+import styles from "./UserFormModal.module.css";
 
-interface AddUserModalProps {
+interface UserFormModalProps {
+  mode: "add" | "edit";
+  user?: UserRow;
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
   onSuccess?: () => void;
 }
 
-export function AddUserModal({ isOpen, onOpenChange, onSuccess }: AddUserModalProps) {
+export function UserFormModal({ mode, user, isOpen, onOpenChange, onSuccess }: UserFormModalProps) {
   const [error, setError] = useState<string | null>(null);
   const [isPending, setIsPending] = useState(false);
 
@@ -36,7 +38,11 @@ export function AddUserModal({ isOpen, onOpenChange, onSuccess }: AddUserModalPr
       return;
     }
 
-    const result = await createUserAction(email, role);
+    const result =
+      mode === "edit" && user
+        ? await updateUserAction(user.id, email, role)
+        : await createUserAction(email, role);
+
     if (result.error) {
       queue.add({ title: result.error });
       setError(result.error);
@@ -44,25 +50,40 @@ export function AddUserModal({ isOpen, onOpenChange, onSuccess }: AddUserModalPr
       return;
     }
 
-    queue.add({ title: "User created", description: email }, { timeout: 5000 });
+    queue.add(
+      { title: mode === "edit" ? "User updated" : "User created", description: email },
+      { timeout: 5000 },
+    );
     setIsPending(false);
     onSuccess?.();
     onOpenChange(false);
   }
 
   return (
-    <Modal className={styles.modal} title="Add User" isOpen={isOpen} onOpenChange={onOpenChange}>
+    <Modal
+      className={styles.modal}
+      title={mode === "edit" ? "Edit User" : "Add User"}
+      isOpen={isOpen}
+      onOpenChange={onOpenChange}
+    >
       <Form action={handleSubmit} className={styles.form}>
         <TextField
           label="Email"
           name="email"
           type="email"
           isRequired
+          defaultValue={user?.email ?? ""}
           placeholder="user@example.com"
           className={styles.field}
         />
 
-        <Select label="Role" name="role" isRequired className={styles.field}>
+        <Select
+          label="Role"
+          name="role"
+          isRequired
+          defaultValue={user?.role ?? null}
+          className={styles.field}
+        >
           {CREATABLE_ROLES.map((role) => (
             <SelectItem id={role} key={role}>
               {roleLabels[role]}
@@ -77,7 +98,7 @@ export function AddUserModal({ isOpen, onOpenChange, onSuccess }: AddUserModalPr
             Cancel
           </Button>
           <Button type="submit" variant="primary" isPending={isPending}>
-            Save
+            {mode === "edit" ? "Update" : "Save"}
           </Button>
         </div>
       </Form>

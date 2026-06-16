@@ -34,19 +34,25 @@ export const getUsersPaginated = cache(
     search = "",
     cursor,
     pageSize = 20,
+    includeInactive = false,
   }: {
     search?: string;
     cursor?: string;
     pageSize?: number;
+    includeInactive?: boolean;
   }) => {
-    const where = search
+    const baseFilter = includeInactive ? {} : { is_active: true };
+
+    const searchFilter = search
       ? {
           OR: [
             { name: { contains: search, mode: "insensitive" as const } },
             { email: { contains: search, mode: "insensitive" as const } },
           ],
         }
-      : undefined;
+      : {};
+
+    const where = { ...baseFilter, ...searchFilter };
 
     const users = await prisma.user.findMany({
       take: pageSize + 1,

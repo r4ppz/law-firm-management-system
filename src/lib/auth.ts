@@ -56,13 +56,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return true;
     },
 
-    async jwt({ token, user }) {
-      if (user && token.email) {
+    async jwt({ token }) {
+      if (token.email) {
         const dbUser = await getUserByEmail(token.email);
-        if (dbUser) {
-          token.role = dbUser.role;
-          token.id = dbUser.id;
+        if (!dbUser || !dbUser.is_active) {
+          return null;
         }
+        token.role = dbUser.role;
+        token.id = dbUser.id;
       }
       return token;
     },
