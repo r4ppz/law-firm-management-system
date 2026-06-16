@@ -11,7 +11,7 @@
 
     .content {
       flex: 1;
-      padding: var(--space-3xl);
+      padding: var(--space-3xl) var(--space-5xl);
       overflow-y: auto;
     }
   }
