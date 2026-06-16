@@ -1,0 +1,58 @@
+.tabContent {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+
+.addButton {
+  flex-shrink: 0;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-5xl);
+}
+
+.badge {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semi-bold);
+  padding: 2px var(--space-sm);
+  border-radius: var(--radius-pill);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.statusPending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.statusOngoing {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.statusInfo {
+  background: #e0e7ff;
+  color: #3730a3;
+}
+
+.statusDone {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.statusCancelled {
+  background: #f3f4f6;
+  color: #6b7280;
+}
