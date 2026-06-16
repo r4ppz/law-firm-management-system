@@ -8,10 +8,7 @@ export default async function UserPage() {
 
   return (
     <div className={styles.wrapper}>
-      <UserTable
-        sessionUserId={session?.user?.id}
-        sessionUserRole={session?.user?.role ?? undefined}
-      />
+      <UserTable sessionUserRole={session?.user?.role ?? undefined} />
     </div>
   );
 }

@@ -30,7 +30,7 @@ it("creates developer user on upsert", async () => {
   expect(result.is_active).toBe(true);
   expect(prisma.user.upsert).toHaveBeenCalledWith({
     where: { email: "dev@example.com" },
-    update: {},
+    update: { image: undefined, is_active: true },
     create: {
       email: "dev@example.com",
       name: "Dev User",

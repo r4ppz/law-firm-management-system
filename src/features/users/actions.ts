@@ -100,10 +100,6 @@ export async function deactivateUserAction(id: string) {
   if (!target) {
     return { error: "User not found." };
   }
-  if (session.user.role === Role.Dev && target.id === session.user.id) {
-    return { error: "Cannot deactivate your own account." };
-  }
-
   try {
     await setUserActiveStatus(id, false);
   } catch {

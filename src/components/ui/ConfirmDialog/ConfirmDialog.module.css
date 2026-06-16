@@ -1,3 +1,7 @@
+.modal {
+  width: 350px;
+}
+
 .message {
   margin: 0 0 var(--space-xl);
   font-size: var(--font-size-md);

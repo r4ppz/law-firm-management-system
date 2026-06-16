@@ -20,7 +20,6 @@ import styles from "./UserTable.module.css";
 
 interface UserTableProps {
   users?: UserRow[];
-  sessionUserId?: string;
   sessionUserRole?: string;
 }
 
@@ -33,7 +32,7 @@ const roleClassMap: Record<Role, string> = {
   ProcessServer: styles.roleProcessServer,
 };
 
-export function UserTable({ users: staticUsers, sessionUserId, sessionUserRole }: UserTableProps) {
+export function UserTable({ users: staticUsers, sessionUserRole }: UserTableProps) {
   const canManage = sessionUserRole === "Admin" || sessionUserRole === "Dev";
   const [items, setItems] = useState<UserRow[]>(staticUsers ?? []);
   const [cursor, setCursor] = useState<string | null>(null);
@@ -124,7 +123,6 @@ export function UserTable({ users: staticUsers, sessionUserId, sessionUserRole }
             name: "Action" as const,
             render: (_value: unknown, row: unknown) => {
               const user = row as UserRow;
-              const isOwnDevRow = sessionUserRole === "Dev" && sessionUserId === user.id;
               return (
                 <div className={styles.actions}>
                   {user.role !== "Dev" && (
@@ -136,15 +134,13 @@ export function UserTable({ users: staticUsers, sessionUserId, sessionUserRole }
                       <FaPenToSquare className={styles.icon} />
                     </Button>
                   )}
-                  {!isOwnDevRow && (
-                    <Button
-                      variant="ghost"
-                      aria-label={`Deactivate ${user.name}`}
-                      onPress={() => setDeletingUser(user)}
-                    >
-                      <FaTrashCan className={styles.icon} />
-                    </Button>
-                  )}
+                  <Button
+                    variant="ghost"
+                    aria-label={`Deactivate ${user.name}`}
+                    onPress={() => setDeletingUser(user)}
+                  >
+                    <FaTrashCan className={styles.icon} />
+                  </Button>
                 </div>
               );
             },

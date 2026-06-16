@@ -36,7 +36,13 @@ export function ConfirmDialog({
   }
 
   return (
-    <Modal isOpen={isOpen} onOpenChange={onOpenChange} title={title} role="alertdialog">
+    <Modal
+      className={styles.modal}
+      isOpen={isOpen}
+      onOpenChange={onOpenChange}
+      title={title}
+      role="alertdialog"
+    >
       <div className={styles.message}>{children}</div>
       <div className={styles.actions}>
         <Button
