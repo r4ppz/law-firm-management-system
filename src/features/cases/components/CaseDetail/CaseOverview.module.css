@@ -32,43 +32,43 @@
 }
 
 .statusOpen {
-  background: #dbeafe;
-  color: #1e40af;
+  background: var(--color-info);
+  color: var(--color-text-inverse);
 }
 
 .statusOngoing {
-  background: #fef3c7;
-  color: #92400e;
+  background: var(--color-warning);
+  color: var(--color-text-inverse);
 }
 
 .statusClosed {
-  background: #d1fae5;
-  color: #065f46;
+  background: var(--color-success);
+  color: var(--color-text-inverse);
 }
 
 .statusTerminated {
-  background: #fee2e2;
-  color: #991b1b;
+  background: var(--color-danger);
+  color: var(--color-text-inverse);
 }
 
 .statusSettled {
-  background: #e0e7ff;
-  color: #3730a3;
+  background: var(--color-info);
+  color: var(--color-text-inverse);
 }
 
 .statusPending {
-  background: #fef3c7;
-  color: #92400e;
+  background: var(--color-warning);
+  color: var(--color-text-inverse);
 }
 
 .statusDone {
-  background: #d1fae5;
-  color: #065f46;
+  background: var(--color-success);
+  color: var(--color-text-inverse);
 }
 
 .statusCancelled {
-  background: #f3f4f6;
-  color: #6b7280;
+  background: var(--color-neutral);
+  color: var(--color-text-inverse);
 }
 
 .grid {

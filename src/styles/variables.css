@@ -1,14 +1,15 @@
 :root {
   /* --------------------------------------------- */
   /* Primitives (raw values) */
-  --raw-black: #0b0b0b;
-  --raw-black-dark: #000000;
-  --raw-black-light: #262626;
+  --raw-black-100: #333333;
+  --raw-black-300: #1a1a1a;
+  --raw-black-500: #0b0b0b;
+  --raw-black-700: #000000;
 
-  --raw-gold: #c9a227;
-  --raw-gold-dark: #9a791c;
-  --raw-gold-light: #d6b24e;
-  --raw-gold-lightest: #ecd28b;
+  --raw-gold-100: #f2e2a0;
+  --raw-gold-300: #e5c556;
+  --raw-gold-500: #d4af37;
+  --raw-gold-700: #a8821e;
 
   --raw-white: #ffffff;
   --raw-cream: #f7f5ef;
@@ -25,6 +26,13 @@
   --raw-gray-800: #1f2937;
   --raw-gray-900: #111827;
 
+  --raw-sage: #5a7c58;
+  --raw-amber: #b7791f;
+  --raw-brick: #9e4747;
+  --raw-steel: #4a6e85;
+  --raw-violet: #7a5ea7;
+  --raw-teal: #3d7a89;
+
   /* --------------------------------------------- */
   /* Semantic tokens - Light mode */
 
@@ -33,7 +41,7 @@
   --color-surface-bg: var(--raw-white);
   --color-surface-bg-alt: var(--raw-sand);
   --color-surface-hover: var(--raw-gray-100);
-  --color-bg-inverse: var(--raw-black);
+  --color-bg-inverse: var(--raw-black-500);
   --color-modal-overlay: rgba(11, 11, 11, var(--opacity-overlay));
 
   /* Text colors */
@@ -43,32 +51,34 @@
   --color-text-inverse: var(--raw-white);
 
   /* Brand colors */
-  --color-brand-primary: var(--raw-black);
-  --color-brand-primary--hover: var(--raw-black-light);
-  --color-brand-primary--active: var(--raw-black-dark);
+  --color-brand-primary: var(--raw-black-500);
+  --color-brand-primary--hover: var(--raw-black-100);
+  --color-brand-primary--active: var(--raw-black-700);
 
-  --color-brand-accent: var(--raw-gold);
-  --color-brand-accent--hover: var(--raw-gold-light);
-  --color-brand-accent--active: var(--raw-gold-dark);
-  --color-brand-accent--focus: var(--raw-gold-lightest);
+  --color-brand-accent: var(--raw-gold-500);
+  --color-brand-accent--hover: var(--raw-gold-300);
+  --color-brand-accent--active: var(--raw-gold-700);
+  --color-brand-accent--focus: var(--raw-gold-100);
 
   /* Border colors */
   --color-border-subtle: var(--raw-gray-200);
   --color-border-default: var(--raw-gray-300);
   --color-border-strong: var(--raw-gray-400);
 
-  --color-success: #2e7d32;
-  --color-warning: #b7791f;
-  --color-danger: #c53030;
-  --color-info: #2b6cb0;
+  --color-success: var(--raw-sage);
+  --color-warning: var(--raw-amber);
+  --color-danger: var(--raw-brick);
+  --color-info: var(--raw-steel);
+
+  --color-neutral: var(--raw-gray-500);
 
   /* Role colors */
-  --role-dev: #7c3aed;
-  --role-admin: #dc2626;
-  --role-branch-manager: #0891b2;
-  --role-lawyer: #16a34a;
-  --role-paralegal: #ca8a04;
-  --role-process-server: #2563eb;
+  --role-dev: var(--raw-violet);
+  --role-admin: var(--raw-brick);
+  --role-branch-manager: var(--raw-teal);
+  --role-lawyer: var(--raw-sage);
+  --role-paralegal: var(--raw-amber);
+  --role-process-server: var(--raw-steel);
 
   /* --------------------------------------------- */
 

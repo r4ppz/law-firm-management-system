@@ -46,6 +46,7 @@ export function ConfirmDialog({
       <div className={styles.message}>{children}</div>
       <div className={styles.actions}>
         <Button
+          className={styles.button}
           type="button"
           variant="secondary"
           isDisabled={isPending}
@@ -53,7 +54,13 @@ export function ConfirmDialog({
         >
           Cancel
         </Button>
-        <Button type="button" variant="primary" isPending={isPending} onPress={handleConfirm}>
+        <Button
+          className={styles.button}
+          type="button"
+          variant="primary"
+          isPending={isPending}
+          onPress={handleConfirm}
+        >
           {confirmLabel}
         </Button>
       </div>

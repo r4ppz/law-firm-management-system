@@ -12,10 +12,14 @@
     width: 100%;
   }
 
-  .buttons {
+  .actions {
     display: flex;
     gap: var(--space-lg);
     justify-content: flex-end;
+
+    .button {
+      width: 100%;
+    }
   }
 
   .formError {

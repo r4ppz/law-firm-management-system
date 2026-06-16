@@ -32,7 +32,7 @@
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   line-height: var(--line-height-normal);
-  color: var(--raw-white);
+  color: var(--color-text-inverse);
 }
 
 .statusScheduled {
@@ -44,7 +44,7 @@
 }
 
 .statusAccepted {
-  background-color: var(--color-accent);
+  background-color: var(--color-brand-accent);
 }
 
 .statusRejected {
@@ -52,7 +52,7 @@
 }
 
 .statusCancelled {
-  background-color: var(--color-border-strong);
+  background-color: var(--color-neutral);
 }
 
 .loadingContainer {
