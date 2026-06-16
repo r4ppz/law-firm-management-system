@@ -4,7 +4,6 @@ import Google from "next-auth/providers/google";
 
 import { syncUserFromGoogle, upsertDeveloperUser } from "@/features/users/mutations";
 import { getUserByEmail } from "@/features/users/queries";
-import { Role } from "@/generated/prisma/client";
 import { parseDeveloperEmails } from "@/lib/developer-emails";
 import { prisma } from "@/lib/prisma";
 
@@ -38,16 +37,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       const existingUser = await getUserByEmail(email);
 
       if (developerWhitelist.includes(email)) {
+        if (existingUser && !existingUser.is_active) {
+          return false;
+        }
         await upsertDeveloperUser(email, user.name ?? "Developer Account", user.image);
         return true;
       }
 
       if (!existingUser || !existingUser.is_active) {
-        return false;
-      }
-
-      // The environment variable was removed, but a developer tries to log in.
-      if (existingUser.role === Role.Dev) {
         return false;
       }
 

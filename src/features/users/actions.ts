@@ -21,18 +21,21 @@ export async function getUsersPaginatedAction({
 
 const ALLOWED_ROLES = new Set(CREATABLE_ROLES);
 
+export async function checkDeveloperEmail(email: string) {
+  return parseDeveloperEmails().includes(email);
+}
+
 export async function createUserAction(email: string, role: string) {
   const session = await auth();
   if (session?.user?.role !== "Admin" && session?.user?.role !== Role.Dev) {
     return { error: "You don't have permission to create users." };
   }
 
-  if (!ALLOWED_ROLES.has(role as Role)) {
-    return { error: "Invalid role." };
-  }
+  const isDevEmail = parseDeveloperEmails().includes(email);
+  const effectiveRole = isDevEmail ? Role.Dev : (role as Role);
 
-  if (parseDeveloperEmails().includes(email)) {
-    return { error: "This email is reserved for system developers." };
+  if (!isDevEmail && !ALLOWED_ROLES.has(effectiveRole)) {
+    return { error: "Invalid role." };
   }
 
   const existing = await getUserByEmail(email);
@@ -41,7 +44,7 @@ export async function createUserAction(email: string, role: string) {
       return { error: "A user with this email already exists." };
     }
     try {
-      await updateUser(existing.id, { role: role as Role, is_active: true });
+      await updateUser(existing.id, { role: effectiveRole, is_active: true });
     } catch {
       return { error: "Failed to reactivate user." };
     }
@@ -49,7 +52,7 @@ export async function createUserAction(email: string, role: string) {
   }
 
   try {
-    await createUser(email, role as Role);
+    await createUser(email, effectiveRole);
   } catch {
     return { error: "Failed to create user." };
   }
