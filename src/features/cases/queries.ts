@@ -1,3 +1,5 @@
+import { cache } from "react";
+
 import { prisma } from "@/lib/prisma";
 
 const caseSelect = {
@@ -27,49 +29,51 @@ export type CaseRow = {
   created_at: Date;
 };
 
-export async function getCasesPaginated({
-  search = "",
-  cursor,
-  pageSize = 10,
-}: {
-  search?: string;
-  cursor?: string;
-  pageSize?: number;
-}) {
-  const where = search
-    ? {
-        OR: [
-          { case_title: { contains: search, mode: "insensitive" as const } },
-          { client: { name: { contains: search, mode: "insensitive" as const } } },
-        ],
-      }
-    : undefined;
+export const getCasesPaginated = cache(
+  async ({
+    search = "",
+    cursor,
+    pageSize = 20,
+  }: {
+    search?: string;
+    cursor?: string;
+    pageSize?: number;
+  }) => {
+    const where = search
+      ? {
+          OR: [
+            { case_title: { contains: search, mode: "insensitive" as const } },
+            { client: { name: { contains: search, mode: "insensitive" as const } } },
+          ],
+        }
+      : undefined;
 
-  const cases = await prisma.case.findMany({
-    take: pageSize + 1,
-    skip: cursor ? 1 : 0,
-    ...(cursor ? { cursor: { id: cursor } } : {}),
-    where,
-    orderBy: { created_at: "desc" },
-    select: caseSelect,
-  });
+    const cases = await prisma.case.findMany({
+      take: pageSize + 1,
+      skip: cursor ? 1 : 0,
+      ...(cursor ? { cursor: { id: cursor } } : {}),
+      where,
+      orderBy: { created_at: "desc" },
+      select: caseSelect,
+    });
 
-  const hasMore = cases.length > pageSize;
-  if (hasMore) cases.pop();
+    const hasMore = cases.length > pageSize;
+    if (hasMore) cases.pop();
 
-  const rows: CaseRow[] = cases.map((c) => ({
-    id: c.id,
-    case_title: c.case_title,
-    case_type: c.case_type,
-    clientName: c.client.name,
-    assignTo: c.caseAssignments.map((a) => a.user.name).join(", "),
-    latestMilestone: c.milestones[0]?.title ?? "",
-    status: c.milestones[0]?.status ?? null,
-    created_at: c.created_at,
-  }));
+    const rows: CaseRow[] = cases.map((c) => ({
+      id: c.id,
+      case_title: c.case_title,
+      case_type: c.case_type,
+      clientName: c.client.name,
+      assignTo: c.caseAssignments.map((a) => a.user.name).join(", "),
+      latestMilestone: c.milestones[0]?.title ?? "",
+      status: c.milestones[0]?.status ?? null,
+      created_at: c.created_at,
+    }));
 
-  return {
-    cases: rows,
-    nextCursor: hasMore ? cases[cases.length - 1].id : null,
-  };
-}
+    return {
+      cases: rows,
+      nextCursor: hasMore ? cases[cases.length - 1].id : null,
+    };
+  },
+);

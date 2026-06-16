@@ -1,3 +1,5 @@
+import { cache } from "react";
+
 import { prisma } from "@/lib/prisma";
 
 const userSelect = {
@@ -9,7 +11,7 @@ const userSelect = {
   created_at: true,
 } as const;
 
-export async function getUserByEmail(email: string) {
+export const getUserByEmail = cache(async (email: string) => {
   return prisma.user.findUnique({
     where: { email },
     select: {
@@ -18,47 +20,49 @@ export async function getUserByEmail(email: string) {
       is_active: true,
     },
   });
-}
+});
 
-export async function getUsers() {
+export const getUsers = cache(async () => {
   return prisma.user.findMany({
     orderBy: { created_at: "desc" },
     select: userSelect,
   });
-}
+});
 
-export async function getUsersPaginated({
-  search = "",
-  cursor,
-  pageSize = 20,
-}: {
-  search?: string;
-  cursor?: string;
-  pageSize?: number;
-}) {
-  const where = search
-    ? {
-        OR: [
-          { name: { contains: search, mode: "insensitive" as const } },
-          { email: { contains: search, mode: "insensitive" as const } },
-        ],
-      }
-    : undefined;
+export const getUsersPaginated = cache(
+  async ({
+    search = "",
+    cursor,
+    pageSize = 20,
+  }: {
+    search?: string;
+    cursor?: string;
+    pageSize?: number;
+  }) => {
+    const where = search
+      ? {
+          OR: [
+            { name: { contains: search, mode: "insensitive" as const } },
+            { email: { contains: search, mode: "insensitive" as const } },
+          ],
+        }
+      : undefined;
 
-  const users = await prisma.user.findMany({
-    take: pageSize + 1,
-    skip: cursor ? 1 : 0,
-    ...(cursor ? { cursor: { id: cursor } } : {}),
-    where,
-    orderBy: { created_at: "desc" },
-    select: userSelect,
-  });
+    const users = await prisma.user.findMany({
+      take: pageSize + 1,
+      skip: cursor ? 1 : 0,
+      ...(cursor ? { cursor: { id: cursor } } : {}),
+      where,
+      orderBy: { created_at: "desc" },
+      select: userSelect,
+    });
 
-  const hasMore = users.length > pageSize;
-  if (hasMore) users.pop();
+    const hasMore = users.length > pageSize;
+    if (hasMore) users.pop();
 
-  return {
-    users,
-    nextCursor: hasMore ? users[users.length - 1].id : null,
-  };
-}
+    return {
+      users,
+      nextCursor: hasMore ? users[users.length - 1].id : null,
+    };
+  },
+);

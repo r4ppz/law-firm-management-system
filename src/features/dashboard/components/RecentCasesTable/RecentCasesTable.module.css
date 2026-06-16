@@ -1,29 +1,20 @@
 .wrapper {
   display: flex;
   flex-direction: column;
-  gap: var(--space-xl);
-  flex: 1;
+  gap: var(--space-lg);
   min-height: 0;
+  flex: 1;
+  min-width: 0;
 }
 
-.toolbar {
-  display: flex;
-  gap: var(--space-xl);
-  align-items: center;
-
-  .searchWrapper {
-    flex: 1;
-    min-width: 0;
-  }
-
-  .addButton {
-    width: auto;
-    font-size: var(--font-size-md);
-    padding: var(--space-sm) var(--space-2xl);
-  }
+.heading {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-primary);
+  line-height: var(--line-height-tight);
 }
 
-.statusBadge {
+.caseStatusBadge {
   opacity: 0.7;
   display: inline-flex;
   align-items: center;
@@ -35,15 +26,23 @@
   color: var(--raw-white);
 }
 
-.statusPending {
+.caseStatusOpen {
+  background-color: var(--color-info);
+}
+
+.caseStatusOngoing {
   background-color: var(--color-warning);
 }
 
-.statusDone {
+.caseStatusClosed {
   background-color: var(--color-success);
 }
 
-.statusCancelled {
+.caseStatusTerminated {
+  background-color: var(--color-danger);
+}
+
+.caseStatusSettled {
   background-color: var(--color-border-strong);
 }
 
