@@ -1,5 +1,6 @@
 import { cache } from "react";
 
+import { Role } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 
 const userSelect = {
@@ -18,6 +19,16 @@ export const getUserById = cache(async (id: string) => {
       id: true,
       role: true,
       is_active: true,
+    },
+  });
+});
+
+export const countActiveAdminsAndDevs = cache(async (excludeUserId?: string) => {
+  return prisma.user.count({
+    where: {
+      is_active: true,
+      role: { in: [Role.Admin, Role.Dev] },
+      ...(excludeUserId ? { id: { not: excludeUserId } } : {}),
     },
   });
 });

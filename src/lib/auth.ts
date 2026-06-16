@@ -4,7 +4,7 @@ import Google from "next-auth/providers/google";
 
 import { syncUserFromGoogle, upsertDeveloperUser } from "@/features/users/mutations";
 import { getUserByEmail } from "@/features/users/queries";
-import { parseDeveloperEmails } from "@/lib/developer-emails";
+import { isDeveloperEmail } from "@/lib/developer-emails";
 import { prisma } from "@/lib/prisma";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
@@ -30,13 +30,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         return false;
       }
 
-      const developerWhitelist = parseDeveloperEmails();
-
-      // Get email and existing user
       const email = user.email;
       const existingUser = await getUserByEmail(email);
 
-      if (developerWhitelist.includes(email)) {
+      if (isDeveloperEmail(email)) {
         if (existingUser && !existingUser.is_active) {
           return false;
         }

@@ -2,10 +2,15 @@
 
 import { CREATABLE_ROLES } from "@/features/users/constants";
 import { createUser, setUserActiveStatus, updateUser } from "@/features/users/mutations";
-import { getUserByEmail, getUserById, getUsersPaginated } from "@/features/users/queries";
+import {
+  countActiveAdminsAndDevs,
+  getUserByEmail,
+  getUserById,
+  getUsersPaginated,
+} from "@/features/users/queries";
 import { Role } from "@/generated/prisma/client";
 import { auth } from "@/lib/auth";
-import { parseDeveloperEmails } from "@/lib/developer-emails";
+import { isDeveloperEmail } from "@/lib/developer-emails";
 
 export async function getUsersPaginatedAction({
   search,
@@ -22,7 +27,7 @@ export async function getUsersPaginatedAction({
 const ALLOWED_ROLES = new Set(CREATABLE_ROLES);
 
 export async function checkDeveloperEmail(email: string) {
-  return parseDeveloperEmails().includes(email);
+  return isDeveloperEmail(email);
 }
 
 export async function createUserAction(email: string, role: string) {
@@ -31,7 +36,7 @@ export async function createUserAction(email: string, role: string) {
     return { error: "You don't have permission to create users." };
   }
 
-  const isDevEmail = parseDeveloperEmails().includes(email);
+  const isDevEmail = isDeveloperEmail(email);
   const effectiveRole = isDevEmail ? Role.Dev : (role as Role);
 
   if (!isDevEmail && !ALLOWED_ROLES.has(effectiveRole)) {
@@ -102,6 +107,12 @@ export async function deactivateUserAction(id: string) {
   const target = await getUserById(id);
   if (!target) {
     return { error: "User not found." };
+  }
+  if (target.role === Role.Admin || target.role === Role.Dev) {
+    const remaining = await countActiveAdminsAndDevs(id);
+    if (remaining === 0) {
+      return { error: "Cannot deactivate the last admin or developer." };
+    }
   }
   try {
     await setUserActiveStatus(id, false);
