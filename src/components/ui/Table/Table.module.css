@@ -330,9 +330,4 @@
       padding: var(--space-md);
     }
   }
-
-  .tableFooter {
-    font-weight: var(--font-weight-bold);
-    background: var(--color-surface-bg-alt);
-  }
 }
