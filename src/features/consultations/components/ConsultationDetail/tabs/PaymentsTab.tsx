@@ -4,18 +4,18 @@ import clsx from "clsx";
 
 import { type ColumnDef } from "@/components/ui/DataTable/DataTable";
 import { PaginatedDataTab } from "@/components/ui/PaginatedDataTab/PaginatedDataTab";
-import { getCasePaymentsPaginatedAction } from "@/features/cases/actions";
-import type { PaymentRow } from "@/features/cases/queries";
+import { getConsultationPaymentsPaginatedAction } from "@/features/consultations/actions";
+import type { PaymentRow } from "@/features/consultations/queries";
 
 import tabStyles from "./Tab.module.css";
 
 interface Props {
-  caseId: string;
+  consultationId: string;
 }
 
 const statusClassMap: Record<string, string> = {
   Unpaid: tabStyles.statusPending,
-  Partial: tabStyles.statusOngoing,
+  Partial: tabStyles.statusInfo,
   Paid: tabStyles.statusDone,
   Refunded: tabStyles.statusCancelled,
 };
@@ -25,7 +25,6 @@ const columns: ColumnDef<PaymentRow>[] = [
     id: "amount",
     name: "Amount",
     isRowHeader: true,
-    allowsSorting: true,
     render: (value) => `$${(value as number).toFixed(2)}`,
   },
   { id: "payment_date", name: "Date" },
@@ -35,16 +34,16 @@ const columns: ColumnDef<PaymentRow>[] = [
     id: "status",
     name: "Status",
     render: (value) => {
-      const s = value as string;
-      return <span className={clsx(tabStyles.badge, statusClassMap[s])}>{s}</span>;
+      const status = value as string;
+      return <span className={clsx(tabStyles.badge, statusClassMap[status])}>{status}</span>;
     },
   },
 ];
 
-export function PaymentsTab({ caseId }: Props) {
+export function PaymentsTab({ consultationId }: Props) {
   return (
     <PaginatedDataTab
-      fetchAction={(p) => getCasePaymentsPaginatedAction({ caseId, ...p })}
+      fetchAction={(p) => getConsultationPaymentsPaginatedAction({ consultationId, ...p })}
       columns={columns}
       searchPlaceholder="Search payments..."
       emptyContent="No payments yet"

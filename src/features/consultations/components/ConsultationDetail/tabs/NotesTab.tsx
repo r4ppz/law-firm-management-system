@@ -2,11 +2,11 @@
 
 import { type ColumnDef } from "@/components/ui/DataTable/DataTable";
 import { PaginatedDataTab } from "@/components/ui/PaginatedDataTab/PaginatedDataTab";
-import { getCaseNotesPaginatedAction } from "@/features/cases/actions";
-import type { NoteRow } from "@/features/cases/queries";
+import { getConsultationNotesPaginatedAction } from "@/features/consultations/actions";
+import type { NoteRow } from "@/features/consultations/queries";
 
 interface Props {
-  caseId: string;
+  consultationId: string;
 }
 
 const columns: ColumnDef<NoteRow>[] = [
@@ -15,10 +15,10 @@ const columns: ColumnDef<NoteRow>[] = [
   { id: "created_at", name: "Created At" },
 ];
 
-export function NotesTab({ caseId }: Props) {
+export function NotesTab({ consultationId }: Props) {
   return (
     <PaginatedDataTab
-      fetchAction={(p) => getCaseNotesPaginatedAction({ caseId, ...p })}
+      fetchAction={(p) => getConsultationNotesPaginatedAction({ consultationId, ...p })}
       columns={columns}
       searchPlaceholder="Search notes..."
       emptyContent="No notes yet"
