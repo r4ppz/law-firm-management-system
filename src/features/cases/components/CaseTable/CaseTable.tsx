@@ -1,6 +1,7 @@
 "use client";
 
 import clsx from "clsx";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState, useTransition } from "react";
 import { FaPlus } from "react-icons/fa6";
 
@@ -57,6 +58,7 @@ const columns: ColumnDef<CaseRow>[] = [
 ];
 
 export function CaseTable() {
+  const router = useRouter();
   const [items, setItems] = useState<CaseRow[]>([]);
   const [cursor, setCursor] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
@@ -141,6 +143,7 @@ export function CaseTable() {
           onLoadMore={handleLoadMore}
           isLoading={isLoading}
           emptyContent={emptyContent}
+          onRowAction={(id) => router.push(`/case/${id}`)}
         />
       )}
     </div>

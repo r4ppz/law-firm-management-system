@@ -1,0 +1,104 @@
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+
+import type { ColumnDef } from "@/components/ui/DataTable/DataTable";
+import { PaginatedDataTab } from "@/components/ui/PaginatedDataTab/PaginatedDataTab";
+
+interface StoryItem {
+  id: string;
+  name: string;
+  role: string;
+}
+
+const mockData: StoryItem[] = [
+  { id: "1", name: "Alice Johnson", role: "Admin" },
+  { id: "2", name: "Bob Smith", role: "Lawyer" },
+  { id: "3", name: "Carol Williams", role: "Paralegal" },
+  { id: "4", name: "David Brown", role: "Branch Manager" },
+  { id: "5", name: "Eve Davis", role: "Process Server" },
+  { id: "6", name: "Frank Miller", role: "Lawyer" },
+  { id: "7", name: "Grace Wilson", role: "Paralegal" },
+  { id: "8", name: "Henry Taylor", role: "Admin" },
+  { id: "9", name: "Iris Anderson", role: "Lawyer" },
+  { id: "10", name: "Jack Thomas", role: "Process Server" },
+];
+
+const mockFetch = async ({
+  search,
+  cursor,
+  pageSize = 5,
+}: {
+  search?: string;
+  cursor?: string;
+  pageSize?: number;
+}) => {
+  await new Promise((resolve) => setTimeout(resolve, 400));
+
+  const filtered = search
+    ? mockData.filter((d) => d.name.toLowerCase().includes(search.toLowerCase()))
+    : [...mockData];
+
+  const startIndex = cursor ? filtered.findIndex((d) => d.id === cursor) + 1 : 0;
+  const page = filtered.slice(startIndex, startIndex + pageSize);
+
+  return {
+    rows: page,
+    nextCursor: page.length === pageSize ? page[page.length - 1].id : null,
+  };
+};
+
+const columns: ColumnDef<StoryItem>[] = [
+  { id: "name", name: "Name", isRowHeader: true },
+  { id: "role", name: "Role" },
+];
+
+const meta = {
+  component: PaginatedDataTab,
+  tags: ["autodocs"],
+} as Meta<typeof PaginatedDataTab>;
+
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+export const Default: Story = {
+  render: () => (
+    <PaginatedDataTab
+      fetchAction={mockFetch}
+      columns={columns}
+      searchPlaceholder="Search users..."
+      emptyContent="No users found"
+      loadingMessage="Loading users..."
+      searchLabel="Search users"
+      renderAddButton
+      addButtonLabel="Add User"
+    />
+  ),
+};
+
+export const NoAddButton: Story = {
+  render: () => (
+    <PaginatedDataTab
+      fetchAction={mockFetch}
+      columns={columns}
+      searchPlaceholder="Search users..."
+      emptyContent="No users found"
+      loadingMessage="Loading users..."
+      searchLabel="Search users"
+    />
+  ),
+};
+
+export const Empty: Story = {
+  render: () => (
+    <PaginatedDataTab
+      fetchAction={async () => {
+        await new Promise((resolve) => setTimeout(resolve, 400));
+        return { rows: [], nextCursor: null };
+      }}
+      columns={columns}
+      searchPlaceholder="Search..."
+      emptyContent="No items to display"
+      loadingMessage="Loading..."
+      searchLabel="Search"
+    />
+  ),
+};

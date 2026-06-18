@@ -7,6 +7,7 @@
     padding: 0.625rem;
     font-size: var(--font-size-sm);
     margin-top: var(--space-md);
+    width: 100%;
 
     .icon {
       width: var(--icon-size-md);

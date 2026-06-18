@@ -59,7 +59,7 @@
 - Use only semantic tokens from `variables.css`; no hardcoded values.
 
 - Responsives:
-- Mobile-first CSS.
+- Desktop first aproach CSS - mobile will be added later.
 - Use flexbox whenever possible - avoid grid.
 - `@media` only at `48rem` (use literal `rem` — CSS variables don't work in media queries).
 - Avoid the use JS viewport detection or conditional mobile/desktop components for layout — use CSS where possible.

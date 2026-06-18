@@ -1,7 +1,8 @@
 .resizableTableContainer {
   width: 100%;
   box-sizing: border-box;
-  overflow: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
   position: relative;
   background: var(--color-surface-bg);
 

@@ -1,0 +1,19 @@
+.statusScheduled {
+  background: var(--color-info);
+}
+
+.statusCompleted {
+  background: var(--color-success);
+}
+
+.statusAccepted {
+  background: var(--color-brand-accent);
+}
+
+.statusRejected {
+  background: var(--color-danger);
+}
+
+.statusCancelled {
+  background: var(--color-neutral);
+}

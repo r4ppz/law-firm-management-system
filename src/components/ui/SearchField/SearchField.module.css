@@ -8,6 +8,7 @@
   align-items: center;
   width: 100%;
   color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
 
   &[data-disabled] .icon {
     color: var(--color-text-muted);
@@ -41,7 +42,6 @@
     width: 100%;
     min-height: var(--space-3xl);
     padding: var(--space-sm) var(--space-md);
-    font-size: var(--font-size-md);
     color: var(--color-text-primary);
     background-color: var(--color-surface-bg);
     border: 1px solid var(--color-border-default);

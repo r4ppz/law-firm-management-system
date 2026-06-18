@@ -35,6 +35,7 @@ export interface DataTableProps<T extends { id: string }> {
   selectionMode?: "none" | "single" | "multiple";
   selectionBehavior?: "toggle" | "replace";
   onSelectionChange?: (keys: Selection) => void;
+  onRowAction?: (key: string) => void;
   onLoadMore?: () => void;
   hasMore?: boolean;
   isLoading?: boolean;
@@ -51,6 +52,7 @@ export function DataTable<T extends { id: string }>({
   selectionMode = "none",
   selectionBehavior = "toggle",
   onSelectionChange,
+  onRowAction,
   onLoadMore,
   hasMore,
   isLoading,
@@ -134,7 +136,12 @@ export function DataTable<T extends { id: string }>({
         <TableBody renderEmptyState={emptyContent ? () => <>{emptyContent}</> : undefined}>
           <Collection items={sortedRows}>
             {(item: T) => (
-              <Row key={item.id} id={item.id} columns={columns}>
+              <Row
+                key={item.id}
+                id={item.id}
+                columns={columns}
+                onAction={onRowAction ? () => onRowAction(item.id) : undefined}
+              >
                 {(column: ColumnDef<T>) => (
                   <Cell>
                     {column.render

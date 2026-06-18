@@ -14,6 +14,10 @@
   .searchWrapper {
     flex: 1;
     min-width: 0;
+
+    input {
+      font-size: var(--font-size-md);
+    }
   }
 
   .addButton {
@@ -32,7 +36,7 @@
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   line-height: var(--line-height-normal);
-  color: var(--raw-white);
+  color: var(--color-text-inverse);
 }
 
 .statusPending {
@@ -44,7 +48,7 @@
 }
 
 .statusCancelled {
-  background-color: var(--color-border-strong);
+  background-color: var(--color-neutral);
 }
 
 .loadingContainer {

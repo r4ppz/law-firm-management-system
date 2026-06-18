@@ -1,6 +1,15 @@
 "use server";
 
-import { getCasesPaginated } from "@/features/cases/queries";
+import {
+  getCaseActivityLogPaginated,
+  getCaseDocumentsPaginated,
+  getCaseMilestonesPaginated,
+  getCaseNotesPaginated,
+  getCaseOverviewById,
+  getCasePaymentsPaginated,
+  getCasesPaginated,
+  getCaseTasksPaginated,
+} from "@/features/cases/queries";
 
 export async function getCasesPaginatedAction({
   search,
@@ -12,4 +21,92 @@ export async function getCasesPaginatedAction({
   pageSize?: number;
 }) {
   return getCasesPaginated({ search, cursor, pageSize });
+}
+
+export async function getCaseOverviewByIdAction(id: string) {
+  return getCaseOverviewById(id);
+}
+
+export async function getCaseTasksPaginatedAction({
+  caseId,
+  search,
+  cursor,
+  pageSize,
+}: {
+  caseId: string;
+  search?: string;
+  cursor?: string;
+  pageSize?: number;
+}) {
+  return getCaseTasksPaginated({ caseId, search, cursor, pageSize });
+}
+
+export async function getCaseNotesPaginatedAction({
+  caseId,
+  search,
+  cursor,
+  pageSize,
+}: {
+  caseId: string;
+  search?: string;
+  cursor?: string;
+  pageSize?: number;
+}) {
+  return getCaseNotesPaginated({ caseId, search, cursor, pageSize });
+}
+
+export async function getCaseDocumentsPaginatedAction({
+  caseId,
+  search,
+  cursor,
+  pageSize,
+}: {
+  caseId: string;
+  search?: string;
+  cursor?: string;
+  pageSize?: number;
+}) {
+  return getCaseDocumentsPaginated({ caseId, search, cursor, pageSize });
+}
+
+export async function getCaseMilestonesPaginatedAction({
+  caseId,
+  search,
+  cursor,
+  pageSize,
+}: {
+  caseId: string;
+  search?: string;
+  cursor?: string;
+  pageSize?: number;
+}) {
+  return getCaseMilestonesPaginated({ caseId, search, cursor, pageSize });
+}
+
+export async function getCasePaymentsPaginatedAction({
+  caseId,
+  search,
+  cursor,
+  pageSize,
+}: {
+  caseId: string;
+  search?: string;
+  cursor?: string;
+  pageSize?: number;
+}) {
+  return getCasePaymentsPaginated({ caseId, search, cursor, pageSize });
+}
+
+export async function getCaseActivityLogPaginatedAction({
+  caseId,
+  search,
+  cursor,
+  pageSize,
+}: {
+  caseId: string;
+  search?: string;
+  cursor?: string;
+  pageSize?: number;
+}) {
+  return getCaseActivityLogPaginated({ caseId, search, cursor, pageSize });
 }

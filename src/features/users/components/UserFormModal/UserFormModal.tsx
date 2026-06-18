@@ -124,11 +124,16 @@ export function UserFormModal({ mode, user, isOpen, onOpenChange, onSuccess }: U
 
         {error && <FieldError className={styles.formError}>{error}</FieldError>}
 
-        <div className={styles.buttons}>
-          <Button type="button" variant="secondary" onPress={() => onOpenChange(false)}>
+        <div className={styles.actions}>
+          <Button
+            className={styles.button}
+            type="button"
+            variant="secondary"
+            onPress={() => onOpenChange(false)}
+          >
             Cancel
           </Button>
-          <Button type="submit" variant="primary" isPending={isPending}>
+          <Button className={styles.button} type="submit" variant="primary" isPending={isPending}>
             {mode === "edit" ? "Update" : "Save"}
           </Button>
         </div>

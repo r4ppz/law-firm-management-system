@@ -1,6 +1,7 @@
 "use client";
 
 import clsx from "clsx";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState, useTransition } from "react";
 import { FaPlus } from "react-icons/fa6";
 
@@ -66,6 +67,7 @@ const columns: ColumnDef<ConsultationRow>[] = [
 ];
 
 export function ConsultationTable() {
+  const router = useRouter();
   const [items, setItems] = useState<ConsultationRow[]>([]);
   const [cursor, setCursor] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
@@ -153,6 +155,7 @@ export function ConsultationTable() {
           onLoadMore={handleLoadMore}
           isLoading={isLoading}
           emptyContent={emptyContent}
+          onRowAction={(id) => router.push(`/consultation/${id}`)}
         />
       )}
     </div>

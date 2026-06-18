@@ -1,0 +1,31 @@
+.statusPending {
+  background: var(--color-warning);
+}
+
+.statusOpen {
+  background: var(--color-info);
+}
+
+.statusOngoing {
+  background: var(--color-warning);
+}
+
+.statusClosed {
+  background: var(--color-success);
+}
+
+.statusTerminated {
+  background: var(--color-danger);
+}
+
+.statusSettled {
+  background: var(--color-info);
+}
+
+.statusDone {
+  background: var(--color-success);
+}
+
+.statusCancelled {
+  background: var(--color-neutral);
+}
