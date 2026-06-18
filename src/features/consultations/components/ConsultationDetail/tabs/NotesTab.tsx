@@ -1,7 +1,7 @@
 "use client";
 
 import { type ColumnDef } from "@/components/ui/DataTable/DataTable";
-import { PaginatedDataTab } from "@/components/ui/PaginatedDataTab/PaginatedDataTab";
+import { ServerDataTable } from "@/components/ui/ServerDataTable/ServerDataTable";
 import { getConsultationNotesPaginatedAction } from "@/features/consultations/actions";
 import type { NoteRow } from "@/features/consultations/queries";
 
@@ -17,7 +17,7 @@ const columns: ColumnDef<NoteRow>[] = [
 
 export function NotesTab({ consultationId }: Props) {
   return (
-    <PaginatedDataTab
+    <ServerDataTable
       fetchAction={(p) => getConsultationNotesPaginatedAction({ consultationId, ...p })}
       columns={columns}
       searchPlaceholder="Search notes..."

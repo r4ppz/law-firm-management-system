@@ -2,16 +2,11 @@
 
 import clsx from "clsx";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState, useTransition } from "react";
-import { FaPlus } from "react-icons/fa6";
 
-import { Button } from "@/components/ui/Button/Button";
-import { DataTable, type ColumnDef } from "@/components/ui/DataTable/DataTable";
-import { ProgressCircle } from "@/components/ui/ProgressCircle/ProgressCircle";
-import { SearchField } from "@/components/ui/SearchField/SearchField";
+import { type ColumnDef } from "@/components/ui/DataTable/DataTable";
+import { ServerDataTable } from "@/components/ui/ServerDataTable/ServerDataTable";
 import { getConsultationsPaginatedAction } from "@/features/consultations/actions";
 import type { ConsultationRow } from "@/features/consultations/queries";
-import { useDebounce } from "@/lib/useDebounce";
 
 import styles from "./ConsultationTable.module.css";
 
@@ -68,96 +63,23 @@ const columns: ColumnDef<ConsultationRow>[] = [
 
 export function ConsultationTable() {
   const router = useRouter();
-  const [items, setItems] = useState<ConsultationRow[]>([]);
-  const [cursor, setCursor] = useState<string | null>(null);
-  const [hasMore, setHasMore] = useState(true);
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [search, setSearch] = useState("");
-  const [isPending, startTransition] = useTransition();
-
-  const isLoading = isPending || isLoadingMore;
-
-  const debouncedSearch = useDebounce(search, 300);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    startTransition(async () => {
-      const result = await getConsultationsPaginatedAction({
-        search: debouncedSearch,
-        pageSize: 10,
-      });
-      if (cancelled) return;
-      setItems(result.consultations);
-      setCursor(result.nextCursor);
-      setHasMore(result.nextCursor !== null);
-      setIsInitialLoad(false);
-    });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [debouncedSearch, startTransition]);
-
-  const handleLoadMore = useCallback(async () => {
-    if (isLoading || !hasMore || !cursor) return;
-
-    setIsLoadingMore(true);
-
-    try {
-      const result = await getConsultationsPaginatedAction({
-        search: debouncedSearch,
-        cursor,
-        pageSize: 10,
-      });
-      setItems((prev) => [...prev, ...result.consultations]);
-      setCursor(result.nextCursor);
-      setHasMore(result.nextCursor !== null);
-    } finally {
-      setIsLoadingMore(false);
-    }
-  }, [isLoading, hasMore, cursor, debouncedSearch]);
-
-  const emptyContent =
-    debouncedSearch && items.length === 0 && !isLoading
-      ? `No consultations matching "${debouncedSearch}"`
-      : !debouncedSearch && items.length === 0 && !isLoading
-        ? "No consultations yet"
-        : undefined;
 
   return (
-    <div className={styles.wrapper}>
-      <div className={styles.toolbar}>
-        <div className={styles.searchWrapper}>
-          <SearchField
-            value={search}
-            onChange={setSearch}
-            placeholder="Search consultations..."
-            aria-label="Search consultations"
-          />
-        </div>
-        <Button variant="secondary" className={styles.addButton} aria-label="Add consultation">
-          <FaPlus /> Add Consultation
-        </Button>
-      </div>
-      {isInitialLoad ? (
-        <div className={styles.loadingContainer}>
-          <ProgressCircle aria-label="Loading consultations..." />
-        </div>
-      ) : (
-        <DataTable
-          columns={columns}
-          rows={items}
-          selectionMode="single"
-          selectionBehavior="replace"
-          hasMore={hasMore}
-          onLoadMore={handleLoadMore}
-          isLoading={isLoading}
-          emptyContent={emptyContent}
-          onRowAction={(id) => router.push(`/consultation/${id}`)}
-        />
-      )}
-    </div>
+    <ServerDataTable
+      fetchAction={async (p) => {
+        const result = await getConsultationsPaginatedAction(p);
+        return { rows: result.consultations, nextCursor: result.nextCursor };
+      }}
+      columns={columns}
+      searchPlaceholder="Search consultations..."
+      emptyContent="No consultations yet"
+      loadingMessage="Loading consultations..."
+      searchLabel="Search consultations"
+      selectionMode="single"
+      selectionBehavior="replace"
+      onRowAction={(id) => router.push(`/consultation/${id}`)}
+      renderAddButton
+      addButtonLabel="Add Consultation"
+    />
   );
 }

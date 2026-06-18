@@ -9,9 +9,9 @@ import { ProgressCircle } from "@/components/ui/ProgressCircle/ProgressCircle";
 import { SearchField } from "@/components/ui/SearchField/SearchField";
 import { useDebounce } from "@/lib/useDebounce";
 
-import styles from "./PaginatedDataTab.module.css";
+import styles from "./ServerDataTable.module.css";
 
-interface PaginatedDataTabProps<T extends { id: string }> {
+interface ServerDataTableProps<T extends { id: string }> {
   fetchAction: (params: {
     search?: string;
     cursor?: string;
@@ -24,9 +24,12 @@ interface PaginatedDataTabProps<T extends { id: string }> {
   searchLabel?: string;
   renderAddButton?: boolean;
   addButtonLabel?: string;
+  selectionMode?: "none" | "single" | "multiple";
+  selectionBehavior?: "toggle" | "replace";
+  onRowAction?: (key: string) => void;
 }
 
-export function PaginatedDataTab<T extends { id: string }>({
+export function ServerDataTable<T extends { id: string }>({
   fetchAction,
   columns,
   searchPlaceholder = "Search...",
@@ -35,7 +38,10 @@ export function PaginatedDataTab<T extends { id: string }>({
   searchLabel = "Search",
   renderAddButton = false,
   addButtonLabel = "Add",
-}: PaginatedDataTabProps<T>) {
+  selectionMode = "single",
+  selectionBehavior = "replace",
+  onRowAction,
+}: ServerDataTableProps<T>) {
   const [items, setItems] = useState<T[]>([]);
   const [cursor, setCursor] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
@@ -95,7 +101,7 @@ export function PaginatedDataTab<T extends { id: string }>({
         : undefined;
 
   return (
-    <div className={styles.tabContent}>
+    <div className={styles.content}>
       <div className={styles.toolbar}>
         <SearchField
           value={search}
@@ -117,12 +123,13 @@ export function PaginatedDataTab<T extends { id: string }>({
         <DataTable
           columns={columns}
           rows={items}
-          selectionMode="single"
-          selectionBehavior="replace"
+          selectionMode={selectionMode}
+          selectionBehavior={selectionBehavior}
           hasMore={hasMore}
           onLoadMore={handleLoadMore}
           isLoading={isLoading}
           emptyContent={computedEmptyContent}
+          onRowAction={onRowAction}
         />
       )}
     </div>

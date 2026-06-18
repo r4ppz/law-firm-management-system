@@ -3,7 +3,7 @@
 import clsx from "clsx";
 
 import { type ColumnDef } from "@/components/ui/DataTable/DataTable";
-import { PaginatedDataTab } from "@/components/ui/PaginatedDataTab/PaginatedDataTab";
+import { ServerDataTable } from "@/components/ui/ServerDataTable/ServerDataTable";
 import { getCaseTasksPaginatedAction } from "@/features/cases/actions";
 import type { TaskRow } from "@/features/cases/queries";
 
@@ -38,7 +38,7 @@ const columns: ColumnDef<TaskRow>[] = [
 
 export function TasksTab({ caseId }: Props) {
   return (
-    <PaginatedDataTab
+    <ServerDataTable
       fetchAction={(p) => getCaseTasksPaginatedAction({ caseId, ...p })}
       columns={columns}
       searchPlaceholder="Search tasks..."
