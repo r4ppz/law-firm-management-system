@@ -6,12 +6,12 @@
   min-height: calc(100vh - var(--layout-header-height));
   gap: var(--space-lg);
   color: var(--color-text-secondary);
-}
 
-.spinner {
-  font-size: var(--icon-size-2xl);
-}
+  .spinner {
+    font-size: var(--icon-size-2xl);
+  }
 
-.text {
-  font-size: var(--font-size-md);
+  .text {
+    font-size: var(--font-size-md);
+  }
 }
