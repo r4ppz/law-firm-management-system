@@ -51,6 +51,15 @@ export const getUsers = cache(async () => {
   });
 });
 
+export type UserRow = {
+  id: string;
+  name: string;
+  email: string;
+  role: Role | null;
+  is_active: boolean;
+  created_at: Date;
+};
+
 export const getUsersPaginated = cache(
   async ({
     search = "",

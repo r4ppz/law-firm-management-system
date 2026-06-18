@@ -12,7 +12,8 @@ import { SearchField } from "@/components/ui/SearchField/SearchField";
 import { queue } from "@/components/ui/Toast/Toast";
 import { deactivateUserAction, getUsersPaginatedAction } from "@/features/users/actions";
 import { UserFormModal } from "@/features/users/components/UserFormModal/UserFormModal";
-import { roleLabels, type UserRow } from "@/features/users/constants";
+import { roleLabels } from "@/features/users/constants";
+import type { UserRow } from "@/features/users/queries";
 import type { Role } from "@/generated/prisma/client";
 import { useDebounce } from "@/lib/useDebounce";
 

@@ -10,7 +10,8 @@ import { Select, SelectItem } from "@/components/ui/Select/Select";
 import { TextField } from "@/components/ui/TextField/TextField";
 import { queue } from "@/components/ui/Toast/Toast";
 import { checkDeveloperEmail, createUserAction, updateUserAction } from "@/features/users/actions";
-import { CREATABLE_ROLES, roleLabels, type UserRow } from "@/features/users/constants";
+import { CREATABLE_ROLES, roleLabels } from "@/features/users/constants";
+import type { UserRow } from "@/features/users/queries";
 
 import styles from "./UserFormModal.module.css";
 
