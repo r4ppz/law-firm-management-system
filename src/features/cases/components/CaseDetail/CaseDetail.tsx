@@ -3,7 +3,6 @@
 import { FaArrowLeft, FaCalendarCheck } from "react-icons/fa6";
 
 import { Link } from "@/components/ui/Link/Link";
-import overviewStyles from "@/components/ui/OverviewCard/OverviewCard.module.css";
 import { RelatedLinkCard } from "@/components/ui/RelatedLinkCard/RelatedLinkCard";
 import { Tab, TabList, TabPanel, TabPanels, Tabs } from "@/components/ui/Tabs/Tabs";
 import type { CaseOverviewData } from "@/features/cases/queries";
@@ -28,7 +27,7 @@ export function CaseDetail({ overview }: Props) {
         <FaArrowLeft /> Back to Cases
       </Link>
 
-      <div className={overviewStyles.overviewRow}>
+      <div className={styles.overviewRow}>
         <CaseOverview data={overview} />
         {overview.sourceConsultation && (
           <RelatedLinkCard

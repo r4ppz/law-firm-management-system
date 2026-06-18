@@ -21,3 +21,8 @@
 .backLink:hover {
   color: var(--color-text-primary);
 }
+
+.overviewRow {
+  display: flex;
+  gap: var(--space-xl);
+}
