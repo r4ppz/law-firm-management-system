@@ -1,16 +1,11 @@
 "use client";
 
 import clsx from "clsx";
-import { useCallback, useEffect, useState, useTransition } from "react";
-import { FaPlus } from "react-icons/fa6";
 
-import { Button } from "@/components/ui/Button/Button";
-import { DataTable, type ColumnDef } from "@/components/ui/DataTable/DataTable";
-import { ProgressCircle } from "@/components/ui/ProgressCircle/ProgressCircle";
-import { SearchField } from "@/components/ui/SearchField/SearchField";
+import { type ColumnDef } from "@/components/ui/DataTable/DataTable";
+import { PaginatedDataTab } from "@/components/ui/PaginatedDataTab/PaginatedDataTab";
 import { getCaseTasksPaginatedAction } from "@/features/cases/actions";
 import type { TaskRow } from "@/features/cases/queries";
-import { useDebounce } from "@/lib/useDebounce";
 
 import tabStyles from "./Tab.module.css";
 
@@ -42,92 +37,16 @@ const columns: ColumnDef<TaskRow>[] = [
 ];
 
 export function TasksTab({ caseId }: Props) {
-  const [items, setItems] = useState<TaskRow[]>([]);
-  const [cursor, setCursor] = useState<string | null>(null);
-  const [hasMore, setHasMore] = useState(true);
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [search, setSearch] = useState("");
-  const [isPending, startTransition] = useTransition();
-
-  const isLoading = isPending || isLoadingMore;
-  const debouncedSearch = useDebounce(search, 300);
-
-  useEffect(() => {
-    let cancelled = false;
-    startTransition(async () => {
-      const result = await getCaseTasksPaginatedAction({
-        caseId,
-        search: debouncedSearch,
-        pageSize: 10,
-      });
-      if (cancelled) return;
-      setItems(result.rows);
-      setCursor(result.nextCursor);
-      setHasMore(result.nextCursor !== null);
-      setIsInitialLoad(false);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [caseId, debouncedSearch, startTransition]);
-
-  const handleLoadMore = useCallback(async () => {
-    if (isLoading || !hasMore || !cursor) return;
-    setIsLoadingMore(true);
-    try {
-      const result = await getCaseTasksPaginatedAction({
-        caseId,
-        search: debouncedSearch,
-        cursor,
-        pageSize: 10,
-      });
-      setItems((prev) => [...prev, ...result.rows]);
-      setCursor(result.nextCursor);
-      setHasMore(result.nextCursor !== null);
-    } finally {
-      setIsLoadingMore(false);
-    }
-  }, [isLoading, hasMore, cursor, caseId, debouncedSearch]);
-
-  const emptyContent =
-    debouncedSearch && items.length === 0 && !isLoading
-      ? `No tasks matching "${debouncedSearch}"`
-      : !debouncedSearch && items.length === 0 && !isLoading
-        ? "No tasks yet"
-        : undefined;
-
-  if (isInitialLoad) {
-    return (
-      <div className={tabStyles.loading}>
-        <ProgressCircle aria-label="Loading tasks..." />
-      </div>
-    );
-  }
-
   return (
-    <div className={tabStyles.tabContent}>
-      <div className={tabStyles.toolbar}>
-        <SearchField
-          value={search}
-          onChange={setSearch}
-          placeholder="Search tasks..."
-          aria-label="Search tasks"
-        />
-        <Button variant="secondary" className={tabStyles.addButton} aria-label="Add task">
-          <FaPlus /> Add Task
-        </Button>
-      </div>
-      <DataTable
-        columns={columns}
-        rows={items}
-        selectionMode="single"
-        selectionBehavior="replace"
-        hasMore={hasMore}
-        onLoadMore={handleLoadMore}
-        isLoading={isLoading}
-        emptyContent={emptyContent}
-      />
-    </div>
+    <PaginatedDataTab
+      fetchAction={(p) => getCaseTasksPaginatedAction({ caseId, ...p })}
+      columns={columns}
+      searchPlaceholder="Search tasks..."
+      emptyContent="No tasks yet"
+      loadingMessage="Loading tasks..."
+      searchLabel="Search tasks"
+      renderAddButton
+      addButtonLabel="Add Task"
+    />
   );
 }

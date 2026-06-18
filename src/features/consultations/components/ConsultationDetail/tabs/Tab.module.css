@@ -1,28 +1,3 @@
-.tabContent {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-}
-
-.toolbar {
-  display: flex;
-  align-items: center;
-  gap: var(--space-md);
-  margin-bottom: var(--space-lg);
-}
-
-.addButton {
-  flex-shrink: 0;
-}
-
-.loading {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-5xl);
-}
-
 .badge {
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semi-bold);
