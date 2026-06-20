@@ -1,18 +1,23 @@
-.card {
+.card.card {
   display: flex;
   align-items: center;
   gap: var(--space-sm);
   width: fit-content;
   padding: var(--space-md) var(--space-lg);
+  background: var(--color-surface-bg-alt);
   border-left: 3px solid var(--color-brand-accent);
   border-radius: var(--radius-sm);
   text-decoration: none;
   color: var(--color-text-primary);
   transition: background var(--transition-base);
-  background: var(--raw-gray-100);
 
-  &:hover {
-    background: var(--color-surface-bg-alt);
+  &[data-hovered] {
+    background: var(--color-surface-hover);
+  }
+
+  &[data-focus-visible] {
+    outline: 2px solid var(--color-brand-accent--focus);
+    outline-offset: 2px;
   }
 
   .icon {
@@ -42,7 +47,7 @@
     transition: transform var(--transition-base);
   }
 
-  &:hover .arrow {
+  &[data-hovered] .arrow {
     transform: translateX(3px);
   }
 }
