@@ -2,7 +2,6 @@
 
 import {
   getCaseActivityLogPaginated,
-  getCaseDocumentsPaginated,
   getCaseMilestonesPaginated,
   getCaseNotesPaginated,
   getCaseOverviewById,
@@ -10,6 +9,7 @@ import {
   getCasesPaginated,
   getCaseTasksPaginated,
 } from "@/features/cases/queries";
+import { getDocumentsPaginated } from "@/features/documents/queries";
 
 export async function getCasesPaginatedAction({
   search,
@@ -66,7 +66,7 @@ export async function getCaseDocumentsPaginatedAction({
   cursor?: string;
   pageSize?: number;
 }) {
-  return getCaseDocumentsPaginated({ caseId, search, cursor, pageSize });
+  return getDocumentsPaginated({ caseId, search, cursor, pageSize });
 }
 
 export async function getCaseMilestonesPaginatedAction({

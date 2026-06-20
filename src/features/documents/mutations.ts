@@ -1,0 +1,20 @@
+import { prisma } from "@/lib/prisma";
+
+interface CreateDocumentParams {
+  file_name: string;
+  file_path: string;
+  file_type: string;
+  file_size: number;
+  case_id?: string | null;
+  consultation_id?: string | null;
+  task_id?: string | null;
+  uploaded_by_user_id: string;
+}
+
+export async function createDocument(params: CreateDocumentParams) {
+  return prisma.document.create({ data: params });
+}
+
+export async function deleteDocument(id: string) {
+  return prisma.document.delete({ where: { id } });
+}

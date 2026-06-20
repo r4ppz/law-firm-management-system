@@ -24,6 +24,7 @@ interface ServerDataTableProps<T extends { id: string }> {
   searchLabel?: string;
   renderAddButton?: boolean;
   addButtonLabel?: string;
+  onAddButtonPress?: () => void;
   selectionMode?: "none" | "single" | "multiple";
   selectionBehavior?: "toggle" | "replace";
   onRowAction?: (key: string) => void;
@@ -38,6 +39,7 @@ export function ServerDataTable<T extends { id: string }>({
   searchLabel = "Search",
   renderAddButton = false,
   addButtonLabel = "Add",
+  onAddButtonPress,
   selectionMode = "single",
   selectionBehavior = "replace",
   onRowAction,
@@ -110,7 +112,12 @@ export function ServerDataTable<T extends { id: string }>({
           aria-label={searchLabel}
         />
         {renderAddButton && (
-          <Button variant="secondary" className={styles.addButton} aria-label={addButtonLabel}>
+          <Button
+            variant="secondary"
+            className={styles.addButton}
+            aria-label={addButtonLabel}
+            onPress={onAddButtonPress}
+          >
             <FaPlus /> {addButtonLabel}
           </Button>
         )}
