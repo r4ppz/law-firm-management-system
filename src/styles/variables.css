@@ -2,34 +2,21 @@
 
 Plan: add more than one theme later
 
-revisions:
-
-first ver:
---raw-black-100: #333333;
---raw-black-300: #1a1a1a;
---raw-black-500: #0b0b0b;
---raw-black-700: #000000;
-
---raw-gold-100: #f2e2a0;
---raw-gold-300: #e5c556;
---raw-gold-500: #d4af37;
---raw-gold-700: #a8821e;
-
 
 */
 
 :root {
   /* --------------------------------------------- */
   /* Primitives (raw values) */
-  --raw-black-100: #3a3835;
-  --raw-black-300: #2a2825;
-  --raw-black-500: #1c1a17;
-  --raw-black-700: #0f0e0c;
+  --raw-black-100: #333333;
+  --raw-black-300: #1a1a1a;
+  --raw-black-500: #0b0b0b;
+  --raw-black-700: #000000;
 
-  --raw-gold-100: #e8d9b0;
-  --raw-gold-300: #cba85f;
-  --raw-gold-500: #b8944d;
-  --raw-gold-700: #8a6e32;
+  --raw-gold-100: #f2e2a0;
+  --raw-gold-300: #e5c556;
+  --raw-gold-500: #d4af37;
+  --raw-gold-700: #bd9422;
 
   --raw-white: #ffffff;
   --raw-cream: #f7f5ef;
