@@ -98,14 +98,6 @@
 
     .textContainer {
       display: none;
-
-      .title {
-        display: none;
-      }
-
-      .desc {
-        display: none;
-      }
     }
 
     .navContainer {

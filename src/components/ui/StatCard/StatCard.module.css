@@ -8,20 +8,20 @@
   border-radius: var(--radius-sm);
   box-shadow: var(--shadow-sm);
   border-top: 3px solid var(--color-border-strong);
-}
 
-.label {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-secondary);
-  line-height: var(--line-height-normal);
-}
+  .label {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-secondary);
+    line-height: var(--line-height-normal);
+  }
 
-.value {
-  font-size: var(--font-size-3xl);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-text-primary);
-  line-height: var(--line-height-tight);
+  .value {
+    font-size: var(--font-size-3xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-primary);
+    line-height: var(--line-height-tight);
+  }
 }
 
 .accentOpen {

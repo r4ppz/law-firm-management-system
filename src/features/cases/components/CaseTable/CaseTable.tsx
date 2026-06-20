@@ -2,16 +2,11 @@
 
 import clsx from "clsx";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState, useTransition } from "react";
-import { FaPlus } from "react-icons/fa6";
 
-import { Button } from "@/components/ui/Button/Button";
-import { DataTable, type ColumnDef } from "@/components/ui/DataTable/DataTable";
-import { ProgressCircle } from "@/components/ui/ProgressCircle/ProgressCircle";
-import { SearchField } from "@/components/ui/SearchField/SearchField";
+import { type ColumnDef } from "@/components/ui/DataTable/DataTable";
+import { ServerDataTable } from "@/components/ui/ServerDataTable/ServerDataTable";
 import { getCasesPaginatedAction } from "@/features/cases/actions";
 import type { CaseRow } from "@/features/cases/queries";
-import { useDebounce } from "@/lib/useDebounce";
 
 import styles from "./CaseTable.module.css";
 
@@ -59,93 +54,23 @@ const columns: ColumnDef<CaseRow>[] = [
 
 export function CaseTable() {
   const router = useRouter();
-  const [items, setItems] = useState<CaseRow[]>([]);
-  const [cursor, setCursor] = useState<string | null>(null);
-  const [hasMore, setHasMore] = useState(true);
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [search, setSearch] = useState("");
-  const [isPending, startTransition] = useTransition();
-
-  const isLoading = isPending || isLoadingMore;
-
-  const debouncedSearch = useDebounce(search, 300);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    startTransition(async () => {
-      const result = await getCasesPaginatedAction({ search: debouncedSearch, pageSize: 10 });
-      if (cancelled) return;
-      setItems(result.cases);
-      setCursor(result.nextCursor);
-      setHasMore(result.nextCursor !== null);
-      setIsInitialLoad(false);
-    });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [debouncedSearch, startTransition]);
-
-  const handleLoadMore = useCallback(async () => {
-    if (isLoading || !hasMore || !cursor) return;
-
-    setIsLoadingMore(true);
-
-    try {
-      const result = await getCasesPaginatedAction({
-        search: debouncedSearch,
-        cursor,
-        pageSize: 10,
-      });
-      setItems((prev) => [...prev, ...result.cases]);
-      setCursor(result.nextCursor);
-      setHasMore(result.nextCursor !== null);
-    } finally {
-      setIsLoadingMore(false);
-    }
-  }, [isLoading, hasMore, cursor, debouncedSearch]);
-
-  const emptyContent =
-    debouncedSearch && items.length === 0 && !isLoading
-      ? `No cases matching "${debouncedSearch}"`
-      : !debouncedSearch && items.length === 0 && !isLoading
-        ? "No cases yet"
-        : undefined;
 
   return (
-    <div className={styles.wrapper}>
-      <div className={styles.toolbar}>
-        <div className={styles.searchWrapper}>
-          <SearchField
-            value={search}
-            onChange={setSearch}
-            placeholder="Search cases..."
-            aria-label="Search cases"
-          />
-        </div>
-        <Button variant="secondary" className={styles.addButton} aria-label="Add case">
-          <FaPlus /> Add Case
-        </Button>
-      </div>
-      {isInitialLoad ? (
-        <div className={styles.loadingContainer}>
-          <ProgressCircle aria-label="Loading cases..." />
-        </div>
-      ) : (
-        <DataTable
-          columns={columns}
-          rows={items}
-          selectionMode="single"
-          selectionBehavior="replace"
-          hasMore={hasMore}
-          onLoadMore={handleLoadMore}
-          isLoading={isLoading}
-          emptyContent={emptyContent}
-          onRowAction={(id) => router.push(`/case/${id}`)}
-        />
-      )}
-    </div>
+    <ServerDataTable
+      fetchAction={async (p) => {
+        const result = await getCasesPaginatedAction(p);
+        return { rows: result.cases, nextCursor: result.nextCursor };
+      }}
+      columns={columns}
+      searchPlaceholder="Search cases..."
+      emptyContent="No cases yet"
+      loadingMessage="Loading cases..."
+      searchLabel="Search cases"
+      selectionMode="single"
+      selectionBehavior="replace"
+      onRowAction={(id) => router.push(`/case/${id}`)}
+      renderAddButton
+      addButtonLabel="Add Case"
+    />
   );
 }

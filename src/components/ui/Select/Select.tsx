@@ -4,7 +4,6 @@ import clsx from "clsx";
 import {
   FieldError as AriaFieldError,
   Label as AriaLabel,
-  Popover as AriaPopover,
   Select as AriaSelect,
   SelectValue as AriaSelectValue,
   type SelectProps as AriaSelectProps,
@@ -16,6 +15,7 @@ import { FaChevronDown } from "react-icons/fa6";
 import { Button } from "@/components/ui/Button/Button";
 import { Text } from "@/components/ui/Content/Content";
 import { DropdownItem, DropdownListBox } from "@/components/ui/ListBox/ListBox";
+import { Popover } from "@/components/ui/Popover/Popover";
 
 import styles from "./Select.module.css";
 
@@ -52,9 +52,9 @@ export function Select<T extends object, M extends "single" | "multiple" = "sing
         </Text>
       )}
       <AriaFieldError className={styles.error}>{errorMessage}</AriaFieldError>
-      <AriaPopover className={styles.popover}>
+      <Popover>
         <DropdownListBox items={items}>{children}</DropdownListBox>
-      </AriaPopover>
+      </Popover>
     </AriaSelect>
   );
 }

@@ -5,13 +5,24 @@
   min-height: 0;
   flex: 1;
   min-width: 0;
-}
 
-.heading {
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semi-bold);
-  color: var(--color-text-primary);
-  line-height: var(--line-height-tight);
+  .heading {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semi-bold);
+    color: var(--color-text-primary);
+    line-height: var(--line-height-tight);
+  }
+
+  .loadingContainer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-sm);
+    background: var(--color-surface-bg);
+  }
 }
 
 .caseStatusBadge {
@@ -44,15 +55,4 @@
 
 .caseStatusSettled {
   background-color: var(--color-border-strong);
-}
-
-.loadingContainer {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex: 1;
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-sm);
-  box-shadow: var(--shadow-sm);
-  background: var(--color-surface-bg);
 }

@@ -5,29 +5,29 @@
   gap: var(--space-3xl);
   height: 100%;
   min-height: 0;
-}
 
-.statsRow {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  gap: var(--space-xl);
-}
+  .statsRow {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: var(--space-xl);
+  }
 
-.tablesWrapper {
-  display: flex;
-  flex-direction: row;
-  gap: var(--space-2xl);
-  flex: 1;
-  min-width: 0;
-  min-height: 0;
-}
+  .tablesWrapper {
+    display: flex;
+    flex-direction: row;
+    gap: var(--space-2xl);
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
 
-.leftTable {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xl);
-  flex: 1;
-  min-width: 0;
-  min-height: 0;
+    .leftTable {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xl);
+      flex: 1;
+      min-width: 0;
+      min-height: 0;
+    }
+  }
 }

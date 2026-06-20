@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
 import type { ColumnDef } from "@/components/ui/DataTable/DataTable";
-import { PaginatedDataTab } from "@/components/ui/PaginatedDataTab/PaginatedDataTab";
+import { ServerDataTable } from "@/components/ui/ServerDataTable/ServerDataTable";
 
 interface StoryItem {
   id: string;
@@ -52,16 +52,16 @@ const columns: ColumnDef<StoryItem>[] = [
 ];
 
 const meta = {
-  component: PaginatedDataTab,
+  component: ServerDataTable,
   tags: ["autodocs"],
-} as Meta<typeof PaginatedDataTab>;
+} as Meta<typeof ServerDataTable>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   render: () => (
-    <PaginatedDataTab
+    <ServerDataTable
       fetchAction={mockFetch}
       columns={columns}
       searchPlaceholder="Search users..."
@@ -76,7 +76,7 @@ export const Default: Story = {
 
 export const NoAddButton: Story = {
   render: () => (
-    <PaginatedDataTab
+    <ServerDataTable
       fetchAction={mockFetch}
       columns={columns}
       searchPlaceholder="Search users..."
@@ -89,7 +89,7 @@ export const NoAddButton: Story = {
 
 export const Empty: Story = {
   render: () => (
-    <PaginatedDataTab
+    <ServerDataTable
       fetchAction={async () => {
         await new Promise((resolve) => setTimeout(resolve, 400));
         return { rows: [], nextCursor: null };

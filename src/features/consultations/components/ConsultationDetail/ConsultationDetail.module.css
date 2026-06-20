@@ -5,6 +5,7 @@
   flex-direction: column;
   gap: var(--space-xl);
   padding: var(--space-lg);
+  overflow-y: auto;
 }
 
 .backLink {
@@ -20,4 +21,9 @@
 
 .backLink:hover {
   color: var(--color-text-primary);
+}
+
+.overviewRow {
+  display: flex;
+  gap: var(--space-xl);
 }

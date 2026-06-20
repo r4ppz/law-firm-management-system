@@ -3,7 +3,7 @@
 import clsx from "clsx";
 
 import { type ColumnDef } from "@/components/ui/DataTable/DataTable";
-import { PaginatedDataTab } from "@/components/ui/PaginatedDataTab/PaginatedDataTab";
+import { ServerDataTable } from "@/components/ui/ServerDataTable/ServerDataTable";
 import { getConsultationPaymentsPaginatedAction } from "@/features/consultations/actions";
 import type { PaymentRow } from "@/features/consultations/queries";
 
@@ -42,7 +42,7 @@ const columns: ColumnDef<PaymentRow>[] = [
 
 export function PaymentsTab({ consultationId }: Props) {
   return (
-    <PaginatedDataTab
+    <ServerDataTable
       fetchAction={(p) => getConsultationPaymentsPaginatedAction({ consultationId, ...p })}
       columns={columns}
       searchPlaceholder="Search payments..."

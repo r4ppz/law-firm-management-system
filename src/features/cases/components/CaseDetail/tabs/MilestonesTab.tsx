@@ -3,7 +3,7 @@
 import clsx from "clsx";
 
 import { type ColumnDef } from "@/components/ui/DataTable/DataTable";
-import { PaginatedDataTab } from "@/components/ui/PaginatedDataTab/PaginatedDataTab";
+import { ServerDataTable } from "@/components/ui/ServerDataTable/ServerDataTable";
 import { getCaseMilestonesPaginatedAction } from "@/features/cases/actions";
 import type { MilestoneRow } from "@/features/cases/queries";
 
@@ -34,7 +34,7 @@ const columns: ColumnDef<MilestoneRow>[] = [
 
 export function MilestonesTab({ caseId }: Props) {
   return (
-    <PaginatedDataTab
+    <ServerDataTable
       fetchAction={(p) => getCaseMilestonesPaginatedAction({ caseId, ...p })}
       columns={columns}
       searchPlaceholder="Search milestones..."

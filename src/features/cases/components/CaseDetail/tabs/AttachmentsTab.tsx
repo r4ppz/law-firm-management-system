@@ -1,7 +1,7 @@
 "use client";
 
 import { type ColumnDef } from "@/components/ui/DataTable/DataTable";
-import { PaginatedDataTab } from "@/components/ui/PaginatedDataTab/PaginatedDataTab";
+import { ServerDataTable } from "@/components/ui/ServerDataTable/ServerDataTable";
 import { getCaseDocumentsPaginatedAction } from "@/features/cases/actions";
 import type { DocumentRow } from "@/features/cases/queries";
 
@@ -19,7 +19,7 @@ const columns: ColumnDef<DocumentRow>[] = [
 
 export function AttachmentsTab({ caseId }: Props) {
   return (
-    <PaginatedDataTab
+    <ServerDataTable
       fetchAction={(p) => getCaseDocumentsPaginatedAction({ caseId, ...p })}
       columns={columns}
       searchPlaceholder="Search attachments..."

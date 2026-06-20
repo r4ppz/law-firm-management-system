@@ -1,7 +1,7 @@
 "use client";
 
 import { type ColumnDef } from "@/components/ui/DataTable/DataTable";
-import { PaginatedDataTab } from "@/components/ui/PaginatedDataTab/PaginatedDataTab";
+import { ServerDataTable } from "@/components/ui/ServerDataTable/ServerDataTable";
 import { getConsultationActivityLogPaginatedAction } from "@/features/consultations/actions";
 import type { ActivityLogRow } from "@/features/consultations/queries";
 
@@ -18,7 +18,7 @@ const columns: ColumnDef<ActivityLogRow>[] = [
 
 export function ActivityLogTab({ consultationId }: Props) {
   return (
-    <PaginatedDataTab
+    <ServerDataTable
       fetchAction={(p) => getConsultationActivityLogPaginatedAction({ consultationId, ...p })}
       columns={columns}
       searchPlaceholder="Search activity..."
