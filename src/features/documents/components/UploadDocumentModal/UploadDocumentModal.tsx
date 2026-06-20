@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 
 import { Button } from "@/components/ui/Button/Button";
-import { FilePicker } from "@/components/ui/FilePicker/FilePicker";
+import { DropZone } from "@/components/ui/DropZone/DropZone";
 import { Modal } from "@/components/ui/Modal/Modal";
 import { ProgressCircle } from "@/components/ui/ProgressCircle/ProgressCircle";
 import {
@@ -104,7 +104,7 @@ export function UploadDocumentModal({
   return (
     <Modal title="Upload Attachment" isOpen={isOpen} onOpenChange={handleClose}>
       <div className={styles.content}>
-        <FilePicker
+        <DropZone
           key={pickerKey}
           onFileSelect={(files) => {
             setFile(files[0]);

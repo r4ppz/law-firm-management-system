@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
-import { FilePicker } from "@/components/ui/FilePicker/FilePicker";
+import { DropZone } from "@/components/ui/DropZone/DropZone";
 
-const meta: Meta<typeof FilePicker> = {
-  component: FilePicker,
+const meta: Meta<typeof DropZone> = {
+  component: DropZone,
   tags: ["autodocs"],
   argTypes: {
     label: { control: "text" },
@@ -16,7 +16,7 @@ const meta: Meta<typeof FilePicker> = {
 };
 
 export default meta;
-type Story = StoryObj<typeof FilePicker>;
+type Story = StoryObj<typeof DropZone>;
 
 export const Default: Story = {
   args: {

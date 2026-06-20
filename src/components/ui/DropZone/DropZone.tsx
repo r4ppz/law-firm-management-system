@@ -3,18 +3,18 @@
 import clsx from "clsx";
 import { useCallback } from "react";
 import {
-  DropZone,
   FileTrigger,
   isFileDropItem,
   Pressable,
+  DropZone as RACDropZone,
   Text,
-  type DropZoneProps,
+  type DropZoneProps as RACDropZoneProps,
 } from "react-aria-components";
 import { FaUpload } from "react-icons/fa6";
 
-import styles from "./FilePicker.module.css";
+import styles from "./DropZone.module.css";
 
-export interface FilePickerProps {
+export interface DropZoneProps {
   onFileSelect: (files: File[]) => void;
   acceptedFileTypes?: readonly string[];
   allowsMultiple?: boolean;
@@ -25,7 +25,7 @@ export interface FilePickerProps {
   className?: string;
 }
 
-export function FilePicker({
+export function DropZone({
   onFileSelect,
   acceptedFileTypes,
   allowsMultiple,
@@ -34,8 +34,8 @@ export function FilePicker({
   label = "Drag & drop files here or click to browse",
   description,
   className,
-}: FilePickerProps) {
-  const handleDrop = useCallback<NonNullable<DropZoneProps["onDrop"]>>(
+}: DropZoneProps) {
+  const handleDrop = useCallback<NonNullable<RACDropZoneProps["onDrop"]>>(
     async (event) => {
       const files: File[] = [];
       for (const item of event.items) {
@@ -59,7 +59,7 @@ export function FilePicker({
   );
 
   return (
-    <DropZone
+    <RACDropZone
       isDisabled={isDisabled}
       getDropOperation={() => "copy"}
       onDrop={handleDrop}
@@ -81,6 +81,6 @@ export function FilePicker({
           </div>
         </Pressable>
       </FileTrigger>
-    </DropZone>
+    </RACDropZone>
   );
 }
