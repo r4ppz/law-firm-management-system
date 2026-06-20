@@ -26,7 +26,6 @@
 }
 
 .caseStatusBadge {
-  opacity: 0.7;
   display: inline-flex;
   align-items: center;
   padding: var(--space-xs) var(--space-md);
