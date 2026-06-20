@@ -6,6 +6,7 @@ import { type ColumnDef } from "@/components/ui/DataTable/DataTable";
 import { ServerDataTable } from "@/components/ui/ServerDataTable/ServerDataTable";
 import { getConsultationPaymentsPaginatedAction } from "@/features/consultations/actions";
 import type { PaymentRow } from "@/features/consultations/queries";
+import { formatDate } from "@/lib/date";
 
 import tabStyles from "./Tab.module.css";
 
@@ -27,7 +28,7 @@ const columns: ColumnDef<PaymentRow>[] = [
     isRowHeader: true,
     render: (value) => `$${(value as number).toFixed(2)}`,
   },
-  { id: "payment_date", name: "Date" },
+  { id: "payment_date", name: "Date", render: (value) => formatDate(value as Date) },
   { id: "payment_method", name: "Method" },
   { id: "receipt_number", name: "Receipt" },
   {

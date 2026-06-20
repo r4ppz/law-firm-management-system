@@ -6,6 +6,7 @@ import { DataTable, type ColumnDef } from "@/components/ui/DataTable/DataTable";
 import { ProgressCircle } from "@/components/ui/ProgressCircle/ProgressCircle";
 import { getUpcomingConsultationsAction } from "@/features/dashboard/actions";
 import type { UpcomingConsultationRow } from "@/features/dashboard/queries";
+import { formatDateTime } from "@/lib/date";
 
 import styles from "./UpcomingConsultationsTable.module.css";
 
@@ -15,15 +16,7 @@ const columns: ColumnDef<UpcomingConsultationRow>[] = [
   {
     id: "booking_datetime",
     name: "Date & Time",
-    render: (value) => {
-      const date = value as Date;
-      return date.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        hour: "numeric",
-        minute: "2-digit",
-      });
-    },
+    render: (value) => formatDateTime(value as Date),
   },
 ];
 

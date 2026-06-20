@@ -5,6 +5,7 @@ import { FaGavel } from "react-icons/fa6";
 
 import { RelatedLinkCard } from "@/components/ui/RelatedLinkCard/RelatedLinkCard";
 import type { ConsultationOverviewData } from "@/features/consultations/queries";
+import { formatDateTime } from "@/lib/date";
 
 import styles from "./ConsultationOverview.module.css";
 
@@ -21,12 +22,6 @@ const statusClassMap: Record<string, string> = {
 };
 
 export function ConsultationOverview({ data }: Props) {
-  const formatDate = (d: Date) =>
-    new Intl.DateTimeFormat("en-US", {
-      dateStyle: "medium",
-      timeStyle: "short",
-    }).format(new Date(d));
-
   return (
     <div className={styles.card}>
       <div className={styles.mainContent}>
@@ -55,7 +50,7 @@ export function ConsultationOverview({ data }: Props) {
             </div>
             <div className={styles.field}>
               <span className={styles.label}>Booking Date & Time</span>
-              <span className={styles.value}>{formatDate(data.booking_datetime)}</span>
+              <span className={styles.value}>{formatDateTime(data.booking_datetime)}</span>
             </div>
             <div className={styles.field}>
               <span className={styles.label}>Created By</span>
@@ -63,11 +58,11 @@ export function ConsultationOverview({ data }: Props) {
             </div>
             <div className={styles.field}>
               <span className={styles.label}>Created At</span>
-              <span className={styles.value}>{formatDate(data.created_at)}</span>
+              <span className={styles.value}>{formatDateTime(data.created_at)}</span>
             </div>
             <div className={styles.field}>
               <span className={styles.label}>Updated At</span>
-              <span className={styles.value}>{formatDate(data.updated_at)}</span>
+              <span className={styles.value}>{formatDateTime(data.updated_at)}</span>
             </div>
           </div>
           {data.relatedCase && (

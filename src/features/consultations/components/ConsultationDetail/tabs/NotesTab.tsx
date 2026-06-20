@@ -4,6 +4,7 @@ import { type ColumnDef } from "@/components/ui/DataTable/DataTable";
 import { ServerDataTable } from "@/components/ui/ServerDataTable/ServerDataTable";
 import { getConsultationNotesPaginatedAction } from "@/features/consultations/actions";
 import type { NoteRow } from "@/features/consultations/queries";
+import { formatDateTime } from "@/lib/date";
 
 interface Props {
   consultationId: string;
@@ -12,7 +13,7 @@ interface Props {
 const columns: ColumnDef<NoteRow>[] = [
   { id: "content", name: "Content", isRowHeader: true },
   { id: "author", name: "Author" },
-  { id: "created_at", name: "Created At" },
+  { id: "created_at", name: "Created At", render: (value) => formatDateTime(value as Date) },
 ];
 
 export function NotesTab({ consultationId }: Props) {

@@ -10,6 +10,7 @@ import {
 } from "@/features/documents/actions";
 import { UploadDocumentModal } from "@/features/documents/components/UploadDocumentModal/UploadDocumentModal";
 import type { DocumentRow } from "@/features/documents/queries";
+import { formatDateTime } from "@/lib/date";
 
 import tabStyles from "./Tab.module.css";
 
@@ -48,7 +49,7 @@ export function AttachmentsTab({ consultationId }: Props) {
       { id: "file_type", name: "Type" },
       { id: "file_size", name: "Size" },
       { id: "uploadedBy", name: "Uploaded By" },
-      { id: "created_at", name: "Uploaded At" },
+      { id: "created_at", name: "Uploaded At", render: (value) => formatDateTime(value as Date) },
     ],
     [handleDownload],
   );
