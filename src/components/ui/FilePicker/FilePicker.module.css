@@ -8,6 +8,7 @@
   padding: var(--space-2xl);
   min-height: 160px;
   outline: none;
+  cursor: pointer;
   transition:
     border-color var(--transition-base),
     background var(--transition-base);
@@ -23,7 +24,7 @@
   }
 
   &[data-disabled] {
-    opacity: var(--opacity-subtle);
+    opacity: var(--opacity-overlay);
     cursor: not-allowed;
   }
 }

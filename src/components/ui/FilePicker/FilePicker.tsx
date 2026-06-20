@@ -6,11 +6,11 @@ import {
   DropZone,
   FileTrigger,
   isFileDropItem,
+  Pressable,
   Text,
   type DropZoneProps,
 } from "react-aria-components";
-
-import { Button } from "@/components/ui/Button/Button";
+import { FaUpload } from "react-icons/fa6";
 
 import styles from "./FilePicker.module.css";
 
@@ -31,7 +31,7 @@ export function FilePicker({
   allowsMultiple,
   acceptDirectory,
   isDisabled,
-  label = "Drag & drop files here",
+  label = "Drag & drop files here or click to browse",
   description,
   className,
 }: FilePickerProps) {
@@ -65,36 +65,22 @@ export function FilePicker({
       onDrop={handleDrop}
       className={clsx(styles.dropZone, className)}
     >
-      <div className={styles.content}>
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className={styles.icon}
-          aria-hidden="true"
-        >
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-          <polyline points="17 8 12 3 7 8" />
-          <line x1="12" y1="3" x2="12" y2="15" />
-        </svg>
-        <Text slot="label" className={styles.label}>
-          {label}
-        </Text>
-        {description && <p className={styles.description}>{description}</p>}
-        <FileTrigger
-          acceptedFileTypes={acceptedFileTypes}
-          allowsMultiple={allowsMultiple}
-          acceptDirectory={acceptDirectory}
-          onSelect={handleSelect}
-        >
-          <Button variant="secondary" isDisabled={isDisabled}>
-            Browse Files
-          </Button>
-        </FileTrigger>
-      </div>
+      <FileTrigger
+        acceptedFileTypes={acceptedFileTypes}
+        allowsMultiple={allowsMultiple}
+        acceptDirectory={acceptDirectory}
+        onSelect={handleSelect}
+      >
+        <Pressable>
+          <div className={styles.content} role="button">
+            <FaUpload className={styles.icon} aria-hidden="true" />
+            <Text slot="label" className={styles.label}>
+              {label}
+            </Text>
+            {description && <p className={styles.description}>{description}</p>}
+          </div>
+        </Pressable>
+      </FileTrigger>
     </DropZone>
   );
 }
