@@ -1,59 +1,53 @@
-.card {
+.card.card {
   display: flex;
-  flex-direction: column;
+  align-items: center;
   gap: var(--space-sm);
-  background: var(--color-surface-bg);
+  width: fit-content;
+  padding: var(--space-md) var(--space-lg);
+  background: var(--color-surface-bg-alt);
+  border-left: 3px solid var(--color-brand-accent);
   border-radius: var(--radius-sm);
-  border: 1px solid var(--color-border-default);
-  border-top: 3px solid var(--color-brand-accent);
-  box-shadow: var(--shadow-sm);
-  padding: var(--space-xl);
   text-decoration: none;
-  transition: box-shadow var(--transition-base);
-  width: 20%;
-  min-width: 12rem;
-  flex-shrink: 0;
+  color: var(--color-text-primary);
+  transition: background var(--transition-base);
 
-  &:hover {
-    box-shadow: var(--shadow-md);
+  &[data-hovered] {
+    background: var(--color-surface-hover);
   }
 
-  &:hover .arrow {
-    transform: translateX(3px);
+  &[data-focus-visible] {
+    outline: 2px solid var(--color-brand-accent--focus);
+    outline-offset: 2px;
   }
 
-  .topRow {
+  .icon {
+    color: var(--color-brand-accent);
+    font-size: var(--font-size-md);
+    flex-shrink: 0;
     display: flex;
-    align-items: center;
-    gap: var(--space-sm);
+  }
 
-    .icon {
-      color: var(--color-brand-accent);
-      font-size: var(--font-size-md);
-      flex-shrink: 0;
-      display: flex;
-    }
-
-    .label {
-      font-size: var(--font-size-xs);
-      font-weight: var(--font-weight-medium);
-      color: var(--color-text-muted);
-      text-transform: uppercase;
-      flex: 1;
-    }
-
-    .arrow {
-      color: var(--color-text-muted);
-      font-size: var(--font-size-sm);
-      flex-shrink: 0;
-      transition: transform var(--transition-base);
-    }
+  .label {
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-muted);
+    text-transform: uppercase;
   }
 
   .title {
     font-size: var(--font-size-sm);
     font-weight: var(--font-weight-medium);
     color: var(--color-text-primary);
-    word-break: break-word;
+  }
+
+  .arrow {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+    flex-shrink: 0;
+    transition: transform var(--transition-base);
+  }
+
+  &[data-hovered] .arrow {
+    transform: translateX(3px);
   }
 }

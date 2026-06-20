@@ -7,6 +7,7 @@ import { type ColumnDef } from "@/components/ui/DataTable/DataTable";
 import { ServerDataTable } from "@/components/ui/ServerDataTable/ServerDataTable";
 import { getConsultationsPaginatedAction } from "@/features/consultations/actions";
 import type { ConsultationRow } from "@/features/consultations/queries";
+import { formatDateTime } from "@/lib/date";
 
 import styles from "./ConsultationTable.module.css";
 
@@ -41,13 +42,7 @@ const columns: ColumnDef<ConsultationRow>[] = [
     allowsSorting: true,
     render: (value) => {
       const date = value as Date;
-      return date.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-        hour: "numeric",
-        minute: "2-digit",
-      });
+      return formatDateTime(date);
     },
   },
   {

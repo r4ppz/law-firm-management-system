@@ -19,7 +19,6 @@
 }
 
 .card {
-  flex: 1;
   min-width: 0;
   display: flex;
   background: var(--color-surface-bg);
@@ -59,27 +58,34 @@
       }
     }
 
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: var(--space-lg) var(--space-3xl);
+    .bodyRow {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xl);
 
-      .field {
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-xs);
+      .grid {
+        min-width: 0;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: var(--space-lg) var(--space-3xl);
 
-        .label {
-          font-size: var(--font-size-xs);
-          font-weight: var(--font-weight-medium);
-          color: var(--color-text-muted);
-          text-transform: uppercase;
-        }
+        .field {
+          display: flex;
+          flex-direction: column;
+          gap: var(--space-xs);
 
-        .value {
-          font-size: var(--font-size-sm);
-          font-weight: var(--font-weight-normal);
-          color: var(--color-text-primary);
+          .label {
+            font-size: var(--font-size-xs);
+            font-weight: var(--font-weight-medium);
+            color: var(--color-text-muted);
+            text-transform: uppercase;
+          }
+
+          .value {
+            font-size: var(--font-size-sm);
+            font-weight: var(--font-weight-normal);
+            color: var(--color-text-primary);
+          }
         }
       }
     }

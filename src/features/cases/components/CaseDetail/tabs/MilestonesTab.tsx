@@ -6,6 +6,7 @@ import { type ColumnDef } from "@/components/ui/DataTable/DataTable";
 import { ServerDataTable } from "@/components/ui/ServerDataTable/ServerDataTable";
 import { getCaseMilestonesPaginatedAction } from "@/features/cases/actions";
 import type { MilestoneRow } from "@/features/cases/queries";
+import { formatDate } from "@/lib/date";
 
 import tabStyles from "./Tab.module.css";
 
@@ -21,7 +22,7 @@ const statusClassMap: Record<string, string> = {
 
 const columns: ColumnDef<MilestoneRow>[] = [
   { id: "title", name: "Title", isRowHeader: true, allowsSorting: true },
-  { id: "due_date", name: "Due Date" },
+  { id: "due_date", name: "Due Date", render: (value) => formatDate(value as Date) },
   {
     id: "status",
     name: "Status",

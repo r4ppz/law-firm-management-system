@@ -1,196 +1,176 @@
 import { ConsultationStatus } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 
-interface SeedConsultation {
-  id: string;
-  clientId: string;
-  creatorEmail: string;
-  booking_datetime: Date;
+interface ConsultationData {
+  clientEmail: string;
+  createdByEmail: string;
   concern: string;
   status: ConsultationStatus;
+  daysAgo: number;
 }
 
-const consultations: SeedConsultation[] = [
+const consultations: ConsultationData[] = [
   {
-    id: "d0000000-0000-4000-a000-000000000001",
-    clientId: "c0000000-0000-4000-a000-000000000001",
-    creatorEmail: "alice@lawfirm.com",
-    booking_datetime: new Date("2026-01-15T09:00:00Z"),
-    concern: "Property boundary dispute with neighbor",
-    status: ConsultationStatus.Completed,
+    clientEmail: "antonio.lopez@email.com",
+    createdByEmail: "jessica.lim@aninolaw.com",
+    concern:
+      "Boundary dispute with neighboring property owner — encroachment on northern lot boundary",
+    status: "Scheduled",
+    daysAgo: -3,
   },
   {
-    id: "d0000000-0000-4000-a000-000000000002",
-    clientId: "c0000000-0000-4000-a000-000000000002",
-    creatorEmail: "bob@lawfirm.com",
-    booking_datetime: new Date("2026-01-20T14:00:00Z"),
-    concern: "Contract review for business acquisition",
-    status: ConsultationStatus.Completed,
+    clientEmail: "patricia.luna@email.com",
+    createdByEmail: "kevin.garcia@aninolaw.com",
+    concern: "Medical malpractice — post-surgical complications from a routine appendectomy",
+    status: "Scheduled",
+    daysAgo: -2,
   },
   {
-    id: "d0000000-0000-4000-a000-000000000003",
-    clientId: "c0000000-0000-4000-a000-000000000003",
-    creatorEmail: "carol@lawfirm.com",
-    booking_datetime: new Date("2026-02-01T10:00:00Z"),
-    concern: "Employment dispute with former executive",
-    status: ConsultationStatus.Accepted,
+    clientEmail: "luisito.ramos@email.com",
+    createdByEmail: "catherine.diaz@aninolaw.com",
+    concern: "Land title verification and transfer for inherited agricultural lot in Batangas",
+    status: "Scheduled",
+    daysAgo: -14,
   },
   {
-    id: "d0000000-0000-4000-a000-000000000004",
-    clientId: "c0000000-0000-4000-a000-000000000004",
-    creatorEmail: "dan@lawfirm.com",
-    booking_datetime: new Date("2026-02-05T11:30:00Z"),
-    concern: "Family business succession planning",
-    status: ConsultationStatus.Accepted,
+    clientEmail: "aileen.castro@email.com",
+    createdByEmail: "maya.fernandez@aninolaw.com",
+    concern: "Review of business loan agreement with BDO — unclear default provisions",
+    status: "Scheduled",
+    daysAgo: -5,
   },
   {
-    id: "d0000000-0000-4000-a000-000000000005",
-    clientId: "c0000000-0000-4000-a000-000000000005",
-    creatorEmail: "eve@lawfirm.com",
-    booking_datetime: new Date("2026-02-10T15:00:00Z"),
-    concern: "Partnership dissolution advice",
-    status: ConsultationStatus.Scheduled,
+    clientEmail: "roberto.hernandez@email.com",
+    createdByEmail: "paolo.guerrero@aninolaw.com",
+    concern: "Property tax reassessment — assessed value doubled, seeking legal remedy",
+    status: "Completed",
+    daysAgo: 14,
   },
   {
-    id: "d0000000-0000-4000-a000-000000000006",
-    clientId: "c0000000-0000-4000-a000-000000000006",
-    creatorEmail: "frank@lawfirm.com",
-    booking_datetime: new Date("2026-06-12T08:00:00Z"),
-    concern: "Personal injury claim consultation",
-    status: ConsultationStatus.Scheduled,
+    clientEmail: "catherine.santos@email.com",
+    createdByEmail: "jessica.lim@aninolaw.com",
+    concern: "Foreclosure notice from BPI — three months behind on mortgage payments",
+    status: "Completed",
+    daysAgo: 10,
   },
   {
-    id: "d0000000-0000-4000-a000-000000000007",
-    clientId: "c0000000-0000-4000-a000-000000000007",
-    creatorEmail: "grace.lawyer@lawfirm.com",
-    booking_datetime: new Date("2026-03-01T13:00:00Z"),
-    concern: "Intellectual property infringement assessment",
-    status: ConsultationStatus.Completed,
+    clientEmail: "jean.garcia@email.com",
+    createdByEmail: "sofia.villanueva@aninolaw.com",
+    concern:
+      "Student suspension case — son expelled over alleged cheating with insufficient evidence",
+    status: "Completed",
+    daysAgo: 7,
   },
   {
-    id: "d0000000-0000-4000-a000-000000000008",
-    clientId: "c0000000-0000-4000-a000-000000000008",
-    creatorEmail: "henry@lawfirm.com",
-    booking_datetime: new Date("2026-03-05T09:30:00Z"),
-    concern: "Divorce and child custody consultation",
-    status: ConsultationStatus.Accepted,
+    clientEmail: "mercedes.alvarez@email.com",
+    createdByEmail: "kevin.garcia@aninolaw.com",
+    concern: "Estate planning — preparation of last will and testament for blended family",
+    status: "Completed",
+    daysAgo: 21,
   },
   {
-    id: "d0000000-0000-4000-a000-000000000009",
-    clientId: "c0000000-0000-4000-a000-000000000009",
-    creatorEmail: "iris@lawfirm.com",
-    booking_datetime: new Date("2026-06-20T16:00:00Z"),
-    concern: "Commercial lease dispute",
-    status: ConsultationStatus.Scheduled,
+    clientEmail: "juan.delacruz@email.com",
+    createdByEmail: "david.tan@aninolaw.com",
+    concern:
+      "Property acquisition — purchasing a residential lot in Nuvali, need contract review and transfer",
+    status: "Accepted",
+    daysAgo: 30,
   },
   {
-    id: "d0000000-0000-4000-a000-000000000010",
-    clientId: "c0000000-0000-4000-a000-000000000010",
-    creatorEmail: "jack.lawyer@lawfirm.com",
-    booking_datetime: new Date("2026-03-15T11:00:00Z"),
-    concern: "Debt collection legal options",
-    status: ConsultationStatus.Rejected,
+    clientEmail: "maria.gonzales@email.com",
+    createdByEmail: "sofia.villanueva@aninolaw.com",
+    concern:
+      "Legal separation — married 12 years, husband abandoned the family, seeking custody and support",
+    status: "Accepted",
+    daysAgo: 25,
   },
   {
-    id: "d0000000-0000-4000-a000-000000000011",
-    clientId: "c0000000-0000-4000-a000-000000000011",
-    creatorEmail: "kate@lawfirm.com",
-    booking_datetime: new Date("2026-03-20T10:00:00Z"),
-    concern: "Real estate purchase agreement review",
-    status: ConsultationStatus.Completed,
+    clientEmail: "carlos.reyes@email.com",
+    createdByEmail: "miguel.cruz@aninolaw.com",
+    concern:
+      "Breach of contract — San Miguel Logistics failed to deliver goods per 6-month supply agreement",
+    status: "Accepted",
+    daysAgo: 20,
   },
   {
-    id: "d0000000-0000-4000-a000-000000000012",
-    clientId: "c0000000-0000-4000-a000-000000000012",
-    creatorEmail: "alice@lawfirm.com",
-    booking_datetime: new Date("2026-04-01T14:30:00Z"),
-    concern: "Medical malpractice preliminary review",
-    status: ConsultationStatus.Scheduled,
+    clientEmail: "fatima.alcantara@email.com",
+    createdByEmail: "sofia.villanueva@aninolaw.com",
+    concern: "Annulment — married 5 years, psychological incapacity, seeking to void marriage",
+    status: "Accepted",
+    daysAgo: 18,
   },
   {
-    id: "d0000000-0000-4000-a000-000000000013",
-    clientId: "c0000000-0000-4000-a000-000000000013",
-    creatorEmail: "bob@lawfirm.com",
-    booking_datetime: new Date("2026-04-05T09:00:00Z"),
-    concern: "Corporate restructuring legal advice",
-    status: ConsultationStatus.Accepted,
+    clientEmail: "miguel.navarro@email.com",
+    createdByEmail: "david.tan@aninolaw.com",
+    concern:
+      "Real estate joint venture — partnering with foreign investor for condominium development in BGC",
+    status: "Accepted",
+    daysAgo: 60,
   },
   {
-    id: "d0000000-0000-4000-a000-000000000014",
-    clientId: "c0000000-0000-4000-a000-000000000014",
-    creatorEmail: "carol@lawfirm.com",
-    booking_datetime: new Date("2026-04-10T15:00:00Z"),
-    concern: "Will and estate planning",
-    status: ConsultationStatus.Completed,
+    clientEmail: "gregorio.santiago@email.com",
+    createdByEmail: "robert.santos@aninolaw.com",
+    concern:
+      "Zoning variance — Calamba property reclassified from residential to commercial, appeal needed",
+    status: "Accepted",
+    daysAgo: 15,
   },
   {
-    id: "d0000000-0000-4000-a000-000000000015",
-    clientId: "c0000000-0000-4000-a000-000000000015",
-    creatorEmail: "dan@lawfirm.com",
-    booking_datetime: new Date("2026-04-15T11:00:00Z"),
-    concern: "LLC formation consultation",
-    status: ConsultationStatus.Cancelled,
+    clientEmail: "victorino.rivera@email.com",
+    createdByEmail: "jessica.lim@aninolaw.com",
+    concern:
+      "Harassment suit against neighbor over drainage dispute — neighbor filed baseless criminal complaint",
+    status: "Rejected",
+    daysAgo: 5,
   },
   {
-    id: "d0000000-0000-4000-a000-000000000016",
-    clientId: "c0000000-0000-4000-a000-000000000001",
-    creatorEmail: "eve@lawfirm.com",
-    booking_datetime: new Date("2026-06-25T13:00:00Z"),
-    concern: "Appeal options for property case",
-    status: ConsultationStatus.Scheduled,
+    clientEmail: "hernando.cruz@email.com",
+    createdByEmail: "marco.lopez@aninolaw.com",
+    concern: "Unlawful detainer — tenant refuses to vacate commercial space despite expired lease",
+    status: "Rejected",
+    daysAgo: 3,
   },
   {
-    id: "d0000000-0000-4000-a000-000000000017",
-    clientId: "c0000000-0000-4000-a000-000000000003",
-    creatorEmail: "frank@lawfirm.com",
-    booking_datetime: new Date("2026-05-01T10:30:00Z"),
-    concern: "Labor law compliance review",
-    status: ConsultationStatus.Completed,
+    clientEmail: "rowena.lim@email.com",
+    createdByEmail: "maya.fernandez@aninolaw.com",
+    concern:
+      "Commercial lease dispute — landlord demanding double rent citing automatic renewal clause",
+    status: "Cancelled",
+    daysAgo: 8,
   },
   {
-    id: "d0000000-0000-4000-a000-000000000018",
-    clientId: "c0000000-0000-4000-a000-000000000006",
-    creatorEmail: "grace.lawyer@lawfirm.com",
-    booking_datetime: new Date("2026-05-05T14:00:00Z"),
-    concern: "Insurance claim dispute",
-    status: ConsultationStatus.Rejected,
-  },
-  {
-    id: "d0000000-0000-4000-a000-000000000019",
-    clientId: "c0000000-0000-4000-a000-000000000009",
-    creatorEmail: "henry@lawfirm.com",
-    booking_datetime: new Date("2026-05-10T09:00:00Z"),
-    concern: "Merger due diligence consultation",
-    status: ConsultationStatus.Cancelled,
-  },
-  {
-    id: "d0000000-0000-4000-a000-000000000020",
-    clientId: "c0000000-0000-4000-a000-000000000012",
-    creatorEmail: "iris@lawfirm.com",
-    booking_datetime: new Date("2026-07-01T11:00:00Z"),
-    concern: "Tenant rights consultation",
-    status: ConsultationStatus.Scheduled,
+    clientEmail: "emmanuel.velasco@email.com",
+    createdByEmail: "kevin.garcia@aninolaw.com",
+    concern:
+      "Data privacy complaint — former employer shared personal data without consent after resignation",
+    status: "Cancelled",
+    daysAgo: 12,
   },
 ];
 
-export async function seedConsultations() {
-  let count = 0;
+export async function seedConsultations(
+  userByEmail: Record<string, string>,
+  clients: { id: string; email: string }[],
+): Promise<{ id: string; status: string }[]> {
+  const clientByEmail = Object.fromEntries(clients.map((c) => [c.email, c.id]));
+  const created: { id: string; status: string }[] = [];
 
   for (const c of consultations) {
-    await prisma.consultation.upsert({
-      where: { id: c.id },
-      update: {},
-      create: {
-        id: c.id,
-        client: { connect: { id: c.clientId } },
-        createdBy: { connect: { email: c.creatorEmail } },
-        booking_datetime: c.booking_datetime,
+    const bookingDate = new Date();
+    bookingDate.setDate(bookingDate.getDate() + c.daysAgo);
+
+    const consultation = await prisma.consultation.create({
+      data: {
+        client_id: clientByEmail[c.clientEmail],
+        created_by_user_id: userByEmail[c.createdByEmail],
+        booking_datetime: bookingDate,
         concern: c.concern,
         status: c.status,
       },
     });
-    count++;
+    created.push({ id: consultation.id, status: c.status });
   }
 
-  console.log(`Seeded ${count} consultations.`);
+  console.log(`Seeded ${created.length} consultations.`);
+  return created;
 }

@@ -1,5 +1,6 @@
 import { cache } from "react";
 
+import { getDocumentsPaginated } from "@/features/documents/queries";
 import { prisma } from "@/lib/prisma";
 
 const consultationSelect = {
@@ -132,48 +133,15 @@ export type DocumentRow = {
 export const getConsultationDocumentsPaginated = cache(
   async ({
     consultationId,
-    search = "",
+    search,
     cursor,
-    pageSize = 20,
+    pageSize,
   }: {
     consultationId: string;
     search?: string;
     cursor?: string;
     pageSize?: number;
-  }) => {
-    const where = {
-      consultation_id: consultationId,
-      ...(search ? { file_name: { contains: search, mode: "insensitive" as const } } : {}),
-    };
-
-    const documents = await prisma.document.findMany({
-      take: pageSize + 1,
-      skip: cursor ? 1 : 0,
-      ...(cursor ? { cursor: { id: cursor } } : {}),
-      where,
-      orderBy: { created_at: "desc" },
-      include: {
-        uploadedBy: { select: { name: true } },
-      },
-    });
-
-    const hasMore = documents.length > pageSize;
-    if (hasMore) documents.pop();
-
-    const rows: DocumentRow[] = documents.map((d) => ({
-      id: d.id,
-      file_name: d.file_name,
-      file_type: d.file_type,
-      file_size: d.file_size,
-      uploadedBy: d.uploadedBy.name,
-      created_at: d.created_at,
-    }));
-
-    return {
-      rows,
-      nextCursor: hasMore ? documents[documents.length - 1].id : null,
-    };
-  },
+  }) => getDocumentsPaginated({ consultationId, search, cursor, pageSize }),
 );
 
 // ----- Payments -----

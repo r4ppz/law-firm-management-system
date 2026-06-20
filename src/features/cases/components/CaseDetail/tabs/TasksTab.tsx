@@ -6,6 +6,7 @@ import { type ColumnDef } from "@/components/ui/DataTable/DataTable";
 import { ServerDataTable } from "@/components/ui/ServerDataTable/ServerDataTable";
 import { getCaseTasksPaginatedAction } from "@/features/cases/actions";
 import type { TaskRow } from "@/features/cases/queries";
+import { formatDateTime } from "@/lib/date";
 
 import tabStyles from "./Tab.module.css";
 
@@ -33,7 +34,7 @@ const columns: ColumnDef<TaskRow>[] = [
     },
   },
   { id: "assignTo", name: "Assigned To" },
-  { id: "updated_at", name: "Updated At" },
+  { id: "updated_at", name: "Updated At", render: (value) => formatDateTime(value as Date) },
 ];
 
 export function TasksTab({ caseId }: Props) {

@@ -6,24 +6,19 @@
   gap: var(--space-xl);
   padding: var(--space-lg);
   overflow-y: auto;
-}
 
-.backLink {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-sm);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-secondary);
-  text-decoration: none;
-  width: fit-content;
-}
+  .backLink {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-sm);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    width: fit-content;
+  }
 
-.backLink:hover {
-  color: var(--color-text-primary);
-}
-
-.overviewRow {
-  display: flex;
-  gap: var(--space-xl);
+  .backLink:hover {
+    color: var(--color-text-primary);
+  }
 }

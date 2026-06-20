@@ -6,6 +6,7 @@ import { DataTable, type ColumnDef } from "@/components/ui/DataTable/DataTable";
 import { ProgressCircle } from "@/components/ui/ProgressCircle/ProgressCircle";
 import { getOverdueMilestonesAction } from "@/features/dashboard/actions";
 import type { OverdueMilestoneRow } from "@/features/dashboard/queries";
+import { formatDate } from "@/lib/date";
 
 import styles from "./OverdueMilestonesTable.module.css";
 
@@ -15,14 +16,7 @@ const columns: ColumnDef<OverdueMilestoneRow>[] = [
   {
     id: "due_date",
     name: "Due Date",
-    render: (value) => {
-      const date = value as Date;
-      return date.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      });
-    },
+    render: (value) => formatDate(value as Date),
   },
 ];
 

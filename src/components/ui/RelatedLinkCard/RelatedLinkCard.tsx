@@ -17,12 +17,10 @@ interface RelatedLinkCardProps {
 export function RelatedLinkCard({ href, label, title, icon }: RelatedLinkCardProps) {
   return (
     <Link href={href} className={styles.card}>
-      <div className={styles.topRow}>
-        {icon && <span className={styles.icon}>{icon}</span>}
-        <span className={styles.label}>{label}</span>
-        <FaArrowRight className={styles.arrow} />
-      </div>
+      {icon && <span className={styles.icon}>{icon}</span>}
+      <span className={styles.label}>{label}</span>
       <span className={styles.title}>{title}</span>
+      <FaArrowRight className={styles.arrow} />
     </Link>
   );
 }

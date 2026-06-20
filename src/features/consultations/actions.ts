@@ -2,12 +2,12 @@
 
 import {
   getConsultationActivityLogPaginated,
-  getConsultationDocumentsPaginated,
   getConsultationNotesPaginated,
   getConsultationOverviewById,
   getConsultationPaymentsPaginated,
   getConsultationsPaginated,
 } from "@/features/consultations/queries";
+import { getDocumentsPaginated } from "@/features/documents/queries";
 
 export async function getConsultationsPaginatedAction({
   search,
@@ -50,7 +50,7 @@ export async function getConsultationDocumentsPaginatedAction({
   cursor?: string;
   pageSize?: number;
 }) {
-  return getConsultationDocumentsPaginated({ consultationId, search, cursor, pageSize });
+  return getDocumentsPaginated({ consultationId, search, cursor, pageSize });
 }
 
 export async function getConsultationPaymentsPaginatedAction({

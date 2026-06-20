@@ -1,316 +1,212 @@
 import { CaseStatus } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 
-interface SeedCase {
-  id: string;
-  clientId: string;
-  creatorEmail: string;
-  case_title: string;
-  case_type: string;
-  parties_involved?: string;
+interface CaseData {
+  clientEmail: string;
+  title: string;
+  type: string;
   status: CaseStatus;
-  consultationId?: string;
+  createdByEmail: string;
+  sourceConsultationClientEmail?: string;
+  partiesInvolved: string;
+  assigneeEmails: string[];
 }
 
-const casesData: SeedCase[] = [
+const cases: CaseData[] = [
   {
-    id: "e0000000-0000-4000-a000-000000000001",
-    clientId: "c0000000-0000-4000-a000-000000000001",
-    creatorEmail: "alice@lawfirm.com",
-    case_title: "Doe vs. Henderson Property Dispute",
-    case_type: "Civil",
-    parties_involved: "John Doe (Plaintiff) vs. Mark Henderson (Defendant)",
-    status: CaseStatus.Ongoing,
-    consultationId: "d0000000-0000-4000-a000-000000000001",
+    clientEmail: "juan.delacruz@email.com",
+    title: "Dela Cruz Property Title Transfer",
+    type: "Real Estate",
+    status: "Ongoing",
+    createdByEmail: "catherine.diaz@aninolaw.com",
+    sourceConsultationClientEmail: "juan.delacruz@email.com",
+    partiesInvolved: "Juan M. Dela Cruz (Buyer), Nuvali Development Corp. (Seller)",
+    assigneeEmails: ["david.tan@aninolaw.com", "jessica.lim@aninolaw.com"],
   },
   {
-    id: "e0000000-0000-4000-a000-000000000002",
-    clientId: "c0000000-0000-4000-a000-000000000002",
-    creatorEmail: "bob@lawfirm.com",
-    case_title: "Smith Acquisition Contract Review",
-    case_type: "Corporate",
-    parties_involved: "Jane Smith (Buyer) vs. TechStart Inc. (Seller)",
-    status: CaseStatus.Closed,
-    consultationId: "d0000000-0000-4000-a000-000000000002",
+    clientEmail: "maria.gonzales@email.com",
+    title: "Gonzales Legal Separation",
+    type: "Family Law",
+    status: "Ongoing",
+    createdByEmail: "sofia.villanueva@aninolaw.com",
+    sourceConsultationClientEmail: "maria.gonzales@email.com",
+    partiesInvolved: "Maria G. Gonzales (Petitioner), Ricardo Gonzales (Respondent)",
+    assigneeEmails: ["sofia.villanueva@aninolaw.com", "kevin.garcia@aninolaw.com"],
   },
   {
-    id: "e0000000-0000-4000-a000-000000000003",
-    clientId: "c0000000-0000-4000-a000-000000000003",
-    creatorEmail: "carol@lawfirm.com",
-    case_title: "ABC Corp Employment Dispute",
-    case_type: "Labor",
-    parties_involved: "ABC Corporation vs. Thomas Reed (Former Executive)",
-    status: CaseStatus.Open,
-    consultationId: "d0000000-0000-4000-a000-000000000003",
+    clientEmail: "carlos.reyes@email.com",
+    title: "Reyes vs. San Miguel Logistics",
+    type: "Civil Litigation",
+    status: "Open",
+    createdByEmail: "miguel.cruz@aninolaw.com",
+    sourceConsultationClientEmail: "carlos.reyes@email.com",
+    partiesInvolved: "Carlos M. Reyes (Plaintiff), San Miguel Logistics Inc. (Defendant)",
+    assigneeEmails: ["miguel.cruz@aninolaw.com", "jessica.lim@aninolaw.com"],
   },
   {
-    id: "e0000000-0000-4000-a000-000000000004",
-    clientId: "c0000000-0000-4000-a000-000000000004",
-    creatorEmail: "dan@lawfirm.com",
-    case_title: "Garcia Family Succession Plan",
-    case_type: "Family",
-    status: CaseStatus.Open,
-    consultationId: "d0000000-0000-4000-a000-000000000004",
+    clientEmail: "fatima.alcantara@email.com",
+    title: "Alcantara Annulment Proceedings",
+    type: "Family Law",
+    status: "Open",
+    createdByEmail: "sofia.villanueva@aninolaw.com",
+    sourceConsultationClientEmail: "fatima.alcantara@email.com",
+    partiesInvolved: "Fatima D. Alcantara (Petitioner), Michael Alcantara (Respondent)",
+    assigneeEmails: ["sofia.villanueva@aninolaw.com", "maya.fernandez@aninolaw.com"],
   },
   {
-    id: "e0000000-0000-4000-a000-000000000005",
-    clientId: "c0000000-0000-4000-a000-000000000005",
-    creatorEmail: "eve@lawfirm.com",
-    case_title: "Thompson Partnership Dissolution",
-    case_type: "Corporate",
-    parties_involved: "Thompson & Sons LLC vs. James Thompson (Partner)",
-    status: CaseStatus.Settled,
+    clientEmail: "miguel.navarro@email.com",
+    title: "Navarro Estate Development Joint Venture",
+    type: "Real Estate",
+    status: "Closed",
+    createdByEmail: "catherine.diaz@aninolaw.com",
+    sourceConsultationClientEmail: "miguel.navarro@email.com",
+    partiesInvolved: "Miguel B. Navarro (Developer), Kingsbridge Capital HK Ltd. (Investor)",
+    assigneeEmails: [
+      "david.tan@aninolaw.com",
+      "angela.mercado@aninolaw.com",
+      "jessica.lim@aninolaw.com",
+    ],
   },
   {
-    id: "e0000000-0000-4000-a000-000000000006",
-    clientId: "c0000000-0000-4000-a000-000000000007",
-    creatorEmail: "grace.lawyer@lawfirm.com",
-    case_title: "Delta Industries IP Infringement",
-    case_type: "Intellectual Property",
-    parties_involved: "Delta Industries vs. Gamma Technologies",
-    status: CaseStatus.Ongoing,
-    consultationId: "d0000000-0000-4000-a000-000000000007",
+    clientEmail: "gregorio.santiago@email.com",
+    title: "Santiago Zoning Compliance Appeal",
+    type: "Real Estate",
+    status: "Open",
+    createdByEmail: "robert.santos@aninolaw.com",
+    sourceConsultationClientEmail: "gregorio.santiago@email.com",
+    partiesInvolved: "Gregorio T. Santiago (Applicant), Calamba City Zoning Board",
+    assigneeEmails: ["gina.reyes@aninolaw.com", "nina.salvador@aninolaw.com"],
   },
   {
-    id: "e0000000-0000-4000-a000-000000000007",
-    clientId: "c0000000-0000-4000-a000-000000000008",
-    creatorEmail: "henry@lawfirm.com",
-    case_title: "Williams Divorce Proceedings",
-    case_type: "Family",
-    parties_involved: "Sarah Williams (Petitioner) vs. David Williams (Respondent)",
-    status: CaseStatus.Ongoing,
-    consultationId: "d0000000-0000-4000-a000-000000000008",
+    clientEmail: "antonio.lopez@email.com",
+    title: "Lopez Property Boundary Litigation",
+    type: "Civil Litigation",
+    status: "Ongoing",
+    createdByEmail: "maria.anino@aninolaw.com",
+    partiesInvolved: "Antonio S. Lopez (Plaintiff), Felipe Dimagiba (Defendant)",
+    assigneeEmails: [
+      "marco.lopez@aninolaw.com",
+      "paolo.guerrero@aninolaw.com",
+      "benito.cruz@aninolaw.com",
+    ],
   },
   {
-    id: "e0000000-0000-4000-a000-000000000008",
-    clientId: "c0000000-0000-4000-a000-000000000009",
-    creatorEmail: "iris@lawfirm.com",
-    case_title: "Pacific Holdings Lease Dispute",
-    case_type: "Real Estate",
-    parties_involved: "Pacific Holdings vs. Metro Retail Group",
-    status: CaseStatus.Open,
-    consultationId: "d0000000-0000-4000-a000-000000000009",
+    clientEmail: "eduardo.villanueva@email.com",
+    title: "Villanueva Corporation Registration",
+    type: "Corporate",
+    status: "Closed",
+    createdByEmail: "angela.mercado@aninolaw.com",
+    partiesInvolved: "Eduardo L. Villanueva (Sole Proprietor), SEC",
+    assigneeEmails: ["angela.mercado@aninolaw.com", "maya.fernandez@aninolaw.com"],
   },
   {
-    id: "e0000000-0000-4000-a000-000000000009",
-    clientId: "c0000000-0000-4000-a000-000000000011",
-    creatorEmail: "kate@lawfirm.com",
-    case_title: "Blue Ridge Property Purchase",
-    case_type: "Real Estate",
-    parties_involved: "Blue Ridge Properties vs. Greenfield Development",
-    status: CaseStatus.Closed,
-    consultationId: "d0000000-0000-4000-a000-000000000011",
+    clientEmail: "danilo.fernandez@email.com",
+    title: "Fernandez Criminal Defense — Estafa Case",
+    type: "Criminal",
+    status: "Ongoing",
+    createdByEmail: "ricardo.guevarra@aninolaw.com",
+    partiesInvolved: "Danilo S. Fernandez (Accused), People of the Philippines",
+    assigneeEmails: ["ricardo.guevarra@aninolaw.com", "nina.salvador@aninolaw.com"],
   },
   {
-    id: "e0000000-0000-4000-a000-000000000010",
-    clientId: "c0000000-0000-4000-a000-000000000013",
-    creatorEmail: "bob@lawfirm.com",
-    case_title: "Summit Consulting Corporate Restructure",
-    case_type: "Corporate",
-    parties_involved: "Summit Consulting Group",
-    status: CaseStatus.Open,
-    consultationId: "d0000000-0000-4000-a000-000000000013",
+    clientEmail: "lily.castillo@email.com",
+    title: "Castillo Illegal Dismissal Complaint",
+    type: "Civil Litigation",
+    status: "Ongoing",
+    createdByEmail: "miguel.cruz@aninolaw.com",
+    partiesInvolved: "Lily M. Castillo (Complainant), Jollibee Foods Corp. (Respondent)",
+    assigneeEmails: ["miguel.cruz@aninolaw.com", "jessica.lim@aninolaw.com"],
   },
   {
-    id: "e0000000-0000-4000-a000-000000000011",
-    clientId: "c0000000-0000-4000-a000-000000000014",
-    creatorEmail: "carol@lawfirm.com",
-    case_title: "Wilson Estate Planning",
-    case_type: "Family",
-    status: CaseStatus.Closed,
-    consultationId: "d0000000-0000-4000-a000-000000000014",
+    clientEmail: "roberto.hernandez@email.com",
+    title: "Hernandez Property Tax Protest",
+    type: "Civil Litigation",
+    status: "Open",
+    createdByEmail: "gina.reyes@aninolaw.com",
+    partiesInvolved: "Roberto S. Hernandez (Taxpayer), City of Manila Assessor's Office",
+    assigneeEmails: ["gina.reyes@aninolaw.com", "kevin.garcia@aninolaw.com"],
   },
   {
-    id: "e0000000-0000-4000-a000-000000000012",
-    clientId: "c0000000-0000-4000-a000-000000000003",
-    creatorEmail: "frank@lawfirm.com",
-    case_title: "ABC Corp Labor Compliance Case",
-    case_type: "Labor",
-    parties_involved: "ABC Corporation vs. Department of Labor",
-    status: CaseStatus.Ongoing,
-    consultationId: "d0000000-0000-4000-a000-000000000017",
+    clientEmail: "sofia.ramirez@email.com",
+    title: "Ramirez Corp — Series A Funding",
+    type: "Corporate",
+    status: "Open",
+    createdByEmail: "angela.mercado@aninolaw.com",
+    partiesInvolved: "Sofia D. Ramirez (Founder, Ramirez Tech Inc.), Venture Capital Fund",
+    assigneeEmails: ["angela.mercado@aninolaw.com", "maya.fernandez@aninolaw.com"],
   },
   {
-    id: "e0000000-0000-4000-a000-000000000013",
-    clientId: "c0000000-0000-4000-a000-000000000006",
-    creatorEmail: "alice@lawfirm.com",
-    case_title: "Johnson Personal Injury Claim",
-    case_type: "Civil",
-    parties_involved: "Robert Johnson (Plaintiff) vs. City of Austin",
-    status: CaseStatus.Open,
+    clientEmail: "elena.rodriguez@email.com",
+    title: "Rodriguez Estate Settlement",
+    type: "Estate",
+    status: "Open",
+    createdByEmail: "sofia.villanueva@aninolaw.com",
+    partiesInvolved: "Elena V. Rodriguez (Administrator), Estate of the late Manuel Rodriguez",
+    assigneeEmails: ["sofia.villanueva@aninolaw.com", "kevin.garcia@aninolaw.com"],
   },
   {
-    id: "e0000000-0000-4000-a000-000000000014",
-    clientId: "c0000000-0000-4000-a000-000000000010",
-    creatorEmail: "jack.lawyer@lawfirm.com",
-    case_title: "Brown Debt Collection Case",
-    case_type: "Civil",
-    parties_involved: "Michael Brown (Creditor) vs. Paul Anderson (Debtor)",
-    status: CaseStatus.Terminated,
-  },
-  {
-    id: "e0000000-0000-4000-a000-000000000015",
-    clientId: "c0000000-0000-4000-a000-000000000012",
-    creatorEmail: "nora@lawfirm.com",
-    case_title: "Davis Medical Malpractice Suit",
-    case_type: "Civil",
-    parties_involved: "Emily Davis (Plaintiff) vs. St. Mary's Hospital",
-    status: CaseStatus.Open,
-  },
-  {
-    id: "e0000000-0000-4000-a000-000000000016",
-    clientId: "c0000000-0000-4000-a000-000000000001",
-    creatorEmail: "eve@lawfirm.com",
-    case_title: "Doe Property Appeal",
-    case_type: "Civil",
-    parties_involved: "John Doe (Appellant) vs. Henderson (Respondent)",
-    status: CaseStatus.Open,
-    consultationId: "d0000000-0000-4000-a000-000000000016",
-  },
-  {
-    id: "e0000000-0000-4000-a000-000000000017",
-    clientId: "c0000000-0000-4000-a000-000000000004",
-    creatorEmail: "dan@lawfirm.com",
-    case_title: "Garcia Business Dispute",
-    case_type: "Corporate",
-    status: CaseStatus.Settled,
-  },
-  {
-    id: "e0000000-0000-4000-a000-000000000018",
-    clientId: "c0000000-0000-4000-a000-000000000007",
-    creatorEmail: "grace.lawyer@lawfirm.com",
-    case_title: "Delta vs Gamma Patent Case",
-    case_type: "Intellectual Property",
-    parties_involved: "Delta Industries vs. Gamma Technologies",
-    status: CaseStatus.Ongoing,
-  },
-  {
-    id: "e0000000-0000-4000-a000-000000000019",
-    clientId: "c0000000-0000-4000-a000-000000000015",
-    creatorEmail: "bob@lawfirm.com",
-    case_title: "Evergreen LLC Formation",
-    case_type: "Corporate",
-    status: CaseStatus.Closed,
-  },
-  {
-    id: "e0000000-0000-4000-a000-000000000020",
-    clientId: "c0000000-0000-4000-a000-000000000009",
-    creatorEmail: "iris@lawfirm.com",
-    case_title: "Pacific Holdings Merger Review",
-    case_type: "Corporate",
-    parties_involved: "Pacific Holdings vs. NorthStar Enterprises",
-    status: CaseStatus.Terminated,
-  },
-  {
-    id: "e0000000-0000-4000-a000-000000000021",
-    clientId: "c0000000-0000-4000-a000-000000000005",
-    creatorEmail: "eve@lawfirm.com",
-    case_title: "Thompson Fraud Investigation",
-    case_type: "Criminal",
-    parties_involved: "State vs. James Thompson",
-    status: CaseStatus.Ongoing,
-  },
-  {
-    id: "e0000000-0000-4000-a000-000000000022",
-    clientId: "c0000000-0000-4000-a000-000000000011",
-    creatorEmail: "alice@lawfirm.com",
-    case_title: "Blue Ridge Zoning Dispute",
-    case_type: "Real Estate",
-    parties_involved: "Blue Ridge Properties vs. City Planning Board",
-    status: CaseStatus.Open,
-  },
-  {
-    id: "e0000000-0000-4000-a000-000000000023",
-    clientId: "c0000000-0000-4000-a000-000000000008",
-    creatorEmail: "henry@lawfirm.com",
-    case_title: "Williams Child Custody Modification",
-    case_type: "Family",
-    parties_involved: "Sarah Williams vs. David Williams",
-    status: CaseStatus.Ongoing,
-  },
-  {
-    id: "e0000000-0000-4000-a000-000000000024",
-    clientId: "c0000000-0000-4000-a000-000000000002",
-    creatorEmail: "bob@lawfirm.com",
-    case_title: "Smith vs TechStart Non-Compete",
-    case_type: "Labor",
-    parties_involved: "Jane Smith vs. TechStart Inc.",
-    status: CaseStatus.Settled,
-  },
-  {
-    id: "e0000000-0000-4000-a000-000000000025",
-    clientId: "c0000000-0000-4000-a000-000000000006",
-    creatorEmail: "frank@lawfirm.com",
-    case_title: "Johnson Insurance Bad Faith",
-    case_type: "Civil",
-    parties_involved: "Robert Johnson vs. Guardian Insurance",
-    status: CaseStatus.Open,
-  },
-  {
-    id: "e0000000-0000-4000-a000-000000000026",
-    clientId: "c0000000-0000-4000-a000-000000000010",
-    creatorEmail: "jack.lawyer@lawfirm.com",
-    case_title: "Brown vs Anderson Fraud Recovery",
-    case_type: "Civil",
-    parties_involved: "Michael Brown vs. Paul Anderson",
-    status: CaseStatus.Terminated,
-  },
-  {
-    id: "e0000000-0000-4000-a000-000000000027",
-    clientId: "c0000000-0000-4000-a000-000000000013",
-    creatorEmail: "carol@lawfirm.com",
-    case_title: "Summit Consulting Tax Dispute",
-    case_type: "Corporate",
-    parties_involved: "Summit Consulting Group vs. IRS",
-    status: CaseStatus.Open,
-  },
-  {
-    id: "e0000000-0000-4000-a000-000000000028",
-    clientId: "c0000000-0000-4000-a000-000000000001",
-    creatorEmail: "alice@lawfirm.com",
-    case_title: "Doe vs Henderson Damages Hearing",
-    case_type: "Civil",
-    parties_involved: "John Doe (Plaintiff) vs. Mark Henderson (Defendant)",
-    status: CaseStatus.Ongoing,
-  },
-  {
-    id: "e0000000-0000-4000-a000-000000000029",
-    clientId: "c0000000-0000-4000-a000-000000000014",
-    creatorEmail: "nora@lawfirm.com",
-    case_title: "Wilson Trust Administration",
-    case_type: "Family",
-    status: CaseStatus.Closed,
-  },
-  {
-    id: "e0000000-0000-4000-a000-000000000030",
-    clientId: "c0000000-0000-4000-a000-000000000015",
-    creatorEmail: "dan@lawfirm.com",
-    case_title: "Evergreen Holdings Real Estate Portfolio",
-    case_type: "Real Estate",
-    status: CaseStatus.Open,
+    clientEmail: "catherine.santos@email.com",
+    title: "Santos Foreclosure Defense",
+    type: "Family Law",
+    status: "Ongoing",
+    createdByEmail: "marco.lopez@aninolaw.com",
+    partiesInvolved: "Catherine P. Santos (Homeowner), BPI Family Bank (Creditor)",
+    assigneeEmails: ["marco.lopez@aninolaw.com", "nina.salvador@aninolaw.com"],
   },
 ];
 
-export async function seedCases() {
-  let count = 0;
+export async function seedCases(
+  userByEmail: Record<string, string>,
+  clients: { id: string; email: string }[],
+  consultations: { id: string; status: string }[],
+): Promise<{ id: string; title: string }[]> {
+  const clientByEmail = Object.fromEntries(clients.map((c) => [c.email, c.id]));
 
-  for (const c of casesData) {
-    await prisma.case.upsert({
-      where: { id: c.id },
-      update: {},
-      create: {
-        id: c.id,
-        client: { connect: { id: c.clientId } },
-        createdBy: { connect: { email: c.creatorEmail } },
-        case_title: c.case_title,
-        case_type: c.case_type,
-        parties_involved: c.parties_involved ?? null,
-        status: c.status,
-        ...(c.consultationId ? { sourceConsultation: { connect: { id: c.consultationId } } } : {}),
-      },
-    });
-    count++;
+  const acceptedConsultations = consultations.filter((c) => c.status === "Accepted");
+  const acceptedConClientIndex = new Map<string, number>();
+  for (let i = 0; i < cases.length; i++) {
+    const c = cases[i];
+    if (c.sourceConsultationClientEmail) {
+      acceptedConClientIndex.set(c.sourceConsultationClientEmail, i);
+    }
   }
 
-  console.log(`Seeded ${count} cases.`);
+  const conByClientEmail = new Map<string, string>();
+  const conData = cases.map((c) => c.sourceConsultationClientEmail).filter(Boolean) as string[];
+  for (let i = 0; i < conData.length; i++) {
+    if (i < acceptedConsultations.length) {
+      conByClientEmail.set(conData[i], acceptedConsultations[i].id);
+    }
+  }
+
+  const created: { id: string; title: string }[] = [];
+
+  for (const c of cases) {
+    const caseRecord = await prisma.case.create({
+      data: {
+        client_id: clientByEmail[c.clientEmail],
+        case_title: c.title,
+        case_type: c.type,
+        status: c.status,
+        created_by_user_id: userByEmail[c.createdByEmail],
+        parties_involved: c.partiesInvolved,
+        source_consultation_id: c.sourceConsultationClientEmail
+          ? (conByClientEmail.get(c.sourceConsultationClientEmail) ?? null)
+          : null,
+      },
+    });
+    created.push({ id: caseRecord.id, title: c.title });
+
+    for (const assigneeEmail of c.assigneeEmails) {
+      await prisma.caseAssignment.create({
+        data: {
+          case_id: caseRecord.id,
+          user_id: userByEmail[assigneeEmail],
+        },
+      });
+    }
+  }
+
+  console.log(`Seeded ${created.length} cases with case assignments.`);
+  return created;
 }
