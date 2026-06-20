@@ -14,19 +14,19 @@
   width: 1em;
   height: 1em;
   animation: spin 1s linear infinite;
-}
 
-.circle svg {
-  display: block;
-}
+  svg {
+    display: block;
+  }
 
-.track {
-  stroke: currentColor;
-  opacity: 0.25;
-}
+  .track {
+    stroke: currentColor;
+    opacity: 0.25;
+  }
 
-.arc {
-  stroke: currentColor;
-  stroke-dasharray: 20 80;
-  stroke-linecap: round;
+  .arc {
+    stroke: currentColor;
+    stroke-dasharray: 20 80;
+    stroke-linecap: round;
+  }
 }

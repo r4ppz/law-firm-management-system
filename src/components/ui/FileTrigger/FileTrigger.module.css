@@ -17,27 +17,27 @@
     outline: 2px solid var(--color-brand-accent);
     outline-offset: 2px;
   }
-}
 
-.disabled {
-  opacity: var(--opacity-subtle);
-  cursor: not-allowed;
-}
+  &.disabled {
+    opacity: var(--opacity-subtle);
+    cursor: not-allowed;
+  }
 
-.icon {
-  width: var(--icon-size-lg);
-  height: var(--icon-size-lg);
-  color: var(--color-text-muted);
-}
+  .icon {
+    width: var(--icon-size-lg);
+    height: var(--icon-size-lg);
+    color: var(--color-text-muted);
+  }
 
-.label {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-primary);
-}
+  .label {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-primary);
+  }
 
-.description {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
-  margin: 0;
+  .description {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-secondary);
+    margin: 0;
+  }
 }
