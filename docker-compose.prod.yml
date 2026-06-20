@@ -31,6 +31,37 @@ services:
       DATABASE_URL: postgres://testing:testing@db:5432/testing
     command: ["pnpm", "prisma", "migrate", "deploy"]
 
+  minio:
+    image: minio/minio:latest
+    container_name: minio-prod
+    restart: unless-stopped
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    expose:
+      - "9000"
+      - "9001"
+
+  createbuckets:
+    image: minio/mc:latest
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+        mc alias set local http://minio:9000 minioadmin minioadmin &&
+        mc mb --ignore-existing local/law-firm-files &&
+        echo 'Bucket law-firm-files created successfully'
+      "
+
   web:
     build:
       context: .
@@ -40,13 +71,22 @@ services:
     depends_on:
       migrate:
         condition: service_completed_successfully
+      createbuckets:
+        condition: service_completed_successfully
     environment:
       NODE_ENV: production
       PORT: 3000
       HOSTNAME: 0.0.0.0
       DATABASE_URL: postgres://testing:testing@db:5432/testing
+      S3_ENDPOINT: http://minio:9000
+      S3_REGION: us-east-1
+      S3_ACCESS_KEY: minioadmin
+      S3_SECRET_KEY: minioadmin
+      S3_BUCKET: law-firm-files
+      S3_FORCE_PATH_STYLE: "true"
     ports:
       - "3000:3000"
 
 volumes:
   postgres_data:
+  minio_data:
