@@ -4,13 +4,13 @@ services:
     container_name: postgres-prod
     restart: unless-stopped
     environment:
-      POSTGRES_DB: testing
-      POSTGRES_USER: testing
-      POSTGRES_PASSWORD: testing
+      POSTGRES_DB: ${POSTGRES_DB:-testing}
+      POSTGRES_USER: ${POSTGRES_USER:-testing}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-testing}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U testing -d testing"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-testing} -d ${POSTGRES_DB:-testing}"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -26,6 +26,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    env_file: .env.prod
     environment:
       NODE_ENV: production
       DATABASE_URL: postgres://testing:testing@db:5432/testing
@@ -36,8 +37,8 @@ services:
     container_name: minio-prod
     restart: unless-stopped
     environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
     command: server /data --console-address ":9001"
     volumes:
       - minio_data:/data
@@ -73,17 +74,14 @@ services:
         condition: service_completed_successfully
       createbuckets:
         condition: service_completed_successfully
+    env_file: .env.prod
     environment:
       NODE_ENV: production
       PORT: 3000
       HOSTNAME: 0.0.0.0
+      AUTH_TRUST_HOST: true
+      AUTH_URL: http://localhost:3000
       DATABASE_URL: postgres://testing:testing@db:5432/testing
-      S3_ENDPOINT: http://minio:9000
-      S3_REGION: us-east-1
-      S3_ACCESS_KEY: minioadmin
-      S3_SECRET_KEY: minioadmin
-      S3_BUCKET: law-firm-files
-      S3_FORCE_PATH_STYLE: "true"
     ports:
       - "3000:3000"
 
