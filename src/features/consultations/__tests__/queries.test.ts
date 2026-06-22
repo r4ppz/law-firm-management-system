@@ -2,10 +2,21 @@ import { describe, expect, it, vi } from "vitest";
 
 import { prisma } from "@/lib/prisma";
 
-import { getConsultationsPaginated } from "../queries";
+import {
+  getConsultationActivityLogPaginated,
+  getConsultationNotesPaginated,
+  getConsultationOverviewById,
+  getConsultationPaymentsPaginated,
+  getConsultationsPaginated,
+} from "../queries";
 
 vi.mock("@/lib/prisma", () => ({
-  prisma: { consultation: { findMany: vi.fn() } },
+  prisma: {
+    auditLog: { findMany: vi.fn() },
+    consultation: { findMany: vi.fn(), findUniqueOrThrow: vi.fn() },
+    note: { findMany: vi.fn() },
+    payment: { findMany: vi.fn() },
+  },
 }));
 
 const consultationSelect = {
@@ -128,5 +139,304 @@ describe("getConsultationsPaginated", () => {
     vi.mocked(prisma.consultation.findMany).mockRejectedValue(error);
 
     await expect(getConsultationsPaginated({})).rejects.toThrow(error);
+  });
+});
+
+describe("getConsultationOverviewById", () => {
+  const mockFullConsultation = (overrides: Record<string, unknown> = {}) => ({
+    id: "1",
+    concern: "Legal advice",
+    booking_datetime: new Date("2024-06-01T10:00:00"),
+    status: "Scheduled" as const,
+    client_id: "c1",
+    created_by_user_id: "u1",
+    created_at: new Date("2024-06-01"),
+    updated_at: new Date("2024-06-01"),
+    client: {
+      id: "c1",
+      name: "Jane Client",
+      phone_number: "09170000001",
+      email: "jane@email.com",
+      address: "123 Rizal St.",
+      created_at: new Date("2024-01-01"),
+      updated_at: new Date("2024-06-01"),
+    },
+    createdBy: { name: "John Lawyer" },
+    cases: [{ id: "case1", case_title: "Jane vs Corp" }],
+    ...overrides,
+  });
+
+  it("returns mapped overview data", async () => {
+    const data = mockFullConsultation();
+    vi.mocked(prisma.consultation.findUniqueOrThrow).mockResolvedValue(data);
+
+    const result = await getConsultationOverviewById("1");
+
+    expect(result).toEqual({
+      id: "1",
+      concern: "Legal advice",
+      booking_datetime: data.booking_datetime,
+      status: "Scheduled",
+      created_at: data.created_at,
+      updated_at: data.updated_at,
+      client: {
+        name: "Jane Client",
+        phone_number: "09170000001",
+        email: "jane@email.com",
+        address: "123 Rizal St.",
+      },
+      createdBy: { name: "John Lawyer" },
+      relatedCase: { id: "case1", case_title: "Jane vs Corp" },
+    });
+    expect(prisma.consultation.findUniqueOrThrow).toHaveBeenCalledWith({
+      where: { id: "1" },
+      include: {
+        client: true,
+        createdBy: { select: { name: true } },
+        cases: { select: { id: true, case_title: true }, take: 1 },
+      },
+    });
+  });
+
+  it("handles consultation with no related case", async () => {
+    vi.mocked(prisma.consultation.findUniqueOrThrow).mockResolvedValue(
+      mockFullConsultation({ cases: [] }),
+    );
+
+    const result = await getConsultationOverviewById("1");
+
+    expect(result.relatedCase).toBeNull();
+  });
+
+  it("propagates database errors", async () => {
+    const error = new Error("not found");
+    vi.mocked(prisma.consultation.findUniqueOrThrow).mockRejectedValue(error);
+
+    await expect(getConsultationOverviewById("999")).rejects.toThrow(error);
+  });
+});
+
+describe("getConsultationNotesPaginated", () => {
+  const mockNote = (overrides: Record<string, unknown> = {}) => ({
+    id: "n1",
+    content: "Client discussed settlement options",
+    case_id: null,
+    consultation_id: "1",
+    task_id: null,
+    created_by_user_id: "u1",
+    created_at: new Date("2024-06-01"),
+    updated_at: new Date("2024-06-01"),
+    createdBy: { name: "John Lawyer" },
+    ...overrides,
+  });
+
+  it("returns mapped note rows", async () => {
+    const notes = [
+      mockNote(),
+      mockNote({
+        id: "n2",
+        content: "Follow-up call scheduled",
+        createdBy: { name: "Alice Paralegal" },
+      }),
+    ];
+    vi.mocked(prisma.note.findMany).mockResolvedValue(notes);
+
+    const result = await getConsultationNotesPaginated({ consultationId: "1", pageSize: 10 });
+
+    expect(result.rows).toHaveLength(2);
+    expect(result.rows[0]).toEqual({
+      id: "n1",
+      content: "Client discussed settlement options",
+      author: "John Lawyer",
+      created_at: notes[0].created_at,
+    });
+  });
+
+  it("filters by search term", async () => {
+    vi.mocked(prisma.note.findMany).mockResolvedValue([mockNote()]);
+
+    await getConsultationNotesPaginated({ consultationId: "1", search: "settlement" });
+
+    expect(prisma.note.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { consultation_id: "1", content: { contains: "settlement", mode: "insensitive" } },
+      }),
+    );
+  });
+
+  it("handles cursor pagination", async () => {
+    const notes = Array.from({ length: 4 }, (_, i) => mockNote({ id: String(i + 1) }));
+    vi.mocked(prisma.note.findMany).mockResolvedValue(notes);
+
+    const result = await getConsultationNotesPaginated({ consultationId: "1", pageSize: 3 });
+
+    expect(result.rows).toHaveLength(3);
+    expect(result.nextCursor).toBe("3");
+  });
+
+  it("returns empty when none exist", async () => {
+    vi.mocked(prisma.note.findMany).mockResolvedValue([]);
+
+    const result = await getConsultationNotesPaginated({ consultationId: "1" });
+
+    expect(result.rows).toEqual([]);
+  });
+});
+
+describe("getConsultationPaymentsPaginated", () => {
+  const mockPayment = (overrides: Record<string, unknown> = {}): Record<string, unknown> => ({
+    id: "p1",
+    amount: 1500,
+    payment_date: new Date("2024-06-15"),
+    status: "Paid",
+    payment_method: "GCash",
+    receipt_number: "RC-2024-001",
+    case_id: null,
+    consultation_id: "1",
+    created_by_user_id: "u1",
+    created_at: new Date("2024-06-15"),
+    updated_at: new Date("2024-06-15"),
+    ...overrides,
+  });
+
+  it("returns mapped payment rows", async () => {
+    const payments = [mockPayment(), mockPayment({ id: "p2", amount: 2500, status: "Partial" })];
+    vi.mocked(prisma.payment.findMany).mockResolvedValue(payments as never[]);
+
+    const result = await getConsultationPaymentsPaginated({ consultationId: "1", pageSize: 10 });
+
+    expect(result.rows).toHaveLength(2);
+    expect(result.rows[0]).toEqual({
+      id: "p1",
+      amount: 1500,
+      payment_date: payments[0].payment_date,
+      payment_method: "GCash",
+      receipt_number: "RC-2024-001",
+      status: "Paid",
+    });
+  });
+
+  it("filters by search on method, status, or receipt", async () => {
+    vi.mocked(prisma.payment.findMany).mockResolvedValue([mockPayment()] as never[]);
+
+    await getConsultationPaymentsPaginated({ consultationId: "1", search: "GCash" });
+
+    expect(prisma.payment.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          consultation_id: "1",
+          OR: [
+            { payment_method: { contains: "GCash", mode: "insensitive" } },
+            { status: { contains: "GCash", mode: "insensitive" } },
+            { receipt_number: { contains: "GCash", mode: "insensitive" } },
+          ],
+        },
+      }),
+    );
+  });
+
+  it("handles cursor pagination", async () => {
+    const payments = Array.from({ length: 4 }, (_, i) => mockPayment({ id: String(i + 1) }));
+    vi.mocked(prisma.payment.findMany).mockResolvedValue(payments as never[]);
+
+    const result = await getConsultationPaymentsPaginated({ consultationId: "1", pageSize: 3 });
+
+    expect(result.rows).toHaveLength(3);
+    expect(result.nextCursor).toBe("3");
+  });
+
+  it("returns empty when none exist", async () => {
+    vi.mocked(prisma.payment.findMany).mockResolvedValue([]);
+
+    const result = await getConsultationPaymentsPaginated({ consultationId: "1" });
+
+    expect(result.rows).toEqual([]);
+  });
+});
+
+describe("getConsultationActivityLogPaginated", () => {
+  const mockLog = (overrides: Record<string, unknown> = {}) => ({
+    id: "l1",
+    action: "CREATE",
+    actor_user_id: "u1",
+    entity_type: "Consultation",
+    entity_id: "1",
+    details: "Consultation created",
+    created_at: new Date("2024-06-01"),
+    actor: { name: "John Lawyer" },
+    ...overrides,
+  });
+
+  it("returns mapped activity log rows", async () => {
+    const logs = [
+      mockLog(),
+      mockLog({
+        id: "l2",
+        action: "UPDATE",
+        details: "Status changed to Accepted",
+        actor: { name: "Alice Paralegal" },
+      }),
+    ];
+    vi.mocked(prisma.auditLog.findMany).mockResolvedValue(logs);
+
+    const result = await getConsultationActivityLogPaginated({ consultationId: "1", pageSize: 10 });
+
+    expect(result.rows).toHaveLength(2);
+    expect(result.rows[0]).toEqual({
+      id: "l1",
+      action: "CREATE",
+      actor: "John Lawyer",
+      details: "Consultation created",
+      created_at: logs[0].created_at,
+    });
+  });
+
+  it("filters by entity type and id", async () => {
+    vi.mocked(prisma.auditLog.findMany).mockResolvedValue([mockLog()]);
+
+    await getConsultationActivityLogPaginated({ consultationId: "1" });
+
+    expect(prisma.auditLog.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { entity_type: "Consultation", entity_id: "1" },
+      }),
+    );
+  });
+
+  it("filters by search on action and details", async () => {
+    vi.mocked(prisma.auditLog.findMany).mockResolvedValue([mockLog()]);
+
+    await getConsultationActivityLogPaginated({ consultationId: "1", search: "created" });
+
+    expect(prisma.auditLog.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          entity_type: "Consultation",
+          entity_id: "1",
+          OR: [
+            { action: { contains: "created", mode: "insensitive" } },
+            { details: { contains: "created", mode: "insensitive" } },
+          ],
+        },
+      }),
+    );
+  });
+
+  it("handles cursor pagination", async () => {
+    const logs = Array.from({ length: 4 }, (_, i) => mockLog({ id: String(i + 1) }));
+    vi.mocked(prisma.auditLog.findMany).mockResolvedValue(logs);
+
+    const result = await getConsultationActivityLogPaginated({ consultationId: "1", pageSize: 3 });
+
+    expect(result.rows).toHaveLength(3);
+    expect(result.nextCursor).toBe("3");
+  });
+
+  it("returns empty when no logs", async () => {
+    vi.mocked(prisma.auditLog.findMany).mockResolvedValue([]);
+
+    const result = await getConsultationActivityLogPaginated({ consultationId: "1" });
+
+    expect(result.rows).toEqual([]);
   });
 });

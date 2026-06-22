@@ -247,6 +247,114 @@ const notes: NoteData[] = [
     createdByEmail: "marco.lopez@aninolaw.com",
     daysAgo: 3,
   },
+  // ── Task-linked notes ──
+  {
+    content:
+      "BIR RDO 39 confirmed the tax computation. Capital gains tax payable is PHP 1.8M. Documentary stamp tax assessed at PHP 315K. Client advised to prepare funds.",
+    taskTitle: "Coordinate Tax Payment with BIR",
+    createdByEmail: "jessica.lim@aninolaw.com",
+    daysAgo: 1,
+  },
+  {
+    content:
+      "First draft of petition completed. Need to incorporate findings from the psychological evaluation report before partner review.",
+    taskTitle: "Draft Petition for Legal Separation",
+    createdByEmail: "kevin.garcia@aninolaw.com",
+    daysAgo: 3,
+  },
+  {
+    content:
+      "Found material inconsistencies in complainant's timeline. The alleged demand letter was dated after the final payment was made — strong basis for motion.",
+    taskTitle: "Review Prosecution Evidence",
+    createdByEmail: "nina.salvador@aninolaw.com",
+    daysAgo: 2,
+  },
+  {
+    content:
+      "Incorporation documents are in order, but one IP assignment agreement was never formally executed by the founder. Need to remedy before VC diligence closes.",
+    taskTitle: "Conduct Legal Due Diligence on Company",
+    createdByEmail: "maya.fernandez@aninolaw.com",
+    daysAgo: 1,
+  },
+  {
+    content:
+      "Bank offered 10% p.a. fixed for 5 years with 6-month grace period. Client wants to counter at 8%. Scheduling second negotiation meeting for next week.",
+    taskTitle: "Negotiate Loan Restructuring with Bank",
+    createdByEmail: "marco.lopez@aninolaw.com",
+    daysAgo: 0,
+  },
+  // ── Additional case notes ──
+  {
+    content:
+      "Estate tax return under preparation. Gross estate valued at approximately PHP 8.2M including three residential lots and bank deposits. Standard deduction of PHP 5M applies, net taxable estate PHP 3.2M.",
+    caseTitle: "Rodriguez Estate Settlement",
+    createdByEmail: "jessica.lim@aninolaw.com",
+    daysAgo: 2,
+  },
+  {
+    content:
+      "RTC Branch 45 denied the motion to suspend foreclosure but granted a 72-hour TRO to allow restructuring talks to conclude. Need to finalize terms before Friday.",
+    caseTitle: "Santos Foreclosure Defense",
+    createdByEmail: "marco.lopez@aninolaw.com",
+    daysAgo: 1,
+  },
+  {
+    content:
+      "LBAA set hearing for March 15. Preparing formal offer of evidence including the comparable valuations spreadsheet and the original assessment notice.",
+    caseTitle: "Hernandez Property Tax Protest",
+    createdByEmail: "gina.reyes@aninolaw.com",
+    daysAgo: 4,
+  },
+  {
+    content:
+      "Prosecution filed opposition to motion to dismiss arguing there is prima facie evidence of deceit. Need to prepare reply memorandum within 10 days.",
+    caseTitle: "Fernandez Criminal Defense — Estafa Case",
+    createdByEmail: "ricardo.guevarra@aninolaw.com",
+    daysAgo: 2,
+  },
+  {
+    content:
+      "VC firm requesting additional diligence on IP portfolio. Need to gather patent application receipts, trademark registrations, and domain ownership records.",
+    caseTitle: "Ramirez Corp — Series A Funding",
+    createdByEmail: "angela.mercado@aninolaw.com",
+    daysAgo: 1,
+  },
+  // ── Additional consultation notes ──
+  {
+    content:
+      "Medical records reviewed. Clear indication of post-surgical negligence — surgical sponge left in abdominal cavity. Strong basis for malpractice claim. Will draft engagement letter.",
+    consultationClientEmail: "patricia.luna@email.com",
+    createdByEmail: "kevin.garcia@aninolaw.com",
+    daysAgo: 2,
+  },
+  {
+    content:
+      "Batangas property has uncleared encumbrances dating to 1998. Need to coordinate with Registry of Deeds for formal reconveyance before transfer can proceed.",
+    consultationClientEmail: "luisito.ramos@email.com",
+    createdByEmail: "catherine.diaz@aninolaw.com",
+    daysAgo: 5,
+  },
+  {
+    content:
+      "BDO loan agreement contains a hidden acceleration clause tied to the borrower's DTI ratio. Advised client to request amendment or seek alternative lender.",
+    consultationClientEmail: "aileen.castro@email.com",
+    createdByEmail: "maya.fernandez@aninolaw.com",
+    daysAgo: 3,
+  },
+  {
+    content:
+      "Former employer shared employment records with a third-party recruiter without consent. This falls under NPC jurisdiction under the Data Privacy Act. Drafting formal complaint.",
+    consultationClientEmail: "emmanuel.velasco@email.com",
+    createdByEmail: "kevin.garcia@aninolaw.com",
+    daysAgo: 8,
+  },
+  {
+    content:
+      "Commercial lease dispute successfully resolved at mediation. Landlord agreed to honor original rent rate without automatic escalation. Settlement documents being prepared.",
+    consultationClientEmail: "rowena.lim@email.com",
+    createdByEmail: "maya.fernandez@aninolaw.com",
+    daysAgo: 6,
+  },
 ];
 
 export async function seedNotes(

@@ -266,6 +266,83 @@ const milestones: MilestoneData[] = [
     createdByEmail: "marco.lopez@aninolaw.com",
     notifyEmails: ["marco.lopez@aninolaw.com"],
   },
+  {
+    caseTitle: "Santos Foreclosure Defense",
+    title: "TRO Issued by Court",
+    description: "RTC Branch 45 issued a 72-hour TRO halting the extrajudicial foreclosure sale",
+    status: "Done",
+    daysFromNow: -2,
+    createdByEmail: "marco.lopez@aninolaw.com",
+    notifyEmails: ["marco.lopez@aninolaw.com", "nina.salvador@aninolaw.com"],
+  },
+  {
+    caseTitle: "Dela Cruz Property Title Transfer",
+    title: "BIR Tax Clearance Obtained",
+    description: "BIR issued Certificate Authorizing Registration for transfer of title",
+    status: "Pending",
+    daysFromNow: 21,
+    createdByEmail: "david.tan@aninolaw.com",
+    notifyEmails: ["david.tan@aninolaw.com", "catherine.diaz@aninolaw.com"],
+  },
+  {
+    caseTitle: "Gonzales Legal Separation",
+    title: "Provisional Orders Issued",
+    description:
+      "Court issued provisional orders for spousal support and child custody pendente lite",
+    status: "Pending",
+    daysFromNow: 12,
+    createdByEmail: "sofia.villanueva@aninolaw.com",
+    notifyEmails: ["sofia.villanueva@aninolaw.com", "kevin.garcia@aninolaw.com"],
+  },
+  {
+    caseTitle: "Ramirez Corp — Series A Funding",
+    title: "Due Diligence Completed",
+    description:
+      "VC firm completed financial, legal, and technical due diligence with no material adverse findings",
+    status: "Pending",
+    daysFromNow: 14,
+    createdByEmail: "angela.mercado@aninolaw.com",
+    notifyEmails: ["angela.mercado@aninolaw.com", "maya.fernandez@aninolaw.com"],
+  },
+  {
+    caseTitle: "Ramirez Corp — Series A Funding",
+    title: "Shareholders Agreement Executed",
+    description:
+      "SHA signed by all existing shareholders and the VC fund, including drag-along and tag-along provisions",
+    status: "Pending",
+    daysFromNow: 35,
+    createdByEmail: "angela.mercado@aninolaw.com",
+    notifyEmails: ["angela.mercado@aninolaw.com"],
+  },
+  {
+    caseTitle: "Rodriguez Estate Settlement",
+    title: "Estate Tax Paid",
+    description: "BIR Form 1801 filed and estate tax paid in full within the 6-month filing period",
+    status: "Pending",
+    daysFromNow: 28,
+    createdByEmail: "sofia.villanueva@aninolaw.com",
+    notifyEmails: ["sofia.villanueva@aninolaw.com", "kevin.garcia@aninolaw.com"],
+  },
+  {
+    caseTitle: "Rodriguez Estate Settlement",
+    title: "Extrajudicial Settlement Notarized",
+    description:
+      "Deed of extrajudicial settlement signed by all heirs and notarized before a notary public",
+    status: "Pending",
+    daysFromNow: 42,
+    createdByEmail: "sofia.villanueva@aninolaw.com",
+    notifyEmails: ["sofia.villanueva@aninolaw.com"],
+  },
+  {
+    caseTitle: "Hernandez Property Tax Protest",
+    title: "LBAA Decision Received",
+    description:
+      "Local Board of Assessment Appeals issued a decision reducing the assessed value from PHP 5.0M to PHP 3.2M",
+    status: "Pending",
+    daysFromNow: 35,
+    createdByEmail: "gina.reyes@aninolaw.com",
+    notifyEmails: ["gina.reyes@aninolaw.com", "kevin.garcia@aninolaw.com"],
+  },
 ];
 
 export async function seedMilestones(
