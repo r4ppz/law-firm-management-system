@@ -1,66 +1,72 @@
-.PHONY: dev dev-up dev-down dev-reset prod prod-up prod-down prod-build \
-        prod-ps prod-reset down clean reset help
+DEV_COMPOSE := docker compose -f docker-compose.yml --env-file .env.dev
+PROD_COMPOSE := docker compose -f docker-compose.prod.yml --env-file .env.prod
 
-DEV_COMPOSE := docker compose --env-file .env.dev
-PROD_COMPOSE := docker compose --env-file .env.prod
+.PHONY: help dev dev-up dev-down dev-clean dev-reset prod prod-up prod-down prod-ps prod-reset down clean reset
 
-# ── Dev ──────────────────────────────────────────
-dev-up:          ## Start dev infra (db + minio)
-	$(DEV_COMPOSE) up -d
+.DEFAULT_GOAL := help
 
-dev-down:        ## Stop dev infra
-	$(DEV_COMPOSE) down
+help: ## Show this help menu
+	@printf "\nUsage: make \033[36m<target>\033[0m\n"
+	@awk ' \
+		BEGIN {FS = ":.*?## "} \
+		/^[a-zA-Z_-]+:.*?## / { \
+			printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 \
+		} \
+		/^# ── / { \
+			gsub(/^# ── | ──+$$/, ""); \
+			printf "\n\033[1;35m%s\033[0m\n", $$0 \
+		} \
+	' $(MAKEFILE_LIST)
+	@printf "\n"
 
-dev-reset:       ## Wipe dev volumes + restart fresh
-	$(DEV_COMPOSE) down -v
-	$(DEV_COMPOSE) up -d
-
-dev: dev-up      ## Infra → migrate → dev server (Ctrl+C to stop server, infra keeps running)
+# ── Development ──────────────────────────────────
+dev: dev-up ## Start dev infra, migrate, and run application
 	@echo "Waiting for Postgres..."
-	@until $(DEV_COMPOSE) exec -T db pg_isready -U testing 2>/dev/null; do sleep 1; done
+	$(DEV_COMPOSE) exec -T db pg_isready -U testing -t 10
 	@echo "Running migrations..."
 	pnpm prisma:deploy
 	@echo "Starting dev server..."
 	pnpm dev
 
-# ── Prod ─────────────────────────────────────────
-prod-build:      ## Build prod images
-	$(PROD_COMPOSE) build
+dev-up: ## Start dev containers
+	$(DEV_COMPOSE) up -d
 
-prod-up:         ## Start prod stack
-	$(PROD_COMPOSE) up -d
+dev-down: ## Stop dev containers
+	$(DEV_COMPOSE) down
 
-prod: prod-build prod-up  ## Build + start prod
+dev-clean: ## Stop dev containers and remove volumes
+	$(DEV_COMPOSE) down -v
 
-prod-down:       ## Stop prod stack
+dev-reset: ## Hard reset dev environment
+	$(DEV_COMPOSE) down -v
+	$(MAKE) dev-up
+
+# ── Production ───────────────────────────────────
+prod: prod-up ## Build and start prod container stack natively
+
+prod-up: ## Build and start prod container stack natively
+	$(PROD_COMPOSE) up -d --build
+
+prod-down: ## Stop prod containers
 	$(PROD_COMPOSE) down
 
-prod-ps:         ## Show prod container status
+prod-ps: ## Status of prod containers
 	$(PROD_COMPOSE) ps
 
-prod-reset:      ## Wipe prod volumes + rebuild + restart
+prod-reset: ## Hard reset prod environment
 	$(PROD_COMPOSE) down -v
-	$(PROD_COMPOSE) build
-	$(PROD_COMPOSE) up -d
+	$(MAKE) prod-up
 
-# ── Docker Cleanup ───────────────────────────────
-down:            ## Stop all environments
+# ── Global ───────────────────────────────────────
+down: ## Stop all container environments
 	$(DEV_COMPOSE) down
 	$(PROD_COMPOSE) down
 
-clean: down      ## Stop + remove all volumes (dev + prod)
+clean: ## Stop all environments and purge all volumes
 	$(DEV_COMPOSE) down -v
 	$(PROD_COMPOSE) down -v
 
-reset: clean     ## Wipe everything + rebuild prod + restart dev+prod
-	$(DEV_COMPOSE) up -d
-	$(PROD_COMPOSE) build
-	$(PROD_COMPOSE) up -d
-
-# ── Help ─────────────────────────────────────────
-help:            ## Show this help
-	@grep -E '^[a-zA-Z_-]+:.*##' $(MAKEFILE_LIST) \
-	  | sort \
-	  | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2}'
-
-.DEFAULT_GOAL := help
+reset: ## Hard reset everything (clean + rebuild + restart)
+	$(MAKE) clean
+	$(MAKE) dev-up
+	$(MAKE) prod-up
