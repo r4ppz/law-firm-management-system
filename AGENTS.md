@@ -90,6 +90,15 @@
 - Naming: `*.test.ts` for logic, `*.test.tsx` for components.
 - Mock `@/lib/prisma` via `vi.mock` for data-layer tests. Use Prisma types for mock values (no `as any`).
 
+### Security & Boundary Safety
+
+- Input Validation with Zod: Every exported Server Action must validate its input via `z.safeParse()` before executing any business logic. Do not declare schemas inside action files; import them from feature-specific schema files (e.g., `@/features/cases/schemas`) so they can be reused by client forms.
+- String Hygiene & Parsing: Ensure all string parameters in schemas call `.trim().min(1)` and include a `.max()` constraint matching database limits to prevent malicious database exhaustion. Reject whitespace-only values.
+- Strict Parameter Assurances: Validate all structural parameters meticulously. Ensure IDs call `.uuid()` or `.cuid()`, and enforce strictly defined sets using `z.nativeEnum(PrismaEnum)`. Never accept raw string inputs to cast them inside the function body via `as`.
+- Standardized Action Responses: All Server Actions must wrap their execution blocks in try-catch structures and return an explicit `Promise<ActionResponse>`. Use `ActionDataResponse<T>` for queries/payloads, and `ActionStatusResponse` for data-less mutations. Never allow raw server exceptions to leak across the network boundary to the client.
+- Centralized Auth Guards: Invoke unified, centralized protection functions like `requireAuth()` (which returns a verified session) or `requireRole(...roles)` at the very top of the execution flow. Do not write inline, ad-hoc `auth()` verification logic inside individual actions.
+- Typed Payloads over Raw FormData: Client components must pass clean, typed objects to actions instead of raw `FormData`. Any necessary coercion or extraction from forms must occur on the client side before triggering the transition boundary. _(Exception: Multi-part binary file uploads where native serialization requires FormData)._
+
 ### General
 
 - Idiomatic, modular code is the top priority in this project, not a collection of hacks and workarounds.
@@ -103,23 +112,23 @@
 
 ## TypeScript Coding Standards
 
-### 1. Parameter Typing and Readability
+### Parameter Typing and Readability
 
 - Ban Destructured Inline Types: Never mix variable destructuring and type definitions inside a function's parameter parentheses (e.g., `({ a, b }: { a: string; b: string })`).
 - Parameter Handling: Pass complex inputs as a single unified object argument (e.g., `payload: DocumentPayload`) and destructure it within the first lines of the function body.
 - Inline Exception: Simple inline types are permitted only if the object has 3 or fewer primitive properties, is not destructured in the signature, and is used in a non-exported helper.
 
-### 2. Domain-Driven Naming (Anti-Nominal)
+### Domain-Driven Naming (Anti-Nominal)
 
 - No Function-Scoped Type Names: Do not name interfaces or types after a single specific function (avoid `ProcessDataArgs`).
 - Focus on the Data Shape: Name types after the domain data or payload they represent (e.g., `DocumentPayload`, `UserSession`). This ensures types are structurally reusable across database utilities, API boundaries, and UI components.
 
-### 3. Boundary Type Strictness
+### Boundary Type Strictness
 
 - Explicit Returns at Boundaries: Always explicitly declare return types on public API endpoints, exported Server Actions, and shared hooks (e.g., `Promise<ActionResponse>`). This protects contracts and speeds up compilation times.
 - Implicit Internal Returns: Allow TypeScript's native type inference engine to handle return types for internal, unexported helper functions or simple utility chains.
 
-### 4. Code Patterns
+### Code Patterns
 
 Avoid this signature clutter:
 
@@ -145,6 +154,6 @@ export async function updateRecordAction(payload: TaskPayload): Promise<{ succes
 }
 ```
 
-### Avoid overengineering:
+#### Avoid overengineering:
 
 Do not generate brand-new named interfaces if the function only returns a simple primitive object (like `{ id: string }`) or if it can be cleanly represented using TypeScript's native `Pick<PrismaModel, Keys>`. Only create a new named domain type if the output combines data from multiple sources or requires custom computed fields.
