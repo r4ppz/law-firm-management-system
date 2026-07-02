@@ -1,6 +1,7 @@
 import { cache } from "react";
 
 import { prisma } from "@/lib/prisma";
+import type { PageQuery } from "@/lib/types";
 
 export type DocumentRow = {
   id: string;
@@ -11,16 +12,22 @@ export type DocumentRow = {
   created_at: Date;
 };
 
-interface GetDocumentsParams {
+export interface DocumentPageQuery extends PageQuery {
   caseId?: string;
   consultationId?: string;
-  search?: string;
-  cursor?: string;
-  pageSize?: number;
 }
 
 export const getDocumentsPaginated = cache(
-  async ({ caseId, consultationId, search = "", cursor, pageSize = 20 }: GetDocumentsParams) => {
+  async ({
+    caseId,
+    consultationId,
+    search = "",
+    cursor,
+    pageSize = 20,
+  }: DocumentPageQuery): Promise<{
+    rows: DocumentRow[];
+    nextCursor: string | null;
+  }> => {
     const where: Record<string, unknown> = {};
     if (caseId) where.case_id = caseId;
     if (consultationId) where.consultation_id = consultationId;
@@ -58,8 +65,25 @@ export const getDocumentsPaginated = cache(
   },
 );
 
-export const getDocumentById = cache(async (id: string) => {
-  return prisma.document.findUnique({
-    where: { id },
-  });
-});
+export const getDocumentById = cache(
+  async (
+    id: string,
+  ): Promise<{
+    id: string;
+    file_path: string;
+    file_name: string;
+    case_id: string | null;
+    consultation_id: string | null;
+  } | null> => {
+    return prisma.document.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        file_path: true,
+        file_name: true,
+        case_id: true,
+        consultation_id: true,
+      },
+    });
+  },
+);

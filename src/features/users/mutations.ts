@@ -1,7 +1,23 @@
 import { Role } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 
-export async function upsertDeveloperUser(email: string, name: string, image?: string | null) {
+export interface UserUpdatePayload {
+  email?: string;
+  role?: Role;
+  is_active?: boolean;
+}
+
+export async function upsertDeveloperUser(
+  email: string,
+  name: string,
+  image?: string | null,
+): Promise<{
+  id: string;
+  email: string;
+  name: string | null;
+  role: Role | null;
+  is_active: boolean;
+}> {
   return prisma.user.upsert({
     where: { email },
     update: { name, image },
@@ -15,8 +31,8 @@ export async function upsertDeveloperUser(email: string, name: string, image?: s
   });
 }
 
-export async function createUser(email: string, role: Role) {
-  return prisma.user.create({
+export async function createUser(email: string, role: Role): Promise<void> {
+  await prisma.user.create({
     data: {
       email,
       name: "New User",
@@ -26,32 +42,25 @@ export async function createUser(email: string, role: Role) {
   });
 }
 
-export async function syncUserFromGoogle(email: string, name: string, image?: string | null) {
-  return prisma.user.update({
+export async function syncUserFromGoogle(
+  email: string,
+  name: string,
+  image?: string | null,
+): Promise<void> {
+  await prisma.user.update({
     where: { email },
     data: { name, image },
   });
 }
 
-export async function updateUser(
-  id: string,
-  data: { email?: string; role?: Role; is_active?: boolean },
-) {
-  return prisma.user.update({
+export async function updateUser(id: string, data: UserUpdatePayload): Promise<void> {
+  await prisma.user.update({
     where: { id },
     data,
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      role: true,
-      is_active: true,
-      created_at: true,
-    },
   });
 }
 
-export async function setUserActiveStatus(id: string, isActive: boolean) {
+export async function setUserActiveStatus(id: string, isActive: boolean): Promise<void> {
   await prisma.user.update({
     where: { id },
     data: { is_active: isActive },

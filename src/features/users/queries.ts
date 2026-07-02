@@ -2,6 +2,7 @@ import { cache } from "react";
 
 import { Role } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
+import type { PageQuery } from "@/lib/types";
 
 const userSelect = {
   id: true,
@@ -12,18 +13,26 @@ const userSelect = {
   created_at: true,
 } as const;
 
-export const getUserById = cache(async (id: string) => {
-  return prisma.user.findUnique({
-    where: { id },
-    select: {
-      id: true,
-      role: true,
-      is_active: true,
-    },
-  });
-});
+export const getUserById = cache(
+  async (
+    id: string,
+  ): Promise<{
+    id: string;
+    role: Role | null;
+    is_active: boolean;
+  } | null> => {
+    return prisma.user.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        role: true,
+        is_active: true,
+      },
+    });
+  },
+);
 
-export const countActiveAdminsAndDevs = cache(async (excludeUserId?: string) => {
+export const countActiveAdminsAndDevs = cache(async (excludeUserId?: string): Promise<number> => {
   return prisma.user.count({
     where: {
       is_active: true,
@@ -33,23 +42,42 @@ export const countActiveAdminsAndDevs = cache(async (excludeUserId?: string) => 
   });
 });
 
-export const getUserByEmail = cache(async (email: string) => {
-  return prisma.user.findUnique({
-    where: { email },
-    select: {
-      id: true,
-      role: true,
-      is_active: true,
-    },
-  });
-});
+export const getUserByEmail = cache(
+  async (
+    email: string,
+  ): Promise<{
+    id: string;
+    role: Role | null;
+    is_active: boolean;
+  } | null> => {
+    return prisma.user.findUnique({
+      where: { email },
+      select: {
+        id: true,
+        role: true,
+        is_active: true,
+      },
+    });
+  },
+);
 
-export const getUsers = cache(async () => {
-  return prisma.user.findMany({
-    orderBy: { created_at: "desc" },
-    select: userSelect,
-  });
-});
+export const getUsers = cache(
+  async (): Promise<
+    Array<{
+      id: string;
+      name: string;
+      email: string;
+      role: Role | null;
+      is_active: boolean;
+      created_at: Date;
+    }>
+  > => {
+    return prisma.user.findMany({
+      orderBy: { created_at: "desc" },
+      select: userSelect,
+    });
+  },
+);
 
 export type UserRow = {
   id: string;
@@ -60,18 +88,27 @@ export type UserRow = {
   created_at: Date;
 };
 
+export interface UserPageQuery extends PageQuery {
+  includeInactive?: boolean;
+}
+
 export const getUsersPaginated = cache(
   async ({
     search = "",
     cursor,
     pageSize = 20,
     includeInactive = false,
-  }: {
-    search?: string;
-    cursor?: string;
-    pageSize?: number;
-    includeInactive?: boolean;
-  }) => {
+  }: UserPageQuery): Promise<{
+    users: Array<{
+      id: string;
+      name: string;
+      email: string;
+      role: Role | null;
+      is_active: boolean;
+      created_at: Date;
+    }>;
+    nextCursor: string | null;
+  }> => {
     const baseFilter = includeInactive ? {} : { is_active: true };
 
     const searchFilter = search

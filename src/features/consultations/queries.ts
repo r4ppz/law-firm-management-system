@@ -2,6 +2,11 @@ import { cache } from "react";
 
 import { getDocumentsPaginated } from "@/features/documents/queries";
 import { prisma } from "@/lib/prisma";
+import type { PageQuery } from "@/lib/types";
+
+export interface ConsultationPageQuery extends PageQuery {
+  consultationId: string;
+}
 
 const consultationSelect = {
   id: true,
@@ -40,33 +45,35 @@ export type ConsultationOverviewData = {
   relatedCase: { id: string; case_title: string } | null;
 };
 
-export const getConsultationOverviewById = cache(async (id: string) => {
-  const data = await prisma.consultation.findUniqueOrThrow({
-    where: { id },
-    include: {
-      client: true,
-      createdBy: { select: { name: true } },
-      cases: { select: { id: true, case_title: true }, take: 1 },
-    },
-  });
+export const getConsultationOverviewById = cache(
+  async (id: string): Promise<ConsultationOverviewData> => {
+    const data = await prisma.consultation.findUniqueOrThrow({
+      where: { id },
+      include: {
+        client: true,
+        createdBy: { select: { name: true } },
+        cases: { select: { id: true, case_title: true }, take: 1 },
+      },
+    });
 
-  return {
-    id: data.id,
-    concern: data.concern,
-    booking_datetime: data.booking_datetime,
-    status: data.status,
-    created_at: data.created_at,
-    updated_at: data.updated_at,
-    client: {
-      name: data.client.name,
-      phone_number: data.client.phone_number,
-      email: data.client.email,
-      address: data.client.address,
-    },
-    createdBy: data.createdBy,
-    relatedCase: data.cases[0] ?? null,
-  } satisfies ConsultationOverviewData;
-});
+    return {
+      id: data.id,
+      concern: data.concern,
+      booking_datetime: data.booking_datetime,
+      status: data.status,
+      created_at: data.created_at,
+      updated_at: data.updated_at,
+      client: {
+        name: data.client.name,
+        phone_number: data.client.phone_number,
+        email: data.client.email,
+        address: data.client.address,
+      },
+      createdBy: data.createdBy,
+      relatedCase: data.cases[0] ?? null,
+    } satisfies ConsultationOverviewData;
+  },
+);
 
 // ----- Notes -----
 
@@ -83,12 +90,10 @@ export const getConsultationNotesPaginated = cache(
     search = "",
     cursor,
     pageSize = 20,
-  }: {
-    consultationId: string;
-    search?: string;
-    cursor?: string;
-    pageSize?: number;
-  }) => {
+  }: ConsultationPageQuery): Promise<{
+    rows: NoteRow[];
+    nextCursor: string | null;
+  }> => {
     const where = {
       consultation_id: consultationId,
       ...(search ? { content: { contains: search, mode: "insensitive" as const } } : {}),
@@ -136,12 +141,10 @@ export const getConsultationDocumentsPaginated = cache(
     search,
     cursor,
     pageSize,
-  }: {
-    consultationId: string;
-    search?: string;
-    cursor?: string;
-    pageSize?: number;
-  }) => getDocumentsPaginated({ consultationId, search, cursor, pageSize }),
+  }: ConsultationPageQuery): Promise<{
+    rows: DocumentRow[];
+    nextCursor: string | null;
+  }> => getDocumentsPaginated({ consultationId, search, cursor, pageSize }),
 );
 
 // ----- Payments -----
@@ -161,12 +164,10 @@ export const getConsultationPaymentsPaginated = cache(
     search = "",
     cursor,
     pageSize = 20,
-  }: {
-    consultationId: string;
-    search?: string;
-    cursor?: string;
-    pageSize?: number;
-  }) => {
+  }: ConsultationPageQuery): Promise<{
+    rows: PaymentRow[];
+    nextCursor: string | null;
+  }> => {
     const where: Record<string, unknown> = { consultation_id: consultationId };
     if (search) {
       where.OR = [
@@ -219,12 +220,10 @@ export const getConsultationActivityLogPaginated = cache(
     search = "",
     cursor,
     pageSize = 20,
-  }: {
-    consultationId: string;
-    search?: string;
-    cursor?: string;
-    pageSize?: number;
-  }) => {
+  }: ConsultationPageQuery): Promise<{
+    rows: ActivityLogRow[];
+    nextCursor: string | null;
+  }> => {
     const where: Record<string, unknown> = {
       entity_type: "Consultation",
       entity_id: consultationId,
@@ -271,11 +270,10 @@ export const getConsultationsPaginated = cache(
     search = "",
     cursor,
     pageSize = 20,
-  }: {
-    search?: string;
-    cursor?: string;
-    pageSize?: number;
-  }) => {
+  }: PageQuery): Promise<{
+    consultations: ConsultationRow[];
+    nextCursor: string | null;
+  }> => {
     const where = search
       ? {
           OR: [

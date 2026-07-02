@@ -7,30 +7,29 @@ import {
   getUserByEmail,
   getUserById,
   getUsersPaginated,
+  type UserPageQuery,
+  type UserRow,
 } from "@/features/users/queries";
 import { Role } from "@/generated/prisma/client";
 import { auth } from "@/lib/auth";
 import { isDeveloperEmail } from "@/lib/developer-emails";
 
-export async function getUsersPaginatedAction({
-  search,
-  cursor,
-  pageSize,
-}: {
-  search?: string;
-  cursor?: string;
-  pageSize?: number;
-}) {
-  return getUsersPaginated({ search, cursor, pageSize });
+export async function getUsersPaginatedAction(
+  params: UserPageQuery,
+): Promise<{ users: UserRow[]; nextCursor: string | null }> {
+  return getUsersPaginated(params);
 }
 
 const ALLOWED_ROLES = new Set(CREATABLE_ROLES);
 
-export async function checkDeveloperEmail(email: string) {
+export async function checkDeveloperEmail(email: string): Promise<boolean> {
   return isDeveloperEmail(email);
 }
 
-export async function createUserAction(email: string, role: string) {
+export async function createUserAction(
+  email: string,
+  role: string,
+): Promise<{ error: string | null }> {
   const session = await auth();
   if (session?.user?.role !== "Admin" && session?.user?.role !== Role.Dev) {
     return { error: "You don't have permission to create users." };
@@ -64,7 +63,11 @@ export async function createUserAction(email: string, role: string) {
   return { error: null };
 }
 
-export async function updateUserAction(id: string, email: string, role: string) {
+export async function updateUserAction(
+  id: string,
+  email: string,
+  role: string,
+): Promise<{ error: string | null }> {
   const session = await auth();
   if (session?.user?.role !== "Admin" && session?.user?.role !== Role.Dev) {
     return { error: "You don't have permission to edit users." };
@@ -98,7 +101,7 @@ export async function updateUserAction(id: string, email: string, role: string) 
   return { error: null };
 }
 
-export async function deactivateUserAction(id: string) {
+export async function deactivateUserAction(id: string): Promise<{ error: string | null }> {
   const session = await auth();
   if (session?.user?.role !== "Admin" && session?.user?.role !== Role.Dev) {
     return { error: "Only admins and developers can deactivate users." };

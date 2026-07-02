@@ -6,29 +6,40 @@ import { auth } from "@/lib/auth";
 import { deleteFile, generateKey, getPresignedDownloadUrl, getPresignedUploadUrl } from "@/lib/s3";
 
 import { createDocument, deleteDocument as deleteDocumentRecord } from "./mutations";
-import { getDocumentById, getDocumentsPaginated } from "./queries";
+import {
+  getDocumentById,
+  getDocumentsPaginated,
+  type DocumentPageQuery,
+  type DocumentRow,
+} from "./queries";
 
-export async function getDocumentsPaginatedAction(params: {
-  caseId?: string;
-  consultationId?: string;
-  search?: string;
-  cursor?: string;
-  pageSize?: number;
-}) {
-  return getDocumentsPaginated(params);
-}
-
-export async function getDocumentUploadUrlAction({
-  file_name,
-  file_type,
-  case_id,
-  consultation_id,
-}: {
+interface DocumentUploadPayload {
   file_name: string;
   file_type: string;
   case_id?: string | null;
   consultation_id?: string | null;
-}) {
+}
+
+interface DocumentConfirmPayload {
+  file_name: string;
+  file_type: string;
+  file_size: number;
+  file_path: string;
+  case_id?: string | null;
+  consultation_id?: string | null;
+}
+
+export async function getDocumentsPaginatedAction(
+  params: DocumentPageQuery,
+): Promise<{ rows: DocumentRow[]; nextCursor: string | null }> {
+  return getDocumentsPaginated(params);
+}
+
+export async function getDocumentUploadUrlAction(
+  payload: DocumentUploadPayload,
+): Promise<{ key: string; uploadUrl: string }> {
+  const { file_name, file_type, case_id, consultation_id } = payload;
+
   const session = await auth();
   if (!session?.user?.id) throw new Error("Unauthorized");
 
@@ -40,21 +51,11 @@ export async function getDocumentUploadUrlAction({
   return { key, uploadUrl };
 }
 
-export async function confirmDocumentUploadAction({
-  file_name,
-  file_type,
-  file_size,
-  file_path,
-  case_id,
-  consultation_id,
-}: {
-  file_name: string;
-  file_type: string;
-  file_size: number;
-  file_path: string;
-  case_id?: string | null;
-  consultation_id?: string | null;
-}) {
+export async function confirmDocumentUploadAction(
+  payload: DocumentConfirmPayload,
+): Promise<{ id: string }> {
+  const { file_name, file_type, file_size, file_path, case_id, consultation_id } = payload;
+
   const session = await auth();
   if (!session?.user?.id) throw new Error("Unauthorized");
 
@@ -73,7 +74,9 @@ export async function confirmDocumentUploadAction({
   return { id: doc.id };
 }
 
-export async function getDocumentDownloadUrlAction(documentId: string) {
+export async function getDocumentDownloadUrlAction(
+  documentId: string,
+): Promise<{ url: string; file_name: string }> {
   const session = await auth();
   if (!session?.user?.id) throw new Error("Unauthorized");
 
@@ -85,7 +88,7 @@ export async function getDocumentDownloadUrlAction(documentId: string) {
   return { url, file_name: doc.file_name };
 }
 
-export async function deleteDocumentAction(documentId: string) {
+export async function deleteDocumentAction(documentId: string): Promise<void> {
   const session = await auth();
   if (!session?.user?.id) throw new Error("Unauthorized");
 

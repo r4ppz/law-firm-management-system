@@ -136,6 +136,13 @@ describe("getDocumentById", () => {
     expect(result).toMatchObject({ id: "d1", file_name: "complaint.pdf" });
     expect(prisma.document.findUnique).toHaveBeenCalledWith({
       where: { id: "d1" },
+      select: {
+        id: true,
+        file_path: true,
+        file_name: true,
+        case_id: true,
+        consultation_id: true,
+      },
     });
   });
 

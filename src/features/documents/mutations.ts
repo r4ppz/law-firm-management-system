@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 
-interface CreateDocumentParams {
+export interface DocumentCreatePayload {
   file_name: string;
   file_path: string;
   file_type: string;
@@ -11,10 +11,10 @@ interface CreateDocumentParams {
   uploaded_by_user_id: string;
 }
 
-export async function createDocument(params: CreateDocumentParams) {
+export async function createDocument(params: DocumentCreatePayload): Promise<{ id: string }> {
   return prisma.document.create({ data: params });
 }
 
-export async function deleteDocument(id: string) {
+export async function deleteDocument(id: string): Promise<{ id: string }> {
   return prisma.document.delete({ where: { id } });
 }

@@ -2,6 +2,11 @@ import { cache } from "react";
 
 import { getDocumentsPaginated } from "@/features/documents/queries";
 import { prisma } from "@/lib/prisma";
+import type { PageQuery } from "@/lib/types";
+
+export interface CasePageQuery extends PageQuery {
+  caseId: string;
+}
 
 const caseSelect = {
   id: true,
@@ -35,11 +40,10 @@ export const getCasesPaginated = cache(
     search = "",
     cursor,
     pageSize = 20,
-  }: {
-    search?: string;
-    cursor?: string;
-    pageSize?: number;
-  }) => {
+  }: PageQuery): Promise<{
+    cases: CaseRow[];
+    nextCursor: string | null;
+  }> => {
     const where = search
       ? {
           OR: [
@@ -101,7 +105,7 @@ export type CaseOverviewData = {
   sourceConsultation: { id: string; concern: string } | null;
 };
 
-export const getCaseOverviewById = cache(async (id: string) => {
+export const getCaseOverviewById = cache(async (id: string): Promise<CaseOverviewData> => {
   const data = await prisma.case.findUniqueOrThrow({
     where: { id },
     include: {
@@ -159,12 +163,10 @@ export const getCaseTasksPaginated = cache(
     search = "",
     cursor,
     pageSize = 20,
-  }: {
-    caseId: string;
-    search?: string;
-    cursor?: string;
-    pageSize?: number;
-  }) => {
+  }: CasePageQuery): Promise<{
+    rows: TaskRow[];
+    nextCursor: string | null;
+  }> => {
     const where = {
       case_id: caseId,
       ...(search ? { title: { contains: search, mode: "insensitive" as const } } : {}),
@@ -213,12 +215,10 @@ export const getCaseNotesPaginated = cache(
     search = "",
     cursor,
     pageSize = 20,
-  }: {
-    caseId: string;
-    search?: string;
-    cursor?: string;
-    pageSize?: number;
-  }) => {
+  }: CasePageQuery): Promise<{
+    rows: NoteRow[];
+    nextCursor: string | null;
+  }> => {
     const where = {
       case_id: caseId,
       ...(search ? { content: { contains: search, mode: "insensitive" as const } } : {}),
@@ -266,12 +266,10 @@ export const getCaseDocumentsPaginated = cache(
     search,
     cursor,
     pageSize,
-  }: {
-    caseId: string;
-    search?: string;
-    cursor?: string;
-    pageSize?: number;
-  }) => getDocumentsPaginated({ caseId, search, cursor, pageSize }),
+  }: CasePageQuery): Promise<{
+    rows: DocumentRow[];
+    nextCursor: string | null;
+  }> => getDocumentsPaginated({ caseId, search, cursor, pageSize }),
 );
 
 // ----- Milestones -----
@@ -289,12 +287,10 @@ export const getCaseMilestonesPaginated = cache(
     search = "",
     cursor,
     pageSize = 20,
-  }: {
-    caseId: string;
-    search?: string;
-    cursor?: string;
-    pageSize?: number;
-  }) => {
+  }: CasePageQuery): Promise<{
+    rows: MilestoneRow[];
+    nextCursor: string | null;
+  }> => {
     const where = {
       case_id: caseId,
       ...(search ? { title: { contains: search, mode: "insensitive" as const } } : {}),
@@ -342,12 +338,10 @@ export const getCasePaymentsPaginated = cache(
     search = "",
     cursor,
     pageSize = 20,
-  }: {
-    caseId: string;
-    search?: string;
-    cursor?: string;
-    pageSize?: number;
-  }) => {
+  }: CasePageQuery): Promise<{
+    rows: PaymentRow[];
+    nextCursor: string | null;
+  }> => {
     const where: Record<string, unknown> = { case_id: caseId };
     if (search) {
       where.OR = [
@@ -400,12 +394,10 @@ export const getCaseActivityLogPaginated = cache(
     search = "",
     cursor,
     pageSize = 20,
-  }: {
-    caseId: string;
-    search?: string;
-    cursor?: string;
-    pageSize?: number;
-  }) => {
+  }: CasePageQuery): Promise<{
+    rows: ActivityLogRow[];
+    nextCursor: string | null;
+  }> => {
     const where: Record<string, unknown> = {
       entity_type: "Case",
       entity_id: caseId,
