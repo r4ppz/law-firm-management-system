@@ -36,7 +36,7 @@
 
 - `src/app/page.tsx` — unauthenticated login page.
 - `src/app/(dashboard)/` — authenticated section (Sidebar + Header shared layout). Dashboard routes: `dashboard/`, `case/`, `consultation/`, `user/`.
-- `src/app/api/auth/[...nextauth]/route.ts` — NextAuth API route (required by NextAuth). This is the **only** API route; do not create additional REST endpoints. Use Server Actions (`actions.ts`) for all custom server-side logic.
+- `src/app/api/auth/[...nextauth]/route.ts` — NextAuth API route (required by NextAuth). This is the only API route; do not create additional REST endpoints. Use Server Actions (`actions.ts`) for all custom server-side logic.
 - `src/features/` — domain logic organized by feature (`auth/`, `users/`, `consultations/`, `cases/`, etc.).
   - Each domain has `actions.ts` (Server Actions), `queries.ts` (Prisma reads), and/or `mutations.ts` (Prisma writes).
   - Feature-specific components live in `src/features/{domain}/components/`.
@@ -98,3 +98,53 @@
 - No comments unless explaining a non-obvious decision.
 - Prisma schema: `snake_case` fields, `PascalCase` models/enums.
 - Husky: pre-commit runs `lint-staged` (Prettier + ESLint on staged files); pre-push runs `pnpm validate && pnpm test`.
+
+---
+
+## TypeScript Coding Standards
+
+### 1. Parameter Typing and Readability
+
+- Ban Destructured Inline Types: Never mix variable destructuring and type definitions inside a function's parameter parentheses (e.g., `({ a, b }: { a: string; b: string })`).
+- Parameter Handling: Pass complex inputs as a single unified object argument (e.g., `payload: DocumentPayload`) and destructure it within the first lines of the function body.
+- Inline Exception: Simple inline types are permitted only if the object has 3 or fewer primitive properties, is not destructured in the signature, and is used in a non-exported helper.
+
+### 2. Domain-Driven Naming (Anti-Nominal)
+
+- No Function-Scoped Type Names: Do not name interfaces or types after a single specific function (avoid `ProcessDataArgs`).
+- Focus on the Data Shape: Name types after the domain data or payload they represent (e.g., `DocumentPayload`, `UserSession`). This ensures types are structurally reusable across database utilities, API boundaries, and UI components.
+
+### 3. Boundary Type Strictness
+
+- Explicit Returns at Boundaries: Always explicitly declare return types on public API endpoints, exported Server Actions, and shared hooks (e.g., `Promise<ActionResponse>`). This protects contracts and speeds up compilation times.
+- Implicit Internal Returns: Allow TypeScript's native type inference engine to handle return types for internal, unexported helper functions or simple utility chains.
+
+### 4. Code Patterns
+
+Avoid this signature clutter:
+
+```typescript
+// ANTI-PATTERN: Heavy cognitive load, zero reusability
+export async function updateRecordAction({ id, Status, retry }: { id: string; status: "pending" | "done"; retry: boolean }) { ... }
+```
+
+Enforce this clean, reusable structure:
+
+```typescript
+// IDIOMATIC: Clear boundaries, reusable domain types, flexible composition
+export interface TaskPayload {
+  id: string;
+  status: "pending" | "done";
+  retry: boolean;
+}
+
+export async function updateRecordAction(payload: TaskPayload): Promise<{ success: boolean }> {
+  const { id, status, retry } = payload;
+  // implementation
+  return { success: true };
+}
+```
+
+### Avoid overengineering:
+
+Do not generate brand-new named interfaces if the function only returns a simple primitive object (like `{ id: string }`) or if it can be cleanly represented using TypeScript's native `Pick<PrismaModel, Keys>`. Only create a new named domain type if the output combines data from multiple sources or requires custom computed fields.
