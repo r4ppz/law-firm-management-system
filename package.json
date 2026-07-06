@@ -73,7 +73,7 @@
     "playwright": "^1.60.0",
     "prettier": "^3.9.4",
     "prisma": "^7.8.0",
-    "storybook": "^10.4.3",
+    "storybook": "^10.4.6",
     "tsx": "^4.22.4",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.62.0",
