@@ -117,4 +117,4 @@ To learn more about Next.js, take a look at the following resources:
 
 ## Using AI/LLM Coding Agents
 
-This project includes an `AGENTS.md` file that documents the full set of conventions, architecture decisions, and coding standards. If you use AI coding tools (Cursor, Claude Code, opencode, etc.), provide `AGENTS.md` to the agent so it understands the project's structure and rules.
+This project includes an [AGENTS.md](./AGENTS.md) file that documents the full set of conventions, architecture decisions, and coding standards. If you use AI coding tools (Cursor, Claude Code, opencode, etc.), provide [AGENTS.md](./AGENTS.md) to the agent so it understands the project's structure and rules.
