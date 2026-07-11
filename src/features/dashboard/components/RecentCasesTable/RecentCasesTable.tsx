@@ -41,11 +41,19 @@ export function RecentCasesTable() {
   useEffect(() => {
     let cancelled = false;
 
-    getRecentCasesAction().then((result) => {
-      if (cancelled) return;
-      setItems(result);
-      setIsLoading(false);
-    });
+    async function load() {
+      try {
+        const result = await getRecentCasesAction();
+        if (cancelled) return;
+        setItems(result);
+      } catch {
+        if (cancelled) return;
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    }
+
+    void load();
 
     return () => {
       cancelled = true;

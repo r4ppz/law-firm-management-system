@@ -55,21 +55,30 @@ export function EditPaymentModal({
   useEffect(() => {
     if (!isOpen || !paymentId) return;
 
+    const id = paymentId;
     let cancelled = false;
 
-    void getPaymentRowByIdAction(paymentId).then((data) => {
-      if (cancelled) return;
-      if (data) {
-        setPayment(data);
-        setAmount(String(data.amount));
-        setPaymentDate(toCalendarDate(data.payment_date));
-        setStatus(data.status);
-        setPaymentMethod(data.payment_method ?? "");
-        setReceiptNumber(data.receipt_number ?? "");
-      } else {
+    async function load() {
+      try {
+        const data = await getPaymentRowByIdAction(id);
+        if (cancelled) return;
+        if (data) {
+          setPayment(data);
+          setAmount(String(data.amount));
+          setPaymentDate(toCalendarDate(data.payment_date));
+          setStatus(data.status);
+          setPaymentMethod(data.payment_method ?? "");
+          setReceiptNumber(data.receipt_number ?? "");
+        } else {
+          setPayment(null);
+        }
+      } catch {
+        if (cancelled) return;
         setPayment(null);
       }
-    });
+    }
+
+    void load();
 
     return () => {
       cancelled = true;

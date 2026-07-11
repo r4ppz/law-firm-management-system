@@ -48,6 +48,7 @@ export function EditTaskModal({ isOpen, onOpenChange, onSuccess, taskId }: EditT
   useEffect(() => {
     if (!isOpen || !taskId) return;
 
+    const id = taskId;
     let cancelled = false;
 
     const resetTimer = setTimeout(() => {
@@ -60,8 +61,12 @@ export function EditTaskModal({ isOpen, onOpenChange, onSuccess, taskId }: EditT
       setLoadState("loading");
     }, 0);
 
-    void Promise.all([getTaskDetailRowByIdAction(taskId), getActiveUsersAction()])
-      .then(([taskData, usersData]) => {
+    async function load() {
+      try {
+        const [taskData, usersData] = await Promise.all([
+          getTaskDetailRowByIdAction(id),
+          getActiveUsersAction(),
+        ]);
         if (cancelled) return;
         if (taskData) {
           setTask(taskData);
@@ -75,13 +80,15 @@ export function EditTaskModal({ isOpen, onOpenChange, onSuccess, taskId }: EditT
           setLoadState("not-found");
         }
         setUsers(usersData);
-      })
-      .catch(() => {
+      } catch {
         if (cancelled) return;
         setTask(null);
         setLoadState("error");
         queue.add({ title: "Failed to load task" }, { timeout: 5000 });
-      });
+      }
+    }
+
+    void load();
 
     return () => {
       clearTimeout(resetTimer);

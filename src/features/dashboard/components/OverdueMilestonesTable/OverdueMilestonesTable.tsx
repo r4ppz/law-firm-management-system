@@ -27,11 +27,19 @@ export function OverdueMilestonesTable() {
   useEffect(() => {
     let cancelled = false;
 
-    getOverdueMilestonesAction().then((result) => {
-      if (cancelled) return;
-      setItems(result);
-      setIsLoading(false);
-    });
+    async function load() {
+      try {
+        const result = await getOverdueMilestonesAction();
+        if (cancelled) return;
+        setItems(result);
+      } catch {
+        if (cancelled) return;
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    }
+
+    void load();
 
     return () => {
       cancelled = true;

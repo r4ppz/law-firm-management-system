@@ -34,15 +34,18 @@ export function AddTaskModal({ isOpen, onOpenChange, onSuccess, caseId }: AddTas
 
     let cancelled = false;
 
-    void getActiveUsersAction()
-      .then((data) => {
+    async function load() {
+      try {
+        const data = await getActiveUsersAction();
         if (cancelled) return;
         setUsers(data);
-      })
-      .catch(() => {
+      } catch {
         if (cancelled) return;
         queue.add({ title: "Failed to load assignees" }, { timeout: 5000 });
-      });
+      }
+    }
+
+    void load();
 
     return () => {
       cancelled = true;

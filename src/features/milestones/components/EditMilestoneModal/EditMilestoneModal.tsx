@@ -54,10 +54,12 @@ export function EditMilestoneModal({
   useEffect(() => {
     if (!isOpen || !milestoneId) return;
 
+    const id = milestoneId;
     let cancelled = false;
 
-    void getMilestoneRowByIdAction(milestoneId)
-      .then((data) => {
+    async function load() {
+      try {
+        const data = await getMilestoneRowByIdAction(id);
         if (cancelled) return;
         if (data) {
           setMilestone(data);
@@ -68,12 +70,14 @@ export function EditMilestoneModal({
         } else {
           setMilestone(null);
         }
-      })
-      .catch(() => {
+      } catch {
         if (cancelled) return;
         setMilestone(null);
         queue.add({ title: "Failed to load milestone" }, { timeout: 5000 });
-      });
+      }
+    }
+
+    void load();
 
     return () => {
       cancelled = true;

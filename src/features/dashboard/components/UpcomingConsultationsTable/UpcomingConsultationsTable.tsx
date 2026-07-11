@@ -27,11 +27,19 @@ export function UpcomingConsultationsTable() {
   useEffect(() => {
     let cancelled = false;
 
-    getUpcomingConsultationsAction().then((result) => {
-      if (cancelled) return;
-      setItems(result);
-      setIsLoading(false);
-    });
+    async function load() {
+      try {
+        const result = await getUpcomingConsultationsAction();
+        if (cancelled) return;
+        setItems(result);
+      } catch {
+        if (cancelled) return;
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    }
+
+    void load();
 
     return () => {
       cancelled = true;
