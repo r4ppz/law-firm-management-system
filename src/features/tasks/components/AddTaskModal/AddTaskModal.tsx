@@ -31,7 +31,22 @@ export function AddTaskModal({ isOpen, onOpenChange, onSuccess, caseId }: AddTas
 
   useEffect(() => {
     if (!isOpen) return;
-    getActiveUsersAction().then(setUsers);
+
+    let cancelled = false;
+
+    void getActiveUsersAction()
+      .then((data) => {
+        if (cancelled) return;
+        setUsers(data);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        queue.add({ title: "Failed to load assignees" }, { timeout: 5000 });
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [isOpen]);
 
   function handleCancel() {

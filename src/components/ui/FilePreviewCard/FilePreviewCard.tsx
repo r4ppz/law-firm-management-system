@@ -6,12 +6,13 @@ import {
   FaRegFileImage,
   FaRegFileLines,
   FaRegFilePdf,
+  FaRegFilePowerpoint,
   FaRegFileWord,
   FaRegFileZipper,
 } from "react-icons/fa6";
 import type { IconType } from "react-icons/lib";
 
-import { formatFileSize } from "@/lib/format";
+import { classifyFileType, formatFileSize, type FileCategory } from "@/lib/format";
 
 import styles from "./FilePreviewCard.module.css";
 
@@ -21,51 +22,19 @@ interface FileTypeConfig {
   color: string;
 }
 
+const FILE_TYPE_CONFIG: Record<FileCategory, FileTypeConfig> = {
+  pdf: { icon: FaRegFilePdf, label: "PDF Document", color: "var(--raw-brick)" },
+  doc: { icon: FaRegFileWord, label: "Word Document", color: "var(--raw-steel)" },
+  xls: { icon: FaRegFileExcel, label: "Spreadsheet", color: "var(--raw-sage)" },
+  ppt: { icon: FaRegFilePowerpoint, label: "Presentation", color: "var(--raw-orange)" },
+  img: { icon: FaRegFileImage, label: "Image", color: "var(--raw-violet)" },
+  zip: { icon: FaRegFileZipper, label: "Archive", color: "var(--raw-amber)" },
+  txt: { icon: FaRegFileLines, label: "Text File", color: "var(--raw-gray-500)" },
+  unknown: { icon: FaRegFile, label: "File", color: "var(--raw-gray-400)" },
+};
+
 function getFileTypeConfig(fileType: string): FileTypeConfig {
-  const type = fileType.toLowerCase();
-
-  if (type.includes("pdf")) {
-    return { icon: FaRegFilePdf, label: "PDF Document", color: "var(--raw-brick)" };
-  }
-
-  if (type.includes("word") || type.includes("document") || type.includes("doc")) {
-    return { icon: FaRegFileWord, label: "Word Document", color: "var(--raw-steel)" };
-  }
-
-  if (
-    type.includes("excel") ||
-    type.includes("spreadsheet") ||
-    type.includes("sheet") ||
-    type.includes("xls")
-  ) {
-    return { icon: FaRegFileExcel, label: "Spreadsheet", color: "var(--raw-sage)" };
-  }
-
-  if (
-    type.includes("image") ||
-    type.includes("png") ||
-    type.includes("jpg") ||
-    type.includes("jpeg") ||
-    type.includes("gif")
-  ) {
-    return { icon: FaRegFileImage, label: "Image", color: "var(--raw-violet)" };
-  }
-
-  if (
-    type.includes("zip") ||
-    type.includes("rar") ||
-    type.includes("tar") ||
-    type.includes("gz") ||
-    type.includes("archive")
-  ) {
-    return { icon: FaRegFileZipper, label: "Archive", color: "var(--raw-amber)" };
-  }
-
-  if (type.includes("text") || type.includes("csv")) {
-    return { icon: FaRegFileLines, label: "Text File", color: "var(--raw-gray-500)" };
-  }
-
-  return { icon: FaRegFile, label: "File", color: "var(--raw-gray-400)" };
+  return FILE_TYPE_CONFIG[classifyFileType(fileType)];
 }
 
 interface FilePreviewCardProps {

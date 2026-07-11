@@ -1,9 +1,10 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 
 import type { ColumnDef } from "@/components/ui/DataTable/DataTable";
 import { ServerDataTable } from "@/components/ui/ServerDataTable/ServerDataTable";
+import { queue } from "@/components/ui/Toast/Toast";
 import {
   getDocumentDetailRowAction,
   getDocumentsPaginatedAction,
@@ -22,6 +23,7 @@ export function AttachmentsTab({ consultationId }: Props) {
   const [isUploadModalOpen, setUploadModalOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
   const [selectedDocument, setSelectedDocument] = useState<DocumentDetailRow | null>(null);
+  const requestRef = useRef(0);
 
   const columns: ColumnDef<DocumentRow>[] = useMemo(
     () => [
@@ -57,8 +59,18 @@ export function AttachmentsTab({ consultationId }: Props) {
   const handleRefresh = useCallback(() => setRefreshKey((k) => k + 1), []);
 
   async function handleRowAction(key: string) {
-    const doc = await getDocumentDetailRowAction(key);
-    setSelectedDocument(doc);
+    const requestId = ++requestRef.current;
+
+    try {
+      const doc = await getDocumentDetailRowAction(key);
+      if (requestRef.current !== requestId) return;
+      setSelectedDocument(doc);
+    } catch {
+      queue.add({
+        title: "Failed to load document",
+        description: "Could not retrieve document details. Please try again.",
+      });
+    }
   }
 
   return (

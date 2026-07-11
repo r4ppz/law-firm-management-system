@@ -33,20 +33,21 @@ export async function createNoteAction(
 
   const { content, case_id, consultation_id } = parsed.data;
 
+  let note;
   try {
-    const note = await createNote({
+    note = await createNote({
       content,
       case_id,
       consultation_id,
       created_by_user_id: session.id,
     });
-
-    revalidatePath(case_id ? `/case/${case_id}` : `/consultation/${consultation_id}`);
-
-    return { success: true, data: { id: note.id } };
   } catch {
     return { success: false, error: "Failed to create note" };
   }
+
+  revalidatePath(case_id ? `/case/${case_id}` : `/consultation/${consultation_id}`);
+
+  return { success: true, data: { id: note.id } };
 }
 
 export async function updateNoteAction(payload: unknown): Promise<ActionStatusResponse> {

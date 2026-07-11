@@ -15,12 +15,21 @@ export function formatFileSize(bytes: number | null): string {
   return `${size.toFixed(unitIndex === 0 ? 0 : 1)} ${units[unitIndex]}`;
 }
 
-export function formatFileType(fileType: string): string {
+export type FileCategory = "pdf" | "doc" | "xls" | "ppt" | "img" | "zip" | "txt" | "unknown";
+
+export function classifyFileType(fileType: string): FileCategory {
   const type = fileType.toLowerCase();
 
-  if (type.includes("pdf")) return "PDF";
-  if (type.includes("word") || type.includes("doc")) return "DOCX";
-  if (type.includes("excel") || type.includes("xls")) return "XLSX";
+  if (type.includes("pdf")) return "pdf";
+  if (
+    type.includes("excel") ||
+    type.includes("spreadsheet") ||
+    type.includes("sheet") ||
+    type.includes("xls")
+  )
+    return "xls";
+  if (type.includes("presentation") || type.includes("ppt")) return "ppt";
+  if (type.includes("word") || type.includes("document") || type.includes("doc")) return "doc";
   if (
     type.includes("image") ||
     type.includes("png") ||
@@ -28,9 +37,34 @@ export function formatFileType(fileType: string): string {
     type.includes("jpeg") ||
     type.includes("gif")
   )
-    return "IMG";
-  if (type.includes("zip") || type.includes("rar") || type.includes("tar")) return "ZIP";
-  if (type.includes("text") || type.includes("csv")) return "TXT";
+    return "img";
+  if (
+    type.includes("zip") ||
+    type.includes("rar") ||
+    type.includes("tar") ||
+    type.includes("gz") ||
+    type.includes("archive")
+  )
+    return "zip";
+  if (type.includes("text") || type.includes("csv")) return "txt";
 
-  return type.split("/").pop()?.toUpperCase() ?? type;
+  return "unknown";
+}
+
+const FILE_TYPE_LABELS: Record<FileCategory, string> = {
+  pdf: "PDF",
+  doc: "DOCX",
+  xls: "XLSX",
+  ppt: "PPT",
+  img: "IMG",
+  zip: "ZIP",
+  txt: "TXT",
+  unknown: "",
+};
+
+export function formatFileType(fileType: string): string {
+  const category = classifyFileType(fileType);
+  const label = FILE_TYPE_LABELS[category];
+  if (label) return label;
+  return fileType.split("/").pop()?.toUpperCase() ?? fileType;
 }

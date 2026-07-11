@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarDate, getLocalTimeZone, today } from "@internationalized/date";
+import { CalendarDate, getLocalTimeZone, parseDate, today } from "@internationalized/date";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/Button/Button";
@@ -24,7 +24,7 @@ import styles from "./EditPaymentModal.module.css";
 const STATUS_OPTIONS = Object.values(PaymentStatus);
 
 function toCalendarDate(date: Date): CalendarDate {
-  return new CalendarDate(date.getFullYear(), date.getMonth() + 1, date.getDate());
+  return parseDate(date.toISOString().slice(0, 10));
 }
 
 interface EditPaymentModalProps {
@@ -80,12 +80,10 @@ export function EditPaymentModal({
     if (!amount.trim() || !paymentId) return;
     setIsPending(true);
 
-    const date = paymentDate.toDate(getLocalTimeZone());
-
     const result = await updatePaymentAction({
       paymentId,
       amount: Number.parseFloat(amount),
-      payment_date: date,
+      payment_date: paymentDate.toString(),
       status,
       payment_method: paymentMethod.trim() || undefined,
       receipt_number: receiptNumber.trim() || undefined,

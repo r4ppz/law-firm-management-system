@@ -38,6 +38,9 @@ export function EditTaskModal({ isOpen, onOpenChange, onSuccess, taskId }: EditT
   const [status, setStatus] = useState<string>(TaskStatus.Pending);
   const [assigneeIds, setAssigneeIds] = useState<Set<string>>(new Set());
 
+  type LoadState = "loading" | "loaded" | "not-found" | "error";
+  const [loadState, setLoadState] = useState<LoadState>("loading");
+
   const [isPending, setIsPending] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -47,8 +50,18 @@ export function EditTaskModal({ isOpen, onOpenChange, onSuccess, taskId }: EditT
 
     let cancelled = false;
 
-    void Promise.all([getTaskDetailRowByIdAction(taskId), getActiveUsersAction()]).then(
-      ([taskData, usersData]) => {
+    const resetTimer = setTimeout(() => {
+      if (cancelled) return;
+      setTask(null);
+      setTitle("");
+      setDescription("");
+      setStatus(TaskStatus.Pending);
+      setAssigneeIds(new Set());
+      setLoadState("loading");
+    }, 0);
+
+    void Promise.all([getTaskDetailRowByIdAction(taskId), getActiveUsersAction()])
+      .then(([taskData, usersData]) => {
         if (cancelled) return;
         if (taskData) {
           setTask(taskData);
@@ -56,14 +69,22 @@ export function EditTaskModal({ isOpen, onOpenChange, onSuccess, taskId }: EditT
           setDescription(taskData.description ?? "");
           setStatus(taskData.status);
           setAssigneeIds(new Set(taskData.assignee_ids));
+          setLoadState("loaded");
         } else {
           setTask(null);
+          setLoadState("not-found");
         }
         setUsers(usersData);
-      },
-    );
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setTask(null);
+        setLoadState("error");
+        queue.add({ title: "Failed to load task" }, { timeout: 5000 });
+      });
 
     return () => {
+      clearTimeout(resetTimer);
       cancelled = true;
     };
   }, [isOpen, taskId]);
@@ -72,22 +93,26 @@ export function EditTaskModal({ isOpen, onOpenChange, onSuccess, taskId }: EditT
     if (!title.trim() || !taskId) return;
     setIsPending(true);
 
-    const result = await updateTaskAction({
-      taskId,
-      title: title.trim(),
-      description: description.trim() || undefined,
-      status,
-      assignee_ids: Array.from(assigneeIds),
-    });
+    try {
+      const result = await updateTaskAction({
+        taskId,
+        title: title.trim(),
+        description: description.trim() || undefined,
+        status,
+        assignee_ids: Array.from(assigneeIds),
+      });
 
-    setIsPending(false);
-
-    if (result.success) {
-      queue.add({ title: "Task updated" }, { timeout: 5000 });
-      onOpenChange(false);
-      onSuccess();
-    } else {
-      queue.add({ title: result.error ?? "Failed to update task" }, { timeout: 5000 });
+      if (result.success) {
+        queue.add({ title: "Task updated" }, { timeout: 5000 });
+        onOpenChange(false);
+        onSuccess();
+      } else {
+        queue.add({ title: result.error ?? "Failed to update task" }, { timeout: 5000 });
+      }
+    } catch {
+      queue.add({ title: "Failed to update task" }, { timeout: 5000 });
+    } finally {
+      setIsPending(false);
     }
   }
 
@@ -95,21 +120,25 @@ export function EditTaskModal({ isOpen, onOpenChange, onSuccess, taskId }: EditT
     if (!taskId) return;
     setIsDeleting(true);
 
-    const result = await deleteTaskAction(taskId);
+    try {
+      const result = await deleteTaskAction(taskId);
 
-    setIsDeleting(false);
-    setShowDeleteConfirm(false);
-
-    if (result.success) {
-      queue.add({ title: "Task deleted" }, { timeout: 5000 });
-      onOpenChange(false);
-      onSuccess();
-    } else {
-      queue.add({ title: result.error ?? "Failed to delete task" }, { timeout: 5000 });
+      if (result.success) {
+        queue.add({ title: "Task deleted" }, { timeout: 5000 });
+        onOpenChange(false);
+        onSuccess();
+      } else {
+        queue.add({ title: result.error ?? "Failed to delete task" }, { timeout: 5000 });
+      }
+    } catch {
+      queue.add({ title: "Failed to delete task" }, { timeout: 5000 });
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteConfirm(false);
     }
   }
 
-  const isLoadingData = isOpen && task == null;
+  const isLoadingData = isOpen && loadState === "loading";
   const hasChanges =
     title.trim() !== (task?.title ?? "") ||
     description.trim() !== (task?.description ?? "") ||
@@ -128,7 +157,17 @@ export function EditTaskModal({ isOpen, onOpenChange, onSuccess, taskId }: EditT
     );
   }
 
-  if (!task) {
+  if (loadState === "error") {
+    return (
+      <Modal title="Edit Task" isOpen={isOpen} onOpenChange={onOpenChange} className={styles.modal}>
+        <div className={styles.loadingContainer}>
+          <span>Failed to load task. Please try again.</span>
+        </div>
+      </Modal>
+    );
+  }
+
+  if (loadState === "not-found") {
     return (
       <Modal title="Edit Task" isOpen={isOpen} onOpenChange={onOpenChange} className={styles.modal}>
         <div className={styles.loadingContainer}>

@@ -56,18 +56,24 @@ export function EditMilestoneModal({
 
     let cancelled = false;
 
-    void getMilestoneRowByIdAction(milestoneId).then((data) => {
-      if (cancelled) return;
-      if (data) {
-        setMilestone(data);
-        setTitle(data.title);
-        setDescription(data.description ?? "");
-        setDueDate(toCalendarDate(data.due_date));
-        setStatus(data.status);
-      } else {
+    void getMilestoneRowByIdAction(milestoneId)
+      .then((data) => {
+        if (cancelled) return;
+        if (data) {
+          setMilestone(data);
+          setTitle(data.title);
+          setDescription(data.description ?? "");
+          setDueDate(toCalendarDate(data.due_date));
+          setStatus(data.status);
+        } else {
+          setMilestone(null);
+        }
+      })
+      .catch(() => {
+        if (cancelled) return;
         setMilestone(null);
-      }
-    });
+        queue.add({ title: "Failed to load milestone" }, { timeout: 5000 });
+      });
 
     return () => {
       cancelled = true;
@@ -121,6 +127,7 @@ export function EditMilestoneModal({
   const hasChanges =
     title.trim() !== (milestone?.title ?? "") ||
     description.trim() !== (milestone?.description ?? "") ||
+    dueDate.compare(toCalendarDate(milestone?.due_date ?? new Date())) !== 0 ||
     status !== (milestone?.status ?? "Pending");
 
   const isValid = title.trim().length > 0;

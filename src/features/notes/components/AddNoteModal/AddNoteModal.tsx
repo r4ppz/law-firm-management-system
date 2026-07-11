@@ -38,21 +38,25 @@ export function AddNoteModal({
     if (!content.trim()) return;
     setIsPending(true);
 
-    const result = await createNoteAction({
-      content: content.trim(),
-      case_id: caseId ?? null,
-      consultation_id: consultationId ?? null,
-    });
+    try {
+      const result = await createNoteAction({
+        content: content.trim(),
+        case_id: caseId ?? null,
+        consultation_id: consultationId ?? null,
+      });
 
-    setIsPending(false);
-
-    if (result.success) {
-      queue.add({ title: "Note added" }, { timeout: 5000 });
-      setContent("");
-      onOpenChange(false);
-      onSuccess();
-    } else {
-      queue.add({ title: result.error ?? "Failed to add note" }, { timeout: 5000 });
+      if (result.success) {
+        queue.add({ title: "Note added" }, { timeout: 5000 });
+        setContent("");
+        onOpenChange(false);
+        onSuccess();
+      } else {
+        queue.add({ title: result.error ?? "Failed to add note" }, { timeout: 5000 });
+      }
+    } catch {
+      queue.add({ title: "Failed to add note" }, { timeout: 5000 });
+    } finally {
+      setIsPending(false);
     }
   }
 
@@ -60,6 +64,7 @@ export function AddNoteModal({
     <Modal title="Add Note" isOpen={isOpen} onOpenChange={handleCancel} className={styles.modal}>
       <div className={styles.content}>
         <TextField
+          label="Note"
           isTextArea
           rows={5}
           value={content}

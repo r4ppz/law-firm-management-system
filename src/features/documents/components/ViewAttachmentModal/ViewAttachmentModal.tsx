@@ -52,17 +52,21 @@ export function ViewAttachmentModal({
   async function handleDelete() {
     setIsDeleting(true);
 
-    const result = await deleteDocumentAction(doc.id);
+    try {
+      const result = await deleteDocumentAction(doc.id);
 
-    setIsDeleting(false);
-    setShowDeleteConfirm(false);
-
-    if (result.success) {
-      queue.add({ title: "Attachment deleted" }, { timeout: 5000 });
-      onOpenChange(false);
-      onSuccess();
-    } else {
-      queue.add({ title: result.error ?? "Failed to delete attachment" }, { timeout: 5000 });
+      if (result.success) {
+        queue.add({ title: "Attachment deleted" }, { timeout: 5000 });
+        onOpenChange(false);
+        onSuccess();
+      } else {
+        queue.add({ title: result.error ?? "Failed to delete attachment" }, { timeout: 5000 });
+      }
+    } catch {
+      queue.add({ title: "Failed to delete attachment" }, { timeout: 5000 });
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteConfirm(false);
     }
   }
 

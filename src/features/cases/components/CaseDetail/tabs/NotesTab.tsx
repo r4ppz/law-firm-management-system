@@ -4,6 +4,7 @@ import { useCallback, useState } from "react";
 
 import { type ColumnDef } from "@/components/ui/DataTable/DataTable";
 import { ServerDataTable } from "@/components/ui/ServerDataTable/ServerDataTable";
+import { queue } from "@/components/ui/Toast/Toast";
 import { getCaseNotesPaginatedAction } from "@/features/cases/actions";
 import type { NoteRow } from "@/features/cases/queries";
 import { getNoteRowByIdAction } from "@/features/notes/actions";
@@ -29,9 +30,15 @@ export function NotesTab({ caseId }: Props) {
   const handleRefresh = useCallback(() => setRefreshKey((k) => k + 1), []);
 
   async function handleRowAction(id: string) {
-    const note = await getNoteRowByIdAction(id);
-    if (note) {
-      setEditNote(note);
+    try {
+      const note = await getNoteRowByIdAction(id);
+      if (note) {
+        setEditNote(note);
+      } else {
+        queue.add({ title: "Note not found" }, { timeout: 5000 });
+      }
+    } catch {
+      queue.add({ title: "Failed to load note" }, { timeout: 5000 });
     }
   }
 

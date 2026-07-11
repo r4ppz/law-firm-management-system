@@ -47,5 +47,13 @@
       flex-shrink: 0;
       color: var(--color-danger);
     }
+
+    .errorText {
+      flex-shrink: 1;
+      color: var(--color-danger);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
   }
 }

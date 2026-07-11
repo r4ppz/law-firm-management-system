@@ -112,32 +112,38 @@ export function UploadDocumentModal({
     }
   }
 
+  async function runUploads(targets: FileEntry[]): Promise<number> {
+    let failed = 0;
+
+    for (const entry of targets) {
+      updateEntry(entry.id, { status: "uploading", error: undefined });
+
+      try {
+        await uploadSingleFile(entry.file);
+        updateEntry(entry.id, { status: "done" });
+      } catch (err) {
+        failed++;
+        updateEntry(entry.id, {
+          status: "failed",
+          error: err instanceof Error ? err.message : "Upload failed",
+        });
+      }
+    }
+
+    return failed;
+  }
+
   function handleSubmitAll() {
     const targets = pendingEntries;
+    const targetIds = new Set(targets.map((e) => e.id));
+    const externalFailedCount = failedEntries.filter((e) => !targetIds.has(e.id)).length;
 
     startTransition(async () => {
-      let failed = 0;
+      const failed = await runUploads(targets);
 
-      for (const entry of targets) {
-        updateEntry(entry.id, { status: "uploading", error: undefined });
-
-        try {
-          await uploadSingleFile(entry.file);
-          updateEntry(entry.id, { status: "done" });
-        } catch (err) {
-          failed++;
-          updateEntry(entry.id, {
-            status: "failed",
-            error: err instanceof Error ? err.message : "Upload failed",
-          });
-        }
-      }
-
-      if (failed === 0) {
+      if (failed === 0 && externalFailedCount === 0) {
         queue.add(
-          {
-            title: `${targets.length} file${targets.length > 1 ? "s" : ""} uploaded`,
-          },
+          { title: `${targets.length} file${targets.length > 1 ? "s" : ""} uploaded` },
           { timeout: 5000 },
         );
         resetState();
@@ -151,28 +157,11 @@ export function UploadDocumentModal({
     const targets = failedEntries;
 
     startTransition(async () => {
-      let failed = 0;
-
-      for (const entry of targets) {
-        updateEntry(entry.id, { status: "uploading", error: undefined });
-
-        try {
-          await uploadSingleFile(entry.file);
-          updateEntry(entry.id, { status: "done" });
-        } catch (err) {
-          failed++;
-          updateEntry(entry.id, {
-            status: "failed",
-            error: err instanceof Error ? err.message : "Upload failed",
-          });
-        }
-      }
+      const failed = await runUploads(targets);
 
       if (failed === 0) {
         queue.add(
-          {
-            title: `${targets.length} file${targets.length > 1 ? "s" : ""} uploaded`,
-          },
+          { title: `${targets.length} file${targets.length > 1 ? "s" : ""} uploaded` },
           { timeout: 5000 },
         );
         resetState();

@@ -1,5 +1,6 @@
 "use client";
 
+import type { DateDuration } from "@internationalized/date";
 import clsx from "clsx";
 import {
   DatePicker as AriaDatePicker,
@@ -24,6 +25,7 @@ export interface DatePickerProps<T extends DateValue> extends AriaDatePickerProp
   label?: string;
   description?: string;
   errorMessage?: string | ((validation: ValidationResult) => string);
+  visibleDuration?: DateDuration;
 }
 
 export function DatePicker<T extends DateValue>({
@@ -31,6 +33,7 @@ export function DatePicker<T extends DateValue>({
   description,
   errorMessage,
   className,
+  visibleDuration,
   ...props
 }: DatePickerProps<T>) {
   return (
@@ -38,8 +41,8 @@ export function DatePicker<T extends DateValue>({
       {label && <AriaLabel className={styles.label}>{label}</AriaLabel>}
       <Group className={styles.group}>
         <DateInput className={styles.dateInput} />
-        <Button variant="ghost" className={styles.trigger}>
-          <FaCalendarDays />
+        <Button variant="ghost" className={styles.trigger} aria-label="Open calendar">
+          <FaCalendarDays aria-hidden="true" />
         </Button>
       </Group>
       {description && (
@@ -49,7 +52,7 @@ export function DatePicker<T extends DateValue>({
       )}
       <AriaFieldError className={styles.error}>{errorMessage}</AriaFieldError>
       <Popover className={styles.popover} placement="bottom">
-        <Calendar />
+        <Calendar visibleDuration={visibleDuration} />
       </Popover>
     </AriaDatePicker>
   );

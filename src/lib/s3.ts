@@ -90,6 +90,10 @@ export async function getPresignedUploadUrl(
   );
 }
 
+function sanitizeFilename(name: string): string {
+  return name.replace(/["\\]/g, "").replace(/[\x00-\x1f]/g, "");
+}
+
 export async function getPresignedDownloadUrl(
   key: string,
   fileName?: string,
@@ -100,7 +104,9 @@ export async function getPresignedDownloadUrl(
     new GetObjectCommand({
       Bucket: bucket(),
       Key: key,
-      ...(fileName ? { ResponseContentDisposition: `attachment; filename="${fileName}"` } : {}),
+      ...(fileName
+        ? { ResponseContentDisposition: `attachment; filename="${sanitizeFilename(fileName)}"` }
+        : {}),
     }),
     { expiresIn },
   );
