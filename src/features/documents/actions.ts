@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import type { ActionDataResponse, ActionStatusResponse } from "@/lib/action-response";
 import { requireAuth, requireRole } from "@/lib/auth-guards";
+import { getParentPath } from "@/lib/path";
 import { deleteFile, generateKey, getPresignedDownloadUrl, getPresignedUploadUrl } from "@/lib/s3";
 
 import { createDocument, deleteDocument as deleteDocumentRecord } from "./mutations";
@@ -73,7 +74,9 @@ export async function confirmDocumentUploadAction(
       uploaded_by_user_id: session.id,
     });
 
-    revalidatePath(case_id ? `/case/${case_id}` : `/consultation/${consultation_id}`);
+    revalidatePath(
+      getParentPath({ case_id: case_id ?? null, consultation_id: consultation_id ?? null }),
+    );
 
     return { success: true, data: { id: doc.id } };
   } catch {
@@ -115,13 +118,7 @@ export async function deleteDocumentAction(documentId: string): Promise<ActionSt
     await deleteFile(doc.file_path);
     await deleteDocumentRecord(parsed.data.documentId);
 
-    const path = doc.case_id
-      ? `/case/${doc.case_id}`
-      : doc.consultation_id
-        ? `/consultation/${doc.consultation_id}`
-        : "/case";
-
-    revalidatePath(path);
+    revalidatePath(getParentPath(doc));
 
     return { success: true };
   } catch {
