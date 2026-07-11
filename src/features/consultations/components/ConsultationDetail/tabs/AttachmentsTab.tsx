@@ -5,27 +5,23 @@ import { useCallback, useMemo, useState } from "react";
 import type { ColumnDef } from "@/components/ui/DataTable/DataTable";
 import { ServerDataTable } from "@/components/ui/ServerDataTable/ServerDataTable";
 import {
-  getDocumentDownloadUrlAction,
+  getDocumentDetailRowAction,
   getDocumentsPaginatedAction,
 } from "@/features/documents/actions";
 import { UploadDocumentModal } from "@/features/documents/components/UploadDocumentModal/UploadDocumentModal";
-import type { DocumentRow } from "@/features/documents/queries";
+import { ViewAttachmentModal } from "@/features/documents/components/ViewAttachmentModal/ViewAttachmentModal";
+import type { DocumentDetailRow, DocumentRow } from "@/features/documents/queries";
 import { formatDateTime } from "@/lib/date";
-
-import tabStyles from "./Tab.module.css";
+import { formatFileSize, formatFileType } from "@/lib/format";
 
 interface Props {
   consultationId: string;
 }
 
 export function AttachmentsTab({ consultationId }: Props) {
-  const [isModalOpen, setModalOpen] = useState(false);
+  const [isUploadModalOpen, setUploadModalOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
-
-  const handleDownload = useCallback(async (documentId: string) => {
-    const { url } = await getDocumentDownloadUrlAction(documentId);
-    window.open(url, "_blank");
-  }, []);
+  const [selectedDocument, setSelectedDocument] = useState<DocumentDetailRow | null>(null);
 
   const columns: ColumnDef<DocumentRow>[] = useMemo(
     () => [
@@ -34,21 +30,19 @@ export function AttachmentsTab({ consultationId }: Props) {
         name: "File Name",
         isRowHeader: true,
         allowsSorting: true,
-        render: (value, row) => (
-          <button
-            className={tabStyles.fileLink}
-            onClick={(e) => {
-              e.stopPropagation();
-              handleDownload(row.id);
-            }}
-            type="button"
-          >
-            {String(value)}
-          </button>
-        ),
       },
-      { id: "file_type", name: "Type", allowsSorting: true },
-      { id: "file_size", name: "Size", allowsSorting: true },
+      {
+        id: "file_type",
+        name: "Type",
+        allowsSorting: true,
+        render: (value) => formatFileType(value as string),
+      },
+      {
+        id: "file_size",
+        name: "Size",
+        allowsSorting: true,
+        render: (value) => formatFileSize(value as number | null),
+      },
       { id: "uploadedBy", name: "Uploaded By" },
       {
         id: "created_at",
@@ -57,10 +51,15 @@ export function AttachmentsTab({ consultationId }: Props) {
         render: (value) => formatDateTime(value as Date),
       },
     ],
-    [handleDownload],
+    [],
   );
 
   const handleRefresh = useCallback(() => setRefreshKey((k) => k + 1), []);
+
+  async function handleRowAction(key: string) {
+    const doc = await getDocumentDetailRowAction(key);
+    setSelectedDocument(doc);
+  }
 
   return (
     <>
@@ -74,14 +73,23 @@ export function AttachmentsTab({ consultationId }: Props) {
         searchLabel="Search attachments"
         renderAddButton
         addButtonLabel="Add Attachment"
-        onAddButtonPress={() => setModalOpen(true)}
+        onAddButtonPress={() => setUploadModalOpen(true)}
+        onRowAction={handleRowAction}
       />
       <UploadDocumentModal
-        isOpen={isModalOpen}
-        onOpenChange={setModalOpen}
+        isOpen={isUploadModalOpen}
+        onOpenChange={setUploadModalOpen}
         onSuccess={handleRefresh}
         consultationId={consultationId}
       />
+      {selectedDocument && (
+        <ViewAttachmentModal
+          isOpen={!!selectedDocument}
+          onOpenChange={() => setSelectedDocument(null)}
+          onSuccess={handleRefresh}
+          document={selectedDocument}
+        />
+      )}
     </>
   );
 }
