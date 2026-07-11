@@ -1,0 +1,23 @@
+.modal {
+  width: 500px;
+
+  .content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+
+    .actions {
+      display: flex;
+      gap: var(--space-lg);
+
+      > * {
+        flex: 1;
+      }
+    }
+
+    .deleteButton {
+      color: var(--color-danger);
+      border-color: var(--color-danger);
+    }
+  }
+}
