@@ -8,7 +8,13 @@ import { getParentPath } from "@/lib/path";
 import { deleteFile, generateKey, getPresignedDownloadUrl, getPresignedUploadUrl } from "@/lib/s3";
 
 import { createDocument, deleteDocument as deleteDocumentRecord } from "./mutations";
-import { getDocumentById, getDocumentsPaginated, type DocumentRow } from "./queries";
+import {
+  getDocumentById,
+  getDocumentDetailRowById,
+  getDocumentsPaginated,
+  type DocumentDetailRow,
+  type DocumentRow,
+} from "./queries";
 import {
   DocumentConfirmPayloadSchema,
   DocumentIdSchema,
@@ -101,6 +107,20 @@ export async function getDocumentDownloadUrlAction(documentId: string): Promise<
   const url = await getPresignedDownloadUrl(doc.file_path, doc.file_name);
 
   return { url, file_name: doc.file_name };
+}
+
+export async function getDocumentDetailRowAction(documentId: string): Promise<DocumentDetailRow> {
+  await requireAuth();
+
+  const parsed = DocumentIdSchema.safeParse({ documentId });
+  if (!parsed.success) {
+    throw new Error("Invalid document ID");
+  }
+
+  const doc = await getDocumentDetailRowById(parsed.data.documentId);
+  if (!doc) throw new Error("Document not found");
+
+  return doc;
 }
 
 export async function deleteDocumentAction(documentId: string): Promise<ActionStatusResponse> {
