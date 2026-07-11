@@ -39,8 +39,11 @@ export function ViewAttachmentModal({
       anchor.download = file_name;
       anchor.click();
       anchor.remove();
-    } catch {
-      queue.add({ title: "Failed to download file" }, { timeout: 5000 });
+    } catch (e) {
+      queue.add(
+        { title: e instanceof Error ? e.message : "Failed to download file" },
+        { timeout: 5000 },
+      );
     } finally {
       setIsDownloading(false);
     }

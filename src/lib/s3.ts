@@ -1,6 +1,8 @@
 import {
   DeleteObjectCommand,
   GetObjectCommand,
+  HeadObjectCommand,
+  NotFound,
   PutObjectCommand,
   S3Client,
 } from "@aws-sdk/client-s3";
@@ -57,6 +59,16 @@ export async function deleteFile(key: string) {
       Key: key,
     }),
   );
+}
+
+export async function objectExists(key: string): Promise<boolean> {
+  try {
+    await s3().send(new HeadObjectCommand({ Bucket: bucket(), Key: key }));
+    return true;
+  } catch (e) {
+    if (e instanceof NotFound) return false;
+    throw e;
+  }
 }
 
 const UPLOAD_URL_EXPIRY_S = 300;

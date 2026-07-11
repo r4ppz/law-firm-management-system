@@ -5,7 +5,13 @@ import { revalidatePath } from "next/cache";
 import type { ActionDataResponse, ActionStatusResponse } from "@/lib/action-response";
 import { requireAuth, requireRole } from "@/lib/auth-guards";
 import { getParentPath } from "@/lib/path";
-import { deleteFile, generateKey, getPresignedDownloadUrl, getPresignedUploadUrl } from "@/lib/s3";
+import {
+  deleteFile,
+  generateKey,
+  getPresignedDownloadUrl,
+  getPresignedUploadUrl,
+  objectExists,
+} from "@/lib/s3";
 
 import { createDocument, deleteDocument as deleteDocumentRecord } from "./mutations";
 import {
@@ -103,6 +109,9 @@ export async function getDocumentDownloadUrlAction(documentId: string): Promise<
 
   const doc = await getDocumentById(parsed.data.documentId);
   if (!doc) throw new Error("Document not found");
+
+  const exists = await objectExists(doc.file_path);
+  if (!exists) throw new Error("This file no longer exists in storage. It may have been deleted.");
 
   const url = await getPresignedDownloadUrl(doc.file_path, doc.file_name);
 
