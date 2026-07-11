@@ -1,0 +1,222 @@
+"use client";
+
+import { CalendarDate, getLocalTimeZone, today } from "@internationalized/date";
+import { useEffect, useState } from "react";
+
+import { Button } from "@/components/ui/Button/Button";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog/ConfirmDialog";
+import { DateField } from "@/components/ui/DateField/DateField";
+import { Modal } from "@/components/ui/Modal/Modal";
+import { ProgressCircle } from "@/components/ui/ProgressCircle/ProgressCircle";
+import { Select, SelectItem } from "@/components/ui/Select/Select";
+import { TextField } from "@/components/ui/TextField/TextField";
+import { queue } from "@/components/ui/Toast/Toast";
+import {
+  deleteMilestoneAction,
+  getMilestoneRowByIdAction,
+  updateMilestoneAction,
+} from "@/features/milestones/actions";
+import type { MilestoneRow } from "@/features/milestones/queries";
+import { CaseMilestoneStatus } from "@/generated/prisma/browser";
+
+import styles from "./EditMilestoneModal.module.css";
+
+const STATUS_OPTIONS = Object.values(CaseMilestoneStatus);
+
+function toCalendarDate(date: Date): CalendarDate {
+  return new CalendarDate(date.getFullYear(), date.getMonth() + 1, date.getDate());
+}
+
+interface EditMilestoneModalProps {
+  isOpen: boolean;
+  onOpenChange: (isOpen: boolean) => void;
+  onSuccess: () => void;
+  milestoneId: string | null;
+}
+
+export function EditMilestoneModal({
+  isOpen,
+  onOpenChange,
+  onSuccess,
+  milestoneId,
+}: EditMilestoneModalProps) {
+  const [milestone, setMilestone] = useState<MilestoneRow | null>(null);
+
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [dueDate, setDueDate] = useState<CalendarDate>(today(getLocalTimeZone()));
+  const [status, setStatus] = useState<string>(CaseMilestoneStatus.Pending);
+
+  const [isPending, setIsPending] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen || !milestoneId) return;
+
+    let cancelled = false;
+
+    void getMilestoneRowByIdAction(milestoneId).then((data) => {
+      if (cancelled) return;
+      if (data) {
+        setMilestone(data);
+        setTitle(data.title);
+        setDescription(data.description ?? "");
+        setDueDate(toCalendarDate(data.due_date));
+        setStatus(data.status);
+      } else {
+        setMilestone(null);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isOpen, milestoneId]);
+
+  async function handleSave() {
+    if (!title.trim() || !milestoneId) return;
+    setIsPending(true);
+
+    const date = dueDate.toDate(getLocalTimeZone());
+
+    const result = await updateMilestoneAction({
+      milestoneId,
+      title: title.trim(),
+      description: description.trim() || undefined,
+      due_date: date,
+      status,
+    });
+
+    setIsPending(false);
+
+    if (result.success) {
+      queue.add({ title: "Milestone updated" }, { timeout: 5000 });
+      onOpenChange(false);
+      onSuccess();
+    } else {
+      queue.add({ title: result.error ?? "Failed to update milestone" }, { timeout: 5000 });
+    }
+  }
+
+  async function handleDelete() {
+    if (!milestoneId) return;
+    setIsDeleting(true);
+
+    const result = await deleteMilestoneAction(milestoneId);
+
+    setIsDeleting(false);
+    setShowDeleteConfirm(false);
+
+    if (result.success) {
+      queue.add({ title: "Milestone deleted" }, { timeout: 5000 });
+      onOpenChange(false);
+      onSuccess();
+    } else {
+      queue.add({ title: result.error ?? "Failed to delete milestone" }, { timeout: 5000 });
+    }
+  }
+
+  const isLoadingData = isOpen && milestone == null;
+  const hasChanges =
+    title.trim() !== (milestone?.title ?? "") ||
+    description.trim() !== (milestone?.description ?? "") ||
+    status !== (milestone?.status ?? "Pending");
+
+  const isValid = title.trim().length > 0;
+
+  if (isLoadingData) {
+    return (
+      <Modal
+        title="Edit Milestone"
+        isOpen={isOpen}
+        onOpenChange={onOpenChange}
+        className={styles.modal}
+      >
+        <div className={styles.loadingContainer}>
+          <ProgressCircle aria-label="Loading milestone" />
+        </div>
+      </Modal>
+    );
+  }
+
+  if (!milestone) {
+    return (
+      <Modal
+        title="Edit Milestone"
+        isOpen={isOpen}
+        onOpenChange={onOpenChange}
+        className={styles.modal}
+      >
+        <div className={styles.loadingContainer}>
+          <span>Milestone not found.</span>
+        </div>
+      </Modal>
+    );
+  }
+
+  return (
+    <>
+      <Modal
+        title="Edit Milestone"
+        isOpen={isOpen}
+        onOpenChange={onOpenChange}
+        className={styles.modal}
+      >
+        <div className={styles.content}>
+          <TextField
+            label="Title"
+            value={title}
+            onChange={setTitle}
+            placeholder="Milestone title"
+            isDisabled={isPending || isDeleting}
+          />
+          <TextField
+            label="Description"
+            value={description}
+            onChange={setDescription}
+            placeholder="Optional description"
+            isTextArea
+            rows={3}
+            isDisabled={isPending || isDeleting}
+          />
+          <DateField
+            label="Due Date"
+            value={dueDate}
+            onChange={(v) => v && setDueDate(v)}
+            isDisabled={isPending || isDeleting}
+          />
+          <Select label="Status" value={status} onChange={(k) => setStatus(String(k))}>
+            {STATUS_OPTIONS.map((s) => (
+              <SelectItem key={s} id={s}>
+                {s}
+              </SelectItem>
+            ))}
+          </Select>
+          <div className={styles.actions}>
+            <Button
+              variant="secondary"
+              onPress={handleSave}
+              isDisabled={!isValid || (!hasChanges && !isPending) || isPending || isDeleting}
+            >
+              {isPending ? "Saving..." : "Save"}
+            </Button>
+            <Button onPress={() => setShowDeleteConfirm(true)} isDisabled={isPending || isDeleting}>
+              {isDeleting ? <ProgressCircle aria-label="Deleting" /> : "Delete"}
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      <ConfirmDialog
+        isOpen={showDeleteConfirm}
+        onOpenChange={setShowDeleteConfirm}
+        title="Delete Milestone"
+        confirmLabel="Delete"
+        onConfirm={handleDelete}
+      >
+        Are you sure you want to delete this milestone? This action cannot be undone.
+      </ConfirmDialog>
+    </>
+  );
+}
