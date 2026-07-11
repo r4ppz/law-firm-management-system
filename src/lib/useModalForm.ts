@@ -20,6 +20,13 @@ interface UseModalFormReturn<TArgs> {
   handleCancel: () => void;
 }
 
+/**
+ * Shared form-submission lifecycle for modals.
+ *
+ * Callers must provide the `TArgs` generic explicitly (e.g.
+ * `useModalForm<z.input<typeof SomeSchema>>`) because `submit` cannot infer it
+ * from the payload — omitting it widens `submitForm` arguments to `unknown`.
+ */
 export function useModalForm<TArgs>({
   submit,
   onOpenChange,
@@ -44,7 +51,8 @@ export function useModalForm<TArgs>({
       } else {
         queue.add({ title: result.error ?? failureMessage }, { timeout: 5000 });
       }
-    } catch {
+    } catch (error) {
+      console.error("useModalForm: submit failed", error);
       queue.add({ title: failureMessage }, { timeout: 5000 });
     } finally {
       setIsPending(false);

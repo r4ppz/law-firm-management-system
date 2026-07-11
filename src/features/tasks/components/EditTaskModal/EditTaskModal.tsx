@@ -47,7 +47,9 @@ export function EditTaskModal({ isOpen, onOpenChange, onSuccess, taskId }: EditT
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  const { isPending, submitForm } = useModalForm<z.input<typeof TaskUpdatePayloadSchema>>({
+  const { isPending, submitForm, handleCancel } = useModalForm<
+    z.input<typeof TaskUpdatePayloadSchema>
+  >({
     submit: updateTaskAction,
     onOpenChange,
     onSuccess,
@@ -106,6 +108,11 @@ export function EditTaskModal({ isOpen, onOpenChange, onSuccess, taskId }: EditT
     };
   }, [isOpen, taskId]);
 
+  function handleDismiss() {
+    if (isPending || isDeleting) return;
+    handleCancel();
+  }
+
   async function handleSave() {
     if (!title.trim() || !taskId) return;
 
@@ -151,7 +158,12 @@ export function EditTaskModal({ isOpen, onOpenChange, onSuccess, taskId }: EditT
 
   if (isLoadingData) {
     return (
-      <Modal title="Edit Task" isOpen={isOpen} onOpenChange={onOpenChange} className={styles.modal}>
+      <Modal
+        title="Edit Task"
+        isOpen={isOpen}
+        onOpenChange={handleDismiss}
+        className={styles.modal}
+      >
         <div className={styles.loadingContainer}>
           <ProgressCircle aria-label="Loading task" />
         </div>
@@ -161,7 +173,12 @@ export function EditTaskModal({ isOpen, onOpenChange, onSuccess, taskId }: EditT
 
   if (loadState === "error") {
     return (
-      <Modal title="Edit Task" isOpen={isOpen} onOpenChange={onOpenChange} className={styles.modal}>
+      <Modal
+        title="Edit Task"
+        isOpen={isOpen}
+        onOpenChange={handleDismiss}
+        className={styles.modal}
+      >
         <div className={styles.loadingContainer}>
           <span>Failed to load task. Please try again.</span>
         </div>
@@ -171,7 +188,12 @@ export function EditTaskModal({ isOpen, onOpenChange, onSuccess, taskId }: EditT
 
   if (loadState === "not-found") {
     return (
-      <Modal title="Edit Task" isOpen={isOpen} onOpenChange={onOpenChange} className={styles.modal}>
+      <Modal
+        title="Edit Task"
+        isOpen={isOpen}
+        onOpenChange={handleDismiss}
+        className={styles.modal}
+      >
         <div className={styles.loadingContainer}>
           <span>Task not found.</span>
         </div>
@@ -181,7 +203,12 @@ export function EditTaskModal({ isOpen, onOpenChange, onSuccess, taskId }: EditT
 
   return (
     <>
-      <Modal title="Edit Task" isOpen={isOpen} onOpenChange={onOpenChange} className={styles.modal}>
+      <Modal
+        title="Edit Task"
+        isOpen={isOpen}
+        onOpenChange={handleDismiss}
+        className={styles.modal}
+      >
         <div className={styles.content}>
           <TextField
             label="Title"
