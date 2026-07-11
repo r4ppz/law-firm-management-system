@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarDate, getLocalTimeZone, parseDate, today } from "@internationalized/date";
+import { CalendarDate, getLocalTimeZone, today } from "@internationalized/date";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/Button/Button";
@@ -18,14 +18,11 @@ import {
 } from "@/features/payments/actions";
 import type { PaymentRow } from "@/features/payments/queries";
 import { PaymentStatus } from "@/generated/prisma/browser";
+import { toCalendarDate } from "@/lib/date";
 
 import styles from "./EditPaymentModal.module.css";
 
 const STATUS_OPTIONS = Object.values(PaymentStatus);
-
-function toCalendarDate(date: Date): CalendarDate {
-  return parseDate(date.toISOString().slice(0, 10));
-}
 
 interface EditPaymentModalProps {
   isOpen: boolean;

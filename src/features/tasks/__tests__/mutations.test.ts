@@ -140,3 +140,24 @@ it("propagates error when deleting nonexistent task", async () => {
 
   await expect(deleteTask("999")).rejects.toThrow(error);
 });
+
+it("propagates error when creating task fails", async () => {
+  const error = new Error("Database connection failed");
+  vi.mocked(prisma.task.create).mockRejectedValue(error);
+
+  await expect(
+    createTask({
+      title: "Task title",
+      status: "Pending",
+      case_id: "c1",
+      created_by_user_id: "u1",
+    }),
+  ).rejects.toThrow(error);
+});
+
+it("propagates error when updating nonexistent task", async () => {
+  const error = new Error("Record not found");
+  vi.mocked(prisma.task.update).mockRejectedValue(error);
+
+  await expect(updateTask("999", { title: "Updated title" })).rejects.toThrow(error);
+});

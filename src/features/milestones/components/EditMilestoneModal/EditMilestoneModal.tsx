@@ -18,14 +18,11 @@ import {
 } from "@/features/milestones/actions";
 import type { MilestoneRow } from "@/features/milestones/queries";
 import { CaseMilestoneStatus } from "@/generated/prisma/browser";
+import { toCalendarDate } from "@/lib/date";
 
 import styles from "./EditMilestoneModal.module.css";
 
 const STATUS_OPTIONS = Object.values(CaseMilestoneStatus);
-
-function toCalendarDate(date: Date): CalendarDate {
-  return new CalendarDate(date.getFullYear(), date.getMonth() + 1, date.getDate());
-}
 
 interface EditMilestoneModalProps {
   isOpen: boolean;
