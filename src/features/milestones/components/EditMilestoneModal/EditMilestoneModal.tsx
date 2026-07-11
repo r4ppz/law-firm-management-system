@@ -2,6 +2,7 @@
 
 import { CalendarDate, getLocalTimeZone, today } from "@internationalized/date";
 import { useEffect, useState } from "react";
+import { z } from "zod";
 
 import { Button } from "@/components/ui/Button/Button";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog/ConfirmDialog";
@@ -17,8 +18,10 @@ import {
   updateMilestoneAction,
 } from "@/features/milestones/actions";
 import type { MilestoneRow } from "@/features/milestones/queries";
+import { MilestoneUpdatePayloadSchema } from "@/features/milestones/schemas";
 import { CaseMilestoneStatus } from "@/generated/prisma/browser";
 import { toCalendarDate } from "@/lib/date";
+import { useModalForm } from "@/lib/useModalForm";
 
 import styles from "./EditMilestoneModal.module.css";
 
@@ -42,11 +45,18 @@ export function EditMilestoneModal({
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [dueDate, setDueDate] = useState<CalendarDate>(today(getLocalTimeZone()));
-  const [status, setStatus] = useState<string>(CaseMilestoneStatus.Pending);
+  const [status, setStatus] = useState<CaseMilestoneStatus>(CaseMilestoneStatus.Pending);
 
-  const [isPending, setIsPending] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  const { isPending, submitForm } = useModalForm<z.input<typeof MilestoneUpdatePayloadSchema>>({
+    submit: updateMilestoneAction,
+    onOpenChange,
+    onSuccess,
+    successMessage: "Milestone updated",
+    failureMessage: "Failed to update milestone",
+  });
 
   useEffect(() => {
     if (!isOpen || !milestoneId) return;
@@ -63,7 +73,7 @@ export function EditMilestoneModal({
           setTitle(data.title);
           setDescription(data.description ?? "");
           setDueDate(toCalendarDate(data.due_date));
-          setStatus(data.status);
+          setStatus(data.status as CaseMilestoneStatus);
         } else {
           setMilestone(null);
         }
@@ -83,27 +93,16 @@ export function EditMilestoneModal({
 
   async function handleSave() {
     if (!title.trim() || !milestoneId) return;
-    setIsPending(true);
 
     const date = dueDate.toDate(getLocalTimeZone());
 
-    const result = await updateMilestoneAction({
+    await submitForm({
       milestoneId,
       title: title.trim(),
       description: description.trim() || undefined,
       due_date: date,
       status,
     });
-
-    setIsPending(false);
-
-    if (result.success) {
-      queue.add({ title: "Milestone updated" }, { timeout: 5000 });
-      onOpenChange(false);
-      onSuccess();
-    } else {
-      queue.add({ title: result.error ?? "Failed to update milestone" }, { timeout: 5000 });
-    }
   }
 
   async function handleDelete() {
@@ -194,7 +193,11 @@ export function EditMilestoneModal({
             onChange={(v) => v && setDueDate(v)}
             isDisabled={isPending || isDeleting}
           />
-          <Select label="Status" value={status} onChange={(k) => setStatus(String(k))}>
+          <Select
+            label="Status"
+            value={status}
+            onChange={(k) => setStatus(String(k) as CaseMilestoneStatus)}
+          >
             {STATUS_OPTIONS.map((s) => (
               <SelectItem key={s} id={s}>
                 {s}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { z } from "zod";
 
 import { Button } from "@/components/ui/Button/Button";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog/ConfirmDialog";
@@ -10,6 +11,8 @@ import { TextField } from "@/components/ui/TextField/TextField";
 import { queue } from "@/components/ui/Toast/Toast";
 import { deleteNoteAction, updateNoteAction } from "@/features/notes/actions";
 import type { NoteRow } from "@/features/notes/queries";
+import { NoteUpdatePayloadSchema } from "@/features/notes/schemas";
+import { useModalForm } from "@/lib/useModalForm";
 
 import styles from "./EditNoteModal.module.css";
 
@@ -22,25 +25,21 @@ interface EditNoteModalProps {
 
 export function EditNoteModal({ isOpen, onOpenChange, onSuccess, note }: EditNoteModalProps) {
   const [content, setContent] = useState(note.content);
-  const [isPending, setIsPending] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
+  const { isPending, submitForm } = useModalForm<z.input<typeof NoteUpdatePayloadSchema>>({
+    submit: updateNoteAction,
+    onOpenChange,
+    onSuccess,
+    successMessage: "Note updated",
+    failureMessage: "Failed to update note",
+  });
+
   async function handleSave() {
     if (!content.trim() || content.trim() === note.content) return;
-    setIsPending(true);
 
-    const result = await updateNoteAction({ noteId: note.id, content: content.trim() });
-
-    setIsPending(false);
-
-    if (result.success) {
-      queue.add({ title: "Note updated" }, { timeout: 5000 });
-      onOpenChange(false);
-      onSuccess();
-    } else {
-      queue.add({ title: result.error ?? "Failed to update note" }, { timeout: 5000 });
-    }
+    await submitForm({ noteId: note.id, content: content.trim() });
   }
 
   async function handleDelete() {

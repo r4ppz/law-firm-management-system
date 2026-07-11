@@ -2,6 +2,7 @@
 
 import { CalendarDate, getLocalTimeZone, today } from "@internationalized/date";
 import { useEffect, useState } from "react";
+import { z } from "zod";
 
 import { Button } from "@/components/ui/Button/Button";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog/ConfirmDialog";
@@ -17,8 +18,10 @@ import {
   updatePaymentAction,
 } from "@/features/payments/actions";
 import type { PaymentRow } from "@/features/payments/queries";
+import { PaymentUpdatePayloadSchema } from "@/features/payments/schemas";
 import { PaymentStatus } from "@/generated/prisma/browser";
 import { toCalendarDate } from "@/lib/date";
+import { useModalForm } from "@/lib/useModalForm";
 
 import styles from "./EditPaymentModal.module.css";
 
@@ -41,13 +44,20 @@ export function EditPaymentModal({
 
   const [amount, setAmount] = useState("");
   const [paymentDate, setPaymentDate] = useState<CalendarDate>(today(getLocalTimeZone()));
-  const [status, setStatus] = useState<string>(PaymentStatus.Unpaid);
+  const [status, setStatus] = useState<PaymentStatus>(PaymentStatus.Unpaid);
   const [paymentMethod, setPaymentMethod] = useState("");
   const [receiptNumber, setReceiptNumber] = useState("");
 
-  const [isPending, setIsPending] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  const { isPending, submitForm } = useModalForm<z.input<typeof PaymentUpdatePayloadSchema>>({
+    submit: updatePaymentAction,
+    onOpenChange,
+    onSuccess,
+    successMessage: "Payment updated",
+    failureMessage: "Failed to update payment",
+  });
 
   useEffect(() => {
     if (!isOpen || !paymentId) return;
@@ -63,7 +73,7 @@ export function EditPaymentModal({
           setPayment(data);
           setAmount(String(data.amount));
           setPaymentDate(toCalendarDate(data.payment_date));
-          setStatus(data.status);
+          setStatus(data.status as PaymentStatus);
           setPaymentMethod(data.payment_method ?? "");
           setReceiptNumber(data.receipt_number ?? "");
         } else {
@@ -84,9 +94,8 @@ export function EditPaymentModal({
 
   async function handleSave() {
     if (!amount.trim() || !paymentId) return;
-    setIsPending(true);
 
-    const result = await updatePaymentAction({
+    await submitForm({
       paymentId,
       amount: Number.parseFloat(amount),
       payment_date: paymentDate.toString(),
@@ -94,16 +103,6 @@ export function EditPaymentModal({
       payment_method: paymentMethod.trim() || undefined,
       receipt_number: receiptNumber.trim() || undefined,
     });
-
-    setIsPending(false);
-
-    if (result.success) {
-      queue.add({ title: "Payment updated" }, { timeout: 5000 });
-      onOpenChange(false);
-      onSuccess();
-    } else {
-      queue.add({ title: result.error ?? "Failed to update payment" }, { timeout: 5000 });
-    }
   }
 
   async function handleDelete() {
@@ -186,7 +185,11 @@ export function EditPaymentModal({
             onChange={(v) => v && setPaymentDate(v)}
             isDisabled={isPending || isDeleting}
           />
-          <Select label="Status" value={status} onChange={(k) => setStatus(String(k))}>
+          <Select
+            label="Status"
+            value={status}
+            onChange={(k) => setStatus(String(k) as PaymentStatus)}
+          >
             {STATUS_OPTIONS.map((s) => (
               <SelectItem key={s} id={s}>
                 {s}

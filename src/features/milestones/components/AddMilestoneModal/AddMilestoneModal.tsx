@@ -2,15 +2,17 @@
 
 import { CalendarDate, getLocalTimeZone, today } from "@internationalized/date";
 import { useState } from "react";
+import { z } from "zod";
 
 import { Button } from "@/components/ui/Button/Button";
 import { DateField } from "@/components/ui/DateField/DateField";
 import { Modal } from "@/components/ui/Modal/Modal";
 import { Select, SelectItem } from "@/components/ui/Select/Select";
 import { TextField } from "@/components/ui/TextField/TextField";
-import { queue } from "@/components/ui/Toast/Toast";
 import { createMilestoneAction } from "@/features/milestones/actions";
+import { MilestoneCreatePayloadSchema } from "@/features/milestones/schemas";
 import { CaseMilestoneStatus } from "@/generated/prisma/browser";
+import { useModalForm } from "@/lib/useModalForm";
 
 import styles from "./AddMilestoneModal.module.css";
 
@@ -32,45 +34,34 @@ export function AddMilestoneModal({
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [dueDate, setDueDate] = useState<CalendarDate>(today(getLocalTimeZone()));
-  const [status, setStatus] = useState<string>(CaseMilestoneStatus.Pending);
-  const [isPending, setIsPending] = useState(false);
+  const [status, setStatus] = useState<CaseMilestoneStatus>(CaseMilestoneStatus.Pending);
 
-  function handleCancel() {
-    if (isPending) return;
-    setTitle("");
-    setDescription("");
-    setDueDate(today(getLocalTimeZone()));
-    setStatus(CaseMilestoneStatus.Pending);
-    onOpenChange(false);
-  }
-
-  async function handleSubmit() {
-    if (!title.trim()) return;
-    setIsPending(true);
-
-    const date = dueDate.toDate(getLocalTimeZone());
-
-    const result = await createMilestoneAction({
-      title: title.trim(),
-      description: description.trim() || undefined,
-      due_date: date,
-      status,
-      case_id: caseId,
-    });
-
-    setIsPending(false);
-
-    if (result.success) {
-      queue.add({ title: "Milestone added" }, { timeout: 5000 });
+  const { isPending, submitForm, handleCancel } = useModalForm<
+    z.input<typeof MilestoneCreatePayloadSchema>
+  >({
+    submit: createMilestoneAction,
+    onOpenChange,
+    onSuccess,
+    successMessage: "Milestone added",
+    failureMessage: "Failed to add milestone",
+    reset: () => {
       setTitle("");
       setDescription("");
       setDueDate(today(getLocalTimeZone()));
       setStatus(CaseMilestoneStatus.Pending);
-      onOpenChange(false);
-      onSuccess();
-    } else {
-      queue.add({ title: result.error ?? "Failed to add milestone" }, { timeout: 5000 });
-    }
+    },
+  });
+
+  async function handleSubmit() {
+    if (!title.trim()) return;
+
+    await submitForm({
+      title: title.trim(),
+      description: description.trim() || undefined,
+      due_date: dueDate.toDate(getLocalTimeZone()),
+      status,
+      case_id: caseId,
+    });
   }
 
   return (
@@ -103,7 +94,11 @@ export function AddMilestoneModal({
           onChange={(v) => v && setDueDate(v)}
           isDisabled={isPending}
         />
-        <Select label="Status" value={status} onChange={(k) => setStatus(String(k))}>
+        <Select
+          label="Status"
+          value={status}
+          onChange={(k) => setStatus(String(k) as CaseMilestoneStatus)}
+        >
           {STATUS_OPTIONS.map((s) => (
             <SelectItem key={s} id={s}>
               {s}

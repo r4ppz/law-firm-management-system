@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { z } from "zod";
 
 import { Button } from "@/components/ui/Button/Button";
 import { Modal } from "@/components/ui/Modal/Modal";
@@ -8,7 +9,9 @@ import { Select, SelectItem } from "@/components/ui/Select/Select";
 import { TextField } from "@/components/ui/TextField/TextField";
 import { queue } from "@/components/ui/Toast/Toast";
 import { createTaskAction, getActiveUsersAction } from "@/features/tasks/actions";
+import { TaskCreatePayloadSchema } from "@/features/tasks/schemas";
 import { TaskStatus } from "@/generated/prisma/browser";
+import { useModalForm } from "@/lib/useModalForm";
 
 import styles from "./AddTaskModal.module.css";
 
@@ -24,10 +27,25 @@ interface AddTaskModalProps {
 export function AddTaskModal({ isOpen, onOpenChange, onSuccess, caseId }: AddTaskModalProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [status, setStatus] = useState<string>(TaskStatus.Pending);
+  const [status, setStatus] = useState<TaskStatus>(TaskStatus.Pending);
   const [assigneeIds, setAssigneeIds] = useState<Set<string>>(new Set());
   const [users, setUsers] = useState<Array<{ id: string; name: string }>>([]);
-  const [isPending, setIsPending] = useState(false);
+
+  const { isPending, submitForm, handleCancel } = useModalForm<
+    z.input<typeof TaskCreatePayloadSchema>
+  >({
+    submit: createTaskAction,
+    onOpenChange,
+    onSuccess,
+    successMessage: "Task created",
+    failureMessage: "Failed to create task",
+    reset: () => {
+      setTitle("");
+      setDescription("");
+      setStatus(TaskStatus.Pending);
+      setAssigneeIds(new Set());
+    },
+  });
 
   useEffect(() => {
     if (!isOpen) return;
@@ -52,40 +70,16 @@ export function AddTaskModal({ isOpen, onOpenChange, onSuccess, caseId }: AddTas
     };
   }, [isOpen]);
 
-  function handleCancel() {
-    if (isPending) return;
-    setTitle("");
-    setDescription("");
-    setStatus(TaskStatus.Pending);
-    setAssigneeIds(new Set());
-    onOpenChange(false);
-  }
-
   async function handleSubmit() {
     if (!title.trim()) return;
-    setIsPending(true);
 
-    const result = await createTaskAction({
+    await submitForm({
       title: title.trim(),
       description: description.trim() || undefined,
       status,
       case_id: caseId,
       assignee_ids: Array.from(assigneeIds),
     });
-
-    setIsPending(false);
-
-    if (result.success) {
-      queue.add({ title: "Task created" }, { timeout: 5000 });
-      setTitle("");
-      setDescription("");
-      setStatus(TaskStatus.Pending);
-      setAssigneeIds(new Set());
-      onOpenChange(false);
-      onSuccess();
-    } else {
-      queue.add({ title: result.error ?? "Failed to create task" }, { timeout: 5000 });
-    }
   }
 
   return (
@@ -107,7 +101,7 @@ export function AddTaskModal({ isOpen, onOpenChange, onSuccess, caseId }: AddTas
           placeholder="Optional description..."
           isDisabled={isPending}
         />
-        <Select label="Status" value={status} onChange={(k) => setStatus(String(k))}>
+        <Select label="Status" value={status} onChange={(k) => setStatus(String(k) as TaskStatus)}>
           {STATUS_OPTIONS.map((s) => (
             <SelectItem key={s} id={s}>
               {s}

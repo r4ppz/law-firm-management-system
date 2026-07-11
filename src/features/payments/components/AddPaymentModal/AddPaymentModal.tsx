@@ -2,15 +2,17 @@
 
 import { CalendarDate, getLocalTimeZone, today } from "@internationalized/date";
 import { useState } from "react";
+import { z } from "zod";
 
 import { Button } from "@/components/ui/Button/Button";
 import { DateField } from "@/components/ui/DateField/DateField";
 import { Modal } from "@/components/ui/Modal/Modal";
 import { Select, SelectItem } from "@/components/ui/Select/Select";
 import { TextField } from "@/components/ui/TextField/TextField";
-import { queue } from "@/components/ui/Toast/Toast";
 import { createPaymentAction } from "@/features/payments/actions";
+import { PaymentCreatePayloadSchema } from "@/features/payments/schemas";
 import { PaymentStatus } from "@/generated/prisma/browser";
+import { useModalForm } from "@/lib/useModalForm";
 
 import styles from "./AddPaymentModal.module.css";
 
@@ -33,51 +35,39 @@ export function AddPaymentModal({
 }: AddPaymentModalProps) {
   const [amount, setAmount] = useState("");
   const [paymentDate, setPaymentDate] = useState<CalendarDate>(today(getLocalTimeZone()));
-  const [status, setStatus] = useState<string>(PaymentStatus.Unpaid);
+  const [status, setStatus] = useState<PaymentStatus>(PaymentStatus.Unpaid);
   const [paymentMethod, setPaymentMethod] = useState("");
   const [receiptNumber, setReceiptNumber] = useState("");
-  const [isPending, setIsPending] = useState(false);
 
-  function handleCancel() {
-    if (isPending) return;
-    setAmount("");
-    setPaymentDate(today(getLocalTimeZone()));
-    setStatus(PaymentStatus.Unpaid);
-    setPaymentMethod("");
-    setReceiptNumber("");
-    onOpenChange(false);
-  }
+  const { isPending, submitForm, handleCancel } = useModalForm<
+    z.input<typeof PaymentCreatePayloadSchema>
+  >({
+    submit: createPaymentAction,
+    onOpenChange,
+    onSuccess,
+    successMessage: "Payment added",
+    failureMessage: "Failed to add payment",
+    reset: () => {
+      setAmount("");
+      setPaymentDate(today(getLocalTimeZone()));
+      setStatus(PaymentStatus.Unpaid);
+      setPaymentMethod("");
+      setReceiptNumber("");
+    },
+  });
 
   async function handleSubmit() {
     if (!amount.trim()) return;
-    setIsPending(true);
 
-    const date = paymentDate.toDate(getLocalTimeZone());
-
-    const result = await createPaymentAction({
+    await submitForm({
       amount: Number.parseFloat(amount),
-      payment_date: date,
+      payment_date: paymentDate.toDate(getLocalTimeZone()),
       status,
       payment_method: paymentMethod.trim() || undefined,
       receipt_number: receiptNumber.trim() || undefined,
       case_id: caseId ?? null,
       consultation_id: consultationId ?? null,
     });
-
-    setIsPending(false);
-
-    if (result.success) {
-      queue.add({ title: "Payment added" }, { timeout: 5000 });
-      setAmount("");
-      setPaymentDate(today(getLocalTimeZone()));
-      setStatus(PaymentStatus.Unpaid);
-      setPaymentMethod("");
-      setReceiptNumber("");
-      onOpenChange(false);
-      onSuccess();
-    } else {
-      queue.add({ title: result.error ?? "Failed to add payment" }, { timeout: 5000 });
-    }
   }
 
   return (
@@ -96,7 +86,11 @@ export function AddPaymentModal({
           onChange={(v) => v && setPaymentDate(v)}
           isDisabled={isPending}
         />
-        <Select label="Status" value={status} onChange={(k) => setStatus(String(k))}>
+        <Select
+          label="Status"
+          value={status}
+          onChange={(k) => setStatus(String(k) as PaymentStatus)}
+        >
           {STATUS_OPTIONS.map((s) => (
             <SelectItem key={s} id={s}>
               {s}

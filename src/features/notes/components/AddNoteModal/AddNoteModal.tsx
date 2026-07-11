@@ -1,12 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import { z } from "zod";
 
 import { Button } from "@/components/ui/Button/Button";
 import { Modal } from "@/components/ui/Modal/Modal";
 import { TextField } from "@/components/ui/TextField/TextField";
-import { queue } from "@/components/ui/Toast/Toast";
 import { createNoteAction } from "@/features/notes/actions";
+import { NoteCreatePayloadSchema } from "@/features/notes/schemas";
+import { useModalForm } from "@/lib/useModalForm";
 
 import styles from "./AddNoteModal.module.css";
 
@@ -26,38 +28,26 @@ export function AddNoteModal({
   consultationId,
 }: AddNoteModalProps) {
   const [content, setContent] = useState("");
-  const [isPending, setIsPending] = useState(false);
 
-  function handleCancel() {
-    if (isPending) return;
-    setContent("");
-    onOpenChange(false);
-  }
+  const { isPending, submitForm, handleCancel } = useModalForm<
+    z.input<typeof NoteCreatePayloadSchema>
+  >({
+    submit: createNoteAction,
+    onOpenChange,
+    onSuccess,
+    successMessage: "Note added",
+    failureMessage: "Failed to add note",
+    reset: () => setContent(""),
+  });
 
   async function handleSubmit() {
     if (!content.trim()) return;
-    setIsPending(true);
 
-    try {
-      const result = await createNoteAction({
-        content: content.trim(),
-        case_id: caseId ?? null,
-        consultation_id: consultationId ?? null,
-      });
-
-      if (result.success) {
-        queue.add({ title: "Note added" }, { timeout: 5000 });
-        setContent("");
-        onOpenChange(false);
-        onSuccess();
-      } else {
-        queue.add({ title: result.error ?? "Failed to add note" }, { timeout: 5000 });
-      }
-    } catch {
-      queue.add({ title: "Failed to add note" }, { timeout: 5000 });
-    } finally {
-      setIsPending(false);
-    }
+    await submitForm({
+      content: content.trim(),
+      case_id: caseId ?? null,
+      consultation_id: consultationId ?? null,
+    });
   }
 
   return (

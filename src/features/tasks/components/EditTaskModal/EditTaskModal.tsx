@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { z } from "zod";
 
 import { Button } from "@/components/ui/Button/Button";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog/ConfirmDialog";
@@ -16,7 +17,9 @@ import {
   updateTaskAction,
 } from "@/features/tasks/actions";
 import type { TaskDetailRow } from "@/features/tasks/queries";
+import { TaskUpdatePayloadSchema } from "@/features/tasks/schemas";
 import { TaskStatus } from "@/generated/prisma/browser";
+import { useModalForm } from "@/lib/useModalForm";
 
 import styles from "./EditTaskModal.module.css";
 
@@ -35,15 +38,22 @@ export function EditTaskModal({ isOpen, onOpenChange, onSuccess, taskId }: EditT
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [status, setStatus] = useState<string>(TaskStatus.Pending);
+  const [status, setStatus] = useState<TaskStatus>(TaskStatus.Pending);
   const [assigneeIds, setAssigneeIds] = useState<Set<string>>(new Set());
 
   type LoadState = "loading" | "loaded" | "not-found" | "error";
   const [loadState, setLoadState] = useState<LoadState>("loading");
 
-  const [isPending, setIsPending] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  const { isPending, submitForm } = useModalForm<z.input<typeof TaskUpdatePayloadSchema>>({
+    submit: updateTaskAction,
+    onOpenChange,
+    onSuccess,
+    successMessage: "Task updated",
+    failureMessage: "Failed to update task",
+  });
 
   useEffect(() => {
     if (!isOpen || !taskId) return;
@@ -72,7 +82,7 @@ export function EditTaskModal({ isOpen, onOpenChange, onSuccess, taskId }: EditT
           setTask(taskData);
           setTitle(taskData.title);
           setDescription(taskData.description ?? "");
-          setStatus(taskData.status);
+          setStatus(taskData.status as TaskStatus);
           setAssigneeIds(new Set(taskData.assignee_ids));
           setLoadState("loaded");
         } else {
@@ -98,29 +108,14 @@ export function EditTaskModal({ isOpen, onOpenChange, onSuccess, taskId }: EditT
 
   async function handleSave() {
     if (!title.trim() || !taskId) return;
-    setIsPending(true);
 
-    try {
-      const result = await updateTaskAction({
-        taskId,
-        title: title.trim(),
-        description: description.trim() || undefined,
-        status,
-        assignee_ids: Array.from(assigneeIds),
-      });
-
-      if (result.success) {
-        queue.add({ title: "Task updated" }, { timeout: 5000 });
-        onOpenChange(false);
-        onSuccess();
-      } else {
-        queue.add({ title: result.error ?? "Failed to update task" }, { timeout: 5000 });
-      }
-    } catch {
-      queue.add({ title: "Failed to update task" }, { timeout: 5000 });
-    } finally {
-      setIsPending(false);
-    }
+    await submitForm({
+      taskId,
+      title: title.trim(),
+      description: description.trim() || undefined,
+      status,
+      assignee_ids: Array.from(assigneeIds),
+    });
   }
 
   async function handleDelete() {
@@ -204,7 +199,11 @@ export function EditTaskModal({ isOpen, onOpenChange, onSuccess, taskId }: EditT
             placeholder="Optional description..."
             isDisabled={isPending || isDeleting}
           />
-          <Select label="Status" value={status} onChange={(k) => setStatus(String(k))}>
+          <Select
+            label="Status"
+            value={status}
+            onChange={(k) => setStatus(String(k) as TaskStatus)}
+          >
             {STATUS_OPTIONS.map((s) => (
               <SelectItem key={s} id={s}>
                 {s}
