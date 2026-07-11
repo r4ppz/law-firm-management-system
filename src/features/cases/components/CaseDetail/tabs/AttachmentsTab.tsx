@@ -65,7 +65,7 @@ export function AttachmentsTab({ caseId }: Props) {
   return (
     <>
       <ServerDataTable
-        key={refreshKey}
+        refreshTrigger={refreshKey}
         fetchAction={(p) => getDocumentsPaginatedAction({ caseId, ...p })}
         columns={columns}
         searchPlaceholder="Search attachments..."

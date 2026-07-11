@@ -38,7 +38,7 @@ export function NotesTab({ caseId }: Props) {
   return (
     <>
       <ServerDataTable
-        key={refreshKey}
+        refreshTrigger={refreshKey}
         fetchAction={(p) => getCaseNotesPaginatedAction({ caseId, ...p })}
         columns={columns}
         searchPlaceholder="Search notes..."
