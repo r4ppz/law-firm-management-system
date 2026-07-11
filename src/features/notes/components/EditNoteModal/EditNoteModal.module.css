@@ -14,10 +14,5 @@
         flex: 1;
       }
     }
-
-    .deleteButton {
-      color: var(--color-danger);
-      border-color: var(--color-danger);
-    }
   }
 }

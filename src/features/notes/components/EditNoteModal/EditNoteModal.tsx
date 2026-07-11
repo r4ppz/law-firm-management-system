@@ -78,17 +78,13 @@ export function EditNoteModal({ isOpen, onOpenChange, onSuccess, note }: EditNot
           <div className={styles.actions}>
             <Button
               variant="secondary"
-              className={styles.deleteButton}
-              onPress={() => setShowDeleteConfirm(true)}
-              isDisabled={isPending || isLoading}
-            >
-              {isLoading ? <ProgressCircle aria-label="Deleting" /> : "Delete"}
-            </Button>
-            <Button
               onPress={handleSave}
               isDisabled={!isValid || !hasChanges || isPending || isLoading}
             >
               {isPending ? "Saving..." : "Save"}
+            </Button>
+            <Button onPress={() => setShowDeleteConfirm(true)} isDisabled={isPending || isLoading}>
+              {isLoading ? <ProgressCircle aria-label="Deleting" /> : "Delete"}
             </Button>
           </div>
         </div>

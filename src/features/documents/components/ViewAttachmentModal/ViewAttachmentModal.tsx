@@ -83,16 +83,11 @@ export function ViewAttachmentModal({
           />
 
           <div className={styles.actions}>
-            <Button
-              variant="secondary"
-              className={styles.deleteButton}
-              onPress={() => setShowDeleteConfirm(true)}
-              isDisabled={isBusy}
-            >
-              {isDeleting ? <ProgressCircle aria-label="Deleting" /> : "Delete"}
-            </Button>
-            <Button onPress={handleDownload} isDisabled={isBusy}>
+            <Button variant="secondary" onPress={handleDownload} isDisabled={isBusy}>
               {isDownloading ? "Opening..." : "Download"}
+            </Button>
+            <Button onPress={() => setShowDeleteConfirm(true)} isDisabled={isBusy}>
+              {isDeleting ? <ProgressCircle aria-label="Deleting" /> : "Delete"}
             </Button>
           </div>
         </div>
