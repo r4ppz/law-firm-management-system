@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 
 import { DataTable, type ColumnDef } from "@/components/ui/DataTable/DataTable";
 import { ProgressCircle } from "@/components/ui/ProgressCircle/ProgressCircle";
+import { queue } from "@/components/ui/Toast/Toast";
 import { getOverdueMilestonesAction } from "@/features/dashboard/actions";
 import type { OverdueMilestoneRow } from "@/features/dashboard/queries";
 import { formatDate } from "@/lib/date";
@@ -33,7 +34,10 @@ export function OverdueMilestonesTable() {
         if (cancelled) return;
         setItems(result);
       } catch {
-        if (cancelled) return;
+        queue.add({
+          title: "Failed to load milestones",
+          description: "Could not load overdue milestones. Please try again.",
+        });
       } finally {
         if (!cancelled) setIsLoading(false);
       }
