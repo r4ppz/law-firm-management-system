@@ -97,6 +97,7 @@ export function AddCaseModal({ isOpen, onOpenChange, onSuccess }: AddCaseModalPr
       return;
     }
 
+    queue.add({ title: "Case created" }, { timeout: 5000 });
     setClient(resetClient());
     setCaseFields(resetCase());
     onSuccess();

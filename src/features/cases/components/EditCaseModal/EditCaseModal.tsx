@@ -150,6 +150,7 @@ export function EditCaseModal({
       return;
     }
 
+    queue.add({ title: "Case updated" }, { timeout: 5000 });
     onOpenChange(false);
     onSuccess();
   }

@@ -100,6 +100,7 @@ export function AddConsultationModal({
       return;
     }
 
+    queue.add({ title: "Consultation created" }, { timeout: 5000 });
     setClient(resetClient());
     setConsultation(resetConsultation());
     onSuccess();
