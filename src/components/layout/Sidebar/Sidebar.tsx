@@ -69,9 +69,7 @@ export function Sidebar({ initialCollapsed = false }: SidebarProps) {
         ))}
       </nav>
       <div className={clsx(styles.version)}>
-        <span className={styles.versionLabel}>
-          v{process.env.NEXT_PUBLIC_APP_VERSION ?? "0.0.0-dev"}
-        </span>
+        <span className={styles.versionLabel}>v{process.env.NEXT_PUBLIC_APP_VERSION}</span>
       </div>
     </aside>
   );

@@ -182,27 +182,23 @@ The release can also be triggered manually from the GitHub Actions tab:
 
 ### Docker Production Build
 
-When building the production Docker image manually, pass the version as a build arg:
+The app version is read from `package.json` at build time and requires no
+special flags. To override (e.g., for a staging build), pass the
+`NEXT_PUBLIC_APP_VERSION` build arg:
 
 ```bash
-docker build --build-arg NEXT_PUBLIC_APP_VERSION="$(git describe --tags --always)" -t law-firm:latest .
+NEXT_PUBLIC_APP_VERSION=staging-2026.07.12 docker build -t law-firm:latest .
 ```
 
-With the production Compose stack, uncomment the `args` section in `docker-compose.prod.yml`:
+### Vercel Deployment (Preview / Production)
 
-```yaml
-web:
-  build:
-    context: .
-    args:
-      NEXT_PUBLIC_APP_VERSION: "${NEXT_PUBLIC_APP_VERSION:-0.0.0-dev}"
-```
+The sidebar displays the app version via `NEXT_PUBLIC_APP_VERSION`, resolved from
+`package.json` at build time. After each release, the CI workflow bumps
+`package.json` to match the calver tag and pushes with `[skip ci]`. No
+additional Vercel environment variables are needed for version display.
 
-Then set the version in `.env.prod`:
-
-```
-NEXT_PUBLIC_APP_VERSION=v2026.07.12.0
-```
+Optionally, override the version at deploy time by setting
+`NEXT_PUBLIC_APP_VERSION` in your Vercel project dashboard.
 
 ## Tech Stack
 

@@ -1,5 +1,9 @@
 import type { NextConfig } from "next";
 
+import pkg from "./package.json";
+
+const version = process.env.NEXT_PUBLIC_APP_VERSION ?? pkg.version;
+
 const nextConfig: NextConfig = {
   reactCompiler: true,
   images: {
@@ -12,10 +16,10 @@ const nextConfig: NextConfig = {
     ],
   },
   generateBuildId: async () => {
-    return process.env.NEXT_PUBLIC_APP_VERSION ?? "local-dev";
+    return version;
   },
   env: {
-    NEXT_PUBLIC_APP_VERSION: process.env.NEXT_PUBLIC_APP_VERSION ?? "0.0.0-dev",
+    NEXT_PUBLIC_APP_VERSION: version,
   },
 };
 
