@@ -14,14 +14,14 @@ import { deactivateUserAction, getUsersPaginatedAction } from "@/features/users/
 import { UserFormModal } from "@/features/users/components/UserFormModal/UserFormModal";
 import { roleLabels } from "@/features/users/constants";
 import type { UserRow } from "@/features/users/queries";
-import type { Role } from "@/generated/prisma/client";
+import { Role } from "@/generated/prisma/client";
 
 import styles from "./UserTable.module.css";
 
 interface UserTableProps {
   users?: UserRow[];
   initialCursor?: string | null;
-  sessionUserRole?: string;
+  sessionUserRole?: Role;
 }
 
 const roleClassMap: Record<Role, string> = {
@@ -33,9 +33,10 @@ const roleClassMap: Record<Role, string> = {
   ProcessServer: styles.roleProcessServer,
 };
 
+type ModalTarget = { type: "add" } | { type: "edit"; user: UserRow } | null;
+
 export function UserTable({ users, initialCursor, sessionUserRole }: UserTableProps) {
-  const canManage = sessionUserRole === "Admin" || sessionUserRole === "Dev";
-  type ModalTarget = { type: "add" } | { type: "edit"; user: UserRow } | null;
+  const canManage = sessionUserRole === Role.Admin || sessionUserRole === Role.Dev;
 
   const [modalTarget, setModalTarget] = useState<ModalTarget>(null);
   const [deletingUser, setDeletingUser] = useState<UserRow | null>(null);

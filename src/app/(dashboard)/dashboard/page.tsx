@@ -8,13 +8,23 @@ import {
 
 import styles from "./page.module.css";
 
+function fulfilledOrNull<T>(result: PromiseSettledResult<T>): T | null {
+  return result.status === "fulfilled" ? result.value : null;
+}
+
 export default async function DashboardPage() {
-  const [stats, recentCases, upcomingConsultations, overdueMilestones] = await Promise.all([
-    getDashboardStats(),
-    getRecentCases(),
-    getUpcomingConsultations(),
-    getOverdueMilestones(),
-  ]);
+  const [statsResult, recentCasesResult, upcomingConsultationsResult, overdueMilestonesResult] =
+    await Promise.allSettled([
+      getDashboardStats(),
+      getRecentCases(),
+      getUpcomingConsultations(),
+      getOverdueMilestones(),
+    ]);
+
+  const stats = fulfilledOrNull(statsResult);
+  const recentCases = fulfilledOrNull(recentCasesResult);
+  const upcomingConsultations = fulfilledOrNull(upcomingConsultationsResult);
+  const overdueMilestones = fulfilledOrNull(overdueMilestonesResult);
 
   return (
     <div className={styles.wrapper}>
