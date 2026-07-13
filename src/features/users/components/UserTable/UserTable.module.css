@@ -7,22 +7,11 @@
 
   .toolbar {
     display: flex;
-    gap: var(--space-xl);
+    gap: var(--space-md);
     align-items: center;
 
     .searchWrapper {
       flex: 1;
-      min-width: 0;
-
-      input {
-        font-size: var(--font-size-md);
-      }
-    }
-
-    .addButton {
-      width: auto;
-      font-size: var(--font-size-md);
-      padding: var(--space-sm) var(--space-2xl);
     }
   }
 
