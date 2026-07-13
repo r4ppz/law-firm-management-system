@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 import { FaUser } from "react-icons/fa6";
 
 import { SignOutButton } from "@/features/auth/components/SignOutButton/SignOutButton";
@@ -18,6 +19,7 @@ interface HeaderProps {
 
 export function Header({ userImage, userName, userRole }: HeaderProps) {
   const pathname = usePathname();
+  const [imgError, setImgError] = useState(false);
 
   const getPageTitle = (path: string) => {
     if (path.startsWith("/dashboard")) return "Overview";
@@ -33,13 +35,14 @@ export function Header({ userImage, userName, userRole }: HeaderProps) {
       <div className={styles.leftSection}>
         <div className={styles.userSection}>
           <div className={styles.userProfile}>
-            {userImage ? (
+            {userImage && !imgError ? (
               <Image
                 src={userImage}
                 alt="Profile"
                 width={32}
                 height={32}
                 className={styles.avatar}
+                onError={() => setImgError(true)}
               />
             ) : (
               <FaUser className={styles.userIcon} />
