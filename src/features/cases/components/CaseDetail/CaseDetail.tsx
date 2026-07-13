@@ -68,22 +68,22 @@ export function CaseDetail({ overview }: Props) {
         </TabList>
         <TabPanels>
           <TabPanel id="tasks">
-            <TasksTab caseId={overview.id} />
+            {selectedKey === "tasks" && <TasksTab caseId={overview.id} />}
           </TabPanel>
           <TabPanel id="notes">
-            <NotesTab caseId={overview.id} />
+            {selectedKey === "notes" && <NotesTab caseId={overview.id} />}
           </TabPanel>
           <TabPanel id="attachments">
-            <AttachmentsTab caseId={overview.id} />
+            {selectedKey === "attachments" && <AttachmentsTab caseId={overview.id} />}
           </TabPanel>
           <TabPanel id="milestones">
-            <MilestonesTab caseId={overview.id} />
+            {selectedKey === "milestones" && <MilestonesTab caseId={overview.id} />}
           </TabPanel>
           <TabPanel id="payments">
-            <PaymentsTab caseId={overview.id} />
+            {selectedKey === "payments" && <PaymentsTab caseId={overview.id} />}
           </TabPanel>
           <TabPanel id="activity">
-            <ActivityLogTab caseId={overview.id} />
+            {selectedKey === "activity" && <ActivityLogTab caseId={overview.id} />}
           </TabPanel>
         </TabPanels>
       </Tabs>

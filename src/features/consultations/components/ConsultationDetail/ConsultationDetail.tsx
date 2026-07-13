@@ -57,16 +57,16 @@ export function ConsultationDetail({ overview }: Props) {
         </TabList>
         <TabPanels>
           <TabPanel id="notes">
-            <NotesTab consultationId={overview.id} />
+            {selectedKey === "notes" && <NotesTab consultationId={overview.id} />}
           </TabPanel>
           <TabPanel id="attachments">
-            <AttachmentsTab consultationId={overview.id} />
+            {selectedKey === "attachments" && <AttachmentsTab consultationId={overview.id} />}
           </TabPanel>
           <TabPanel id="payments">
-            <PaymentsTab consultationId={overview.id} />
+            {selectedKey === "payments" && <PaymentsTab consultationId={overview.id} />}
           </TabPanel>
           <TabPanel id="activity">
-            <ActivityLogTab consultationId={overview.id} />
+            {selectedKey === "activity" && <ActivityLogTab consultationId={overview.id} />}
           </TabPanel>
         </TabPanels>
       </Tabs>
