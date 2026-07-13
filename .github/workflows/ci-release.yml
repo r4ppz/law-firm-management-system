@@ -40,18 +40,33 @@ jobs:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
-          persist-credentials: false
 
-      - id: calver
-        uses: basnijholt/calver-auto-release@v1
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create CalVer tag and release
+        id: calver
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          DATE_TAG="v$(date +'%Y.%m.%d')"
+          LAST=$(git tag -l "${DATE_TAG}.*" | sort -V | tail -1)
+          if [ -z "$LAST" ]; then
+            PATCH=0
+          else
+            PATCH=$(( ${LAST##*.} + 1 ))
+          fi
+          TAG="${DATE_TAG}.${PATCH}"
+          gh release create "$TAG" \
+            --generate-notes \
+            --target "${{ github.sha }}" \
+            --title "$TAG"
+          echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
 
       - name: Sync package.json version
         if: steps.calver.outputs.version != ''
         env:
           VERSION: ${{ steps.calver.outputs.version }}
         run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
           npm version --no-git-tag-version "$VERSION"
           git add package.json
           git commit -m "chore: bump package.json to $VERSION [skip ci]"
