@@ -1,3 +1,5 @@
+import { cache } from "react";
+
 import { prisma } from "@/lib/prisma";
 
 export type PaymentRow = {
@@ -9,7 +11,7 @@ export type PaymentRow = {
   status: string;
 };
 
-export async function getPaymentById(id: string) {
+export const getPaymentById = cache(async (id: string) => {
   return prisma.payment.findUnique({
     where: { id },
     select: {
@@ -23,9 +25,9 @@ export async function getPaymentById(id: string) {
       consultation_id: true,
     },
   });
-}
+});
 
-export async function getPaymentRowById(id: string): Promise<PaymentRow | null> {
+export const getPaymentRowById = cache(async (id: string): Promise<PaymentRow | null> => {
   const payment = await prisma.payment.findUnique({ where: { id } });
   if (!payment) return null;
 
@@ -37,4 +39,4 @@ export async function getPaymentRowById(id: string): Promise<PaymentRow | null> 
     receipt_number: payment.receipt_number,
     status: payment.status,
   };
-}
+});

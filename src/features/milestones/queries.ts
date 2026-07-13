@@ -1,3 +1,5 @@
+import { cache } from "react";
+
 import { prisma } from "@/lib/prisma";
 
 export type MilestoneRow = {
@@ -8,7 +10,7 @@ export type MilestoneRow = {
   status: string;
 };
 
-export async function getMilestoneById(id: string) {
+export const getMilestoneById = cache(async (id: string) => {
   return prisma.caseMilestone.findUnique({
     where: { id },
     select: {
@@ -20,9 +22,9 @@ export async function getMilestoneById(id: string) {
       case_id: true,
     },
   });
-}
+});
 
-export async function getMilestoneRowById(id: string): Promise<MilestoneRow | null> {
+export const getMilestoneRowById = cache(async (id: string): Promise<MilestoneRow | null> => {
   const milestone = await prisma.caseMilestone.findUnique({ where: { id } });
   if (!milestone) return null;
 
@@ -33,4 +35,4 @@ export async function getMilestoneRowById(id: string): Promise<MilestoneRow | nu
     due_date: milestone.due_date,
     status: milestone.status,
   };
-}
+});

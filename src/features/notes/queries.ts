@@ -1,3 +1,5 @@
+import { cache } from "react";
+
 import { prisma } from "@/lib/prisma";
 
 export type NoteRow = {
@@ -7,7 +9,7 @@ export type NoteRow = {
   created_at: Date;
 };
 
-export async function getNoteById(id: string) {
+export const getNoteById = cache(async (id: string) => {
   return prisma.note.findUnique({
     where: { id },
     select: {
@@ -18,9 +20,9 @@ export async function getNoteById(id: string) {
       createdBy: { select: { name: true } },
     },
   });
-}
+});
 
-export async function getNoteRowById(id: string): Promise<NoteRow | null> {
+export const getNoteRowById = cache(async (id: string): Promise<NoteRow | null> => {
   const note = await prisma.note.findUnique({
     where: { id },
     select: {
@@ -39,4 +41,4 @@ export async function getNoteRowById(id: string): Promise<NoteRow | null> {
     author: note.createdBy.name,
     created_at: note.created_at,
   };
-}
+});
