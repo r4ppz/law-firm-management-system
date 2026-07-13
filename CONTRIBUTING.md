@@ -39,6 +39,20 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
    - `AUTH_SECRET` — generate with `pnpx auth secret`
    - `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` — from [Google OAuth console](https://console.cloud.google.com/apis/credentials)
    - `DEVELOPER_EMAILS` — comma-separated email addresses that bypass Google OAuth in dev
+   - `MINIO_KMS_SECRET_KEY` — **required** for MinIO server-side encryption; generate with:
+
+     ```bash
+     openssl rand -base64 32
+     ```
+
+     Then set in `.env.dev` (and `.env.prod` for production):
+
+     ```bash
+     MINIO_KMS_SECRET_KEY=lawfirm-sse:<base64-key>
+     MINIO_KMS_AUTO_ENCRYPTION=on
+     ```
+
+     **Use a different key per environment** (dev vs prod) and store it in a secrets manager — do **not** commit it. The key in `.env.*` is the sole decryption key: **losing it means permanent loss of all stored documents.**
 
 4. **Start dev infrastructure** (Postgres + MinIO + auto-create S3 bucket)
 
@@ -92,66 +106,54 @@ object on write. No changes to `src/lib/s3.ts` or any app code are required.
 
 ### How it is configured
 
-Two environment variables are read by the `minio` container (set in `.env.dev` /
-`.env.prod`, both gitignored):
+The `MINIO_KMS_SECRET_KEY` and `MINIO_KMS_AUTO_ENCRYPTION` environment variables must be set in `.env.dev` / `.env.prod` **before** running `make dev-up` / `make prod-up`. The format is:
 
 ```bash
-# A 32-byte base64 key, formatted as <key-name>:<base64-key>
-MINIO_KMS_SECRET_KEY=lawfirm-sse:<base64-key>
-# Encrypt every new object automatically
-MINIO_KMS_AUTO_ENCRYPTION=on
+MINIO_KMS_SECRET_KEY=lawfirm-sse:<base64-key>  # 32-byte base64 key
+MINIO_KMS_AUTO_ENCRYPTION=on                    # Encrypt every new object
 ```
 
-The `createbuckets` init container also runs `mc encrypt set sse-s3
-local/law-firm-files` so the bucket itself declares the default encryption rule.
-
-### Generating the master key
-
-```bash
-openssl rand -base64 32
-```
-
-Use a **different key per environment** (dev vs prod) and store it in a secrets
-manager — do **not** commit it. The key in `.env.*` is the sole decryption key:
-**losing it means permanent loss of all stored documents.**
+The `createbuckets` init container also runs `mc encrypt set sse-s3 local/law-firm-files` so the bucket itself declares the default encryption rule.
 
 ### Re-encrypting existing data
 
-`MINIO_KMS_AUTO_ENCRYPTION=on` only encrypts **new** writes. To encrypt data that
-already exists in the bucket, rewrite every object (mirror out and back in):
+`MINIO_KMS_AUTO_ENCRYPTION=on` only encrypts **new** writes. To encrypt data that already exists in the bucket, copy all objects to a new bucket (which will encrypt them on write), verify the copy, then cut over.
+
+**Important:** Test this workflow against a backup or non-production copy first. The original bucket remains untouched during the process.
 
 ```bash
 # dev (MinIO on localhost:9000)
 docker run --rm --network host minio/mc sh -c "
   mc alias set local http://localhost:9000 minioadmin minioadmin &&
-  mc mirror local/law-firm-files /tmp/reenc &&
-  mc rm -r --force local/law-firm-files &&
-  mc mirror /tmp/reenc local/law-firm-files"
+  mc mb local/law-firm-files-encrypted &&
+  mc mirror --preserve local/law-firm-files local/law-firm-files-encrypted &&
+  echo 'Verify the new bucket contents and encryption status before cutting over.'"
 
 # prod (MinIO reachable as http://minio:9000 inside the compose network)
 docker compose -f docker-compose.prod.yml --env-file .env.prod run --rm \
   --entrypoint sh minio -c "
     mc alias set local http://minio:9000 minioadmin minioadmin &&
-    mc mirror local/law-firm-files /tmp/reenc &&
-    mc rm -r --force local/law-firm-files &&
-    mc mirror /tmp/reenc local/law-firm-files"
+    mc mb local/law-firm-files-encrypted &&
+    mc mirror --preserve local/law-firm-files local/law-firm-files-encrypted &&
+    echo 'Verify the new bucket contents and encryption status before cutting over.'"
 ```
+
+After verifying the new bucket, update your application configuration to point to `law-firm-files-encrypted`, or manually rename/remove the old bucket. Do **not** delete the original bucket until you have confirmed the new bucket is working correctly.
 
 ### Verifying
 
 ```bash
-mc encrypt info local/law-firm-files        # → sse-s3 (lawfirm-sse)
-mc stat local/law-firm-files/<any-key>      # → Encryption method: AES256
+mc encrypt info local/law-firm-files          # → sse-s3 (lawfirm-sse)
+mc stat local/law-firm-files/OBJECT_KEY       # → Encryption method: AES256
 ```
 
 ### Encryption in transit (TLS) — prod only
 
-SSE protects data **on disk** only. In dev the browser→MinIO traffic is `localhost`
-(loopback), so plaintext HTTP is acceptable. In **prod** the upload/download bytes
-cross a real network and should be HTTPS. Terminate TLS either with a reverse proxy
-(Caddy/Traefik) in front of `minio:9000`, or mount certificates and set
-`MINIO_SERVER_CERT` / `MINIO_SERVER_KEY`. Then update `S3_ENDPOINT` in `.env.prod`
-to the `https://` URL — presigned URLs will switch to HTTPS automatically.
+SSE protects data **on disk** only. In dev the browser→MinIO traffic is `localhost` (loopback), so plaintext HTTP is acceptable. In **prod** the upload/download bytes cross a real network and should be HTTPS.
+
+Terminate TLS either with a reverse proxy (Caddy/Traefik) in front of `minio:9000`, or configure MinIO to use TLS directly by mounting a certs directory into the container. MinIO expects certificate files named `public.crt` and `private.key` inside `/root/.minio/certs` (or a custom directory specified with `--certs-dir`). In `docker-compose.prod.yml`, add a volume mount for the certs directory and reference `--certs-dir` in the MinIO `command:` if using a custom path.
+
+Then update `S3_ENDPOINT` in `.env.prod` to the `https://` URL — presigned URLs will switch to HTTPS automatically.
 
 ## Available Commands
 
