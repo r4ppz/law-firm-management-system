@@ -63,10 +63,15 @@ export function ServerDataTable<T extends { id: string }>({
   const [search, setSearch] = useState("");
   const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor | undefined>();
   const [isPending, startTransition] = useTransition();
+  const [isClient, setIsClient] = useState(false);
 
   const isLoading = isPending || isLoadingMore;
   const debouncedSearch = useDebounce(search, 300);
   const skipInitialFetch = useRef(initialRows !== undefined);
+
+  useEffect(() => {
+    startTransition(() => setIsClient(true));
+  }, [startTransition]);
 
   const fetchActionRef = useRef(fetchAction);
   useEffect(() => {
@@ -164,7 +169,7 @@ export function ServerDataTable<T extends { id: string }>({
           </Button>
         )}
       </div>
-      {isInitialLoad ? (
+      {isInitialLoad || !isClient ? (
         <div className={styles.loadingContainer}>
           <ProgressCircle aria-label={loadingMessage} />
         </div>

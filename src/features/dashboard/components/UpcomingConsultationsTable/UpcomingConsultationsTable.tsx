@@ -1,15 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useTransition } from "react";
 
 import { DataTable, type ColumnDef } from "@/components/ui/DataTable/DataTable";
 import { ProgressCircle } from "@/components/ui/ProgressCircle/ProgressCircle";
-import { queue } from "@/components/ui/Toast/Toast";
-import { getUpcomingConsultationsAction } from "@/features/dashboard/actions";
 import type { UpcomingConsultationRow } from "@/features/dashboard/queries";
 import { formatDateTime } from "@/lib/date";
 
 import styles from "./UpcomingConsultationsTable.module.css";
+
+interface UpcomingConsultationsTableProps {
+  consultations: UpcomingConsultationRow[];
+}
 
 const columns: ColumnDef<UpcomingConsultationRow>[] = [
   { id: "clientName", name: "Client Name", isRowHeader: true },
@@ -21,36 +23,14 @@ const columns: ColumnDef<UpcomingConsultationRow>[] = [
   },
 ];
 
-export function UpcomingConsultationsTable() {
-  const [items, setItems] = useState<UpcomingConsultationRow[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
+export function UpcomingConsultationsTable({ consultations }: UpcomingConsultationsTableProps) {
+  const [isClient, setIsClient] = useState(false);
+  const [, startTransition] = useTransition();
   useEffect(() => {
-    let cancelled = false;
+    startTransition(() => setIsClient(true));
+  }, [startTransition]);
 
-    async function load() {
-      try {
-        const result = await getUpcomingConsultationsAction();
-        if (cancelled) return;
-        setItems(result);
-      } catch {
-        queue.add({
-          title: "Failed to load consultations",
-          description: "Could not load upcoming consultations. Please try again.",
-        });
-      } finally {
-        if (!cancelled) setIsLoading(false);
-      }
-    }
-
-    void load();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  if (isLoading) {
+  if (!isClient) {
     return (
       <div className={styles.wrapper}>
         <h3 className={styles.heading}>Upcoming Consultations</h3>
@@ -64,7 +44,7 @@ export function UpcomingConsultationsTable() {
   return (
     <div className={styles.wrapper}>
       <h3 className={styles.heading}>Upcoming Consultations</h3>
-      <DataTable columns={columns} rows={items} emptyContent={"No data yet"} />
+      <DataTable columns={columns} rows={consultations} emptyContent={"No data yet"} />
     </div>
   );
 }

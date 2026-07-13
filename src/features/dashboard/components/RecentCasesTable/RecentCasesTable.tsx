@@ -1,15 +1,17 @@
 "use client";
 
 import clsx from "clsx";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useTransition } from "react";
 
 import { DataTable, type ColumnDef } from "@/components/ui/DataTable/DataTable";
 import { ProgressCircle } from "@/components/ui/ProgressCircle/ProgressCircle";
-import { queue } from "@/components/ui/Toast/Toast";
-import { getRecentCasesAction } from "@/features/dashboard/actions";
 import type { RecentCaseRow } from "@/features/dashboard/queries";
 
 import styles from "./RecentCasesTable.module.css";
+
+interface RecentCasesTableProps {
+  cases: RecentCaseRow[];
+}
 
 const caseStatusClassMap: Record<string, string> = {
   Open: styles.caseStatusOpen,
@@ -35,36 +37,14 @@ const columns: ColumnDef<RecentCaseRow>[] = [
   },
 ];
 
-export function RecentCasesTable() {
-  const [items, setItems] = useState<RecentCaseRow[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
+export function RecentCasesTable({ cases }: RecentCasesTableProps) {
+  const [isClient, setIsClient] = useState(false);
+  const [, startTransition] = useTransition();
   useEffect(() => {
-    let cancelled = false;
+    startTransition(() => setIsClient(true));
+  }, [startTransition]);
 
-    async function load() {
-      try {
-        const result = await getRecentCasesAction();
-        if (cancelled) return;
-        setItems(result);
-      } catch {
-        queue.add({
-          title: "Failed to load cases",
-          description: "Could not load recent cases. Please try again.",
-        });
-      } finally {
-        if (!cancelled) setIsLoading(false);
-      }
-    }
-
-    void load();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  if (isLoading) {
+  if (!isClient) {
     return (
       <div className={styles.wrapper}>
         <h3 className={styles.heading}>Recent Cases</h3>
@@ -78,7 +58,7 @@ export function RecentCasesTable() {
   return (
     <div className={styles.wrapper}>
       <h3 className={styles.heading}>Recent Cases</h3>
-      <DataTable columns={columns} rows={items} emptyContent={"No data yet"} />
+      <DataTable columns={columns} rows={cases} emptyContent={"No data yet"} />
     </div>
   );
 }
