@@ -7,7 +7,7 @@ import { FaUser } from "react-icons/fa6";
 
 import { SignOutButton } from "@/features/auth/components/SignOutButton/SignOutButton";
 import { roleLabels } from "@/features/users/constants";
-import type { Role } from "@/generated/prisma/client";
+import type { Role } from "@/generated/prisma/browser";
 
 import styles from "./Header.module.css";
 

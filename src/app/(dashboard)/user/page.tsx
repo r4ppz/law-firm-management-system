@@ -1,6 +1,6 @@
 import { UserTable } from "@/features/users/components/UserTable/UserTable";
 import { getUsersPaginated } from "@/features/users/queries";
-import { Role } from "@/generated/prisma/client";
+import { Role } from "@/generated/prisma/browser";
 import { auth } from "@/lib/auth";
 
 import styles from "./page.module.css";

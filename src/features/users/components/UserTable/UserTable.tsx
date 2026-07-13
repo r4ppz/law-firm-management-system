@@ -14,7 +14,7 @@ import { deactivateUserAction, getUsersPaginatedAction } from "@/features/users/
 import { UserFormModal } from "@/features/users/components/UserFormModal/UserFormModal";
 import { roleLabels } from "@/features/users/constants";
 import type { UserRow } from "@/features/users/queries";
-import { Role } from "@/generated/prisma/client";
+import { Role } from "@/generated/prisma/browser";
 
 import styles from "./UserTable.module.css";
 
