@@ -83,6 +83,76 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 | `make clean`               | Stop all environments and purge volumes |
 | `make reset`               | Clean + rebuild + restart everything    |
 
+## Storage Encryption (MinIO at-rest)
+
+Object storage is encrypted **at rest** using MinIO Server-Side Encryption (SSE-S3)
+with a single master key. This is **transparent to the application** — the app uploads
+via presigned `PutObject` URLs and never sets encryption headers; MinIO encrypts each
+object on write. No changes to `src/lib/s3.ts` or any app code are required.
+
+### How it is configured
+
+Two environment variables are read by the `minio` container (set in `.env.dev` /
+`.env.prod`, both gitignored):
+
+```bash
+# A 32-byte base64 key, formatted as <key-name>:<base64-key>
+MINIO_KMS_SECRET_KEY=lawfirm-sse:<base64-key>
+# Encrypt every new object automatically
+MINIO_KMS_AUTO_ENCRYPTION=on
+```
+
+The `createbuckets` init container also runs `mc encrypt set sse-s3 lawfirm-sse
+local/law-firm-files` so the bucket itself declares the default encryption rule.
+
+### Generating the master key
+
+```bash
+openssl rand -base64 32
+```
+
+Use a **different key per environment** (dev vs prod) and store it in a secrets
+manager — do **not** commit it. The key in `.env.*` is the sole decryption key:
+**losing it means permanent loss of all stored documents.**
+
+### Re-encrypting existing data
+
+`MINIO_KMS_AUTO_ENCRYPTION=on` only encrypts **new** writes. To encrypt data that
+already exists in the bucket, rewrite every object (mirror out and back in):
+
+```bash
+# dev (MinIO on localhost:9000)
+docker run --rm --network host minio/mc sh -c "
+  mc alias set local http://localhost:9000 minioadmin minioadmin &&
+  mc mirror local/law-firm-files /tmp/reenc &&
+  mc rm -r --force local/law-firm-files &&
+  mc mirror /tmp/reenc local/law-firm-files"
+
+# prod (MinIO reachable as http://minio:9000 inside the compose network)
+docker compose -f docker-compose.prod.yml --env-file .env.prod run --rm \
+  --entrypoint sh minio -c "
+    mc alias set local http://minio:9000 minioadmin minioadmin &&
+    mc mirror local/law-firm-files /tmp/reenc &&
+    mc rm -r --force local/law-firm-files &&
+    mc mirror /tmp/reenc local/law-firm-files"
+```
+
+### Verifying
+
+```bash
+mc encrypt info local/law-firm-files        # → sse-s3 (lawfirm-sse)
+mc stat local/law-firm-files/<any-key>      # → Encryption method: AES256
+```
+
+### Encryption in transit (TLS) — prod only
+
+SSE protects data **on disk** only. In dev the browser→MinIO traffic is `localhost`
+(loopback), so plaintext HTTP is acceptable. In **prod** the upload/download bytes
+cross a real network and should be HTTPS. Terminate TLS either with a reverse proxy
+(Caddy/Traefik) in front of `minio:9000`, or mount certificates and set
+`MINIO_SERVER_CERT` / `MINIO_SERVER_KEY`. Then update `S3_ENDPOINT` in `.env.prod`
+to the `https://` URL — presigned URLs will switch to HTTPS automatically.
+
 ## Available Commands
 
 | Command                                                               | Description                                             |
@@ -121,7 +191,7 @@ The project uses **CalVer** (Calendar Versioning) with automatic tagging on ever
 ### Branching Flow
 
 ```text
-dev  ──(work)──→ dev ──(PR)──→ main ──(merge)──→ auto-tag + GitHub Release
+dev  --(work)-->  dev --(PR)--> main --(merge)--> auto-tag + GitHub Release
 ```
 
 1. Work is committed to `dev` (or feature branches).
