@@ -1,15 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useTransition } from "react";
 
 import { DataTable, type ColumnDef } from "@/components/ui/DataTable/DataTable";
 import { ProgressCircle } from "@/components/ui/ProgressCircle/ProgressCircle";
-import { queue } from "@/components/ui/Toast/Toast";
-import { getOverdueMilestonesAction } from "@/features/dashboard/actions";
 import type { OverdueMilestoneRow } from "@/features/dashboard/queries";
 import { formatDate } from "@/lib/date";
 
 import styles from "./OverdueMilestonesTable.module.css";
+
+interface OverdueMilestonesTableProps {
+  milestones: OverdueMilestoneRow[];
+}
 
 const columns: ColumnDef<OverdueMilestoneRow>[] = [
   { id: "caseTitle", name: "Case Title", isRowHeader: true },
@@ -21,36 +23,14 @@ const columns: ColumnDef<OverdueMilestoneRow>[] = [
   },
 ];
 
-export function OverdueMilestonesTable() {
-  const [items, setItems] = useState<OverdueMilestoneRow[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
+export function OverdueMilestonesTable({ milestones }: OverdueMilestonesTableProps) {
+  const [isClient, setIsClient] = useState(false);
+  const [, startTransition] = useTransition();
   useEffect(() => {
-    let cancelled = false;
+    startTransition(() => setIsClient(true));
+  }, [startTransition]);
 
-    async function load() {
-      try {
-        const result = await getOverdueMilestonesAction();
-        if (cancelled) return;
-        setItems(result);
-      } catch {
-        queue.add({
-          title: "Failed to load milestones",
-          description: "Could not load overdue milestones. Please try again.",
-        });
-      } finally {
-        if (!cancelled) setIsLoading(false);
-      }
-    }
-
-    void load();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  if (isLoading) {
+  if (!isClient) {
     return (
       <div className={styles.wrapper}>
         <h3 className={styles.heading}>Overdue Milestones</h3>
@@ -64,7 +44,7 @@ export function OverdueMilestonesTable() {
   return (
     <div className={styles.wrapper}>
       <h3 className={styles.heading}>Overdue Milestones</h3>
-      <DataTable columns={columns} rows={items} emptyContent={"No data yet"} />
+      <DataTable columns={columns} rows={milestones} emptyContent={"No data yet"} />
     </div>
   );
 }

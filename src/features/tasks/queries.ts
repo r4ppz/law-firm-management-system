@@ -1,3 +1,5 @@
+import { cache } from "react";
+
 import { prisma } from "@/lib/prisma";
 
 export type TaskRow = {
@@ -14,15 +16,15 @@ export type TaskDetailRow = TaskRow & {
   assignee_ids: string[];
 };
 
-export async function getActiveUsers(): Promise<Array<{ id: string; name: string }>> {
+export const getActiveUsers = cache(async (): Promise<Array<{ id: string; name: string }>> => {
   return prisma.user.findMany({
     where: { is_active: true },
     select: { id: true, name: true },
     orderBy: { name: "asc" },
   });
-}
+});
 
-export async function getTaskById(id: string) {
+export const getTaskById = cache(async (id: string) => {
   return prisma.task.findUnique({
     where: { id },
     select: {
@@ -38,9 +40,9 @@ export async function getTaskById(id: string) {
       },
     },
   });
-}
+});
 
-export async function getTaskDetailRowById(id: string): Promise<TaskDetailRow | null> {
+export const getTaskDetailRowById = cache(async (id: string): Promise<TaskDetailRow | null> => {
   const task = await prisma.task.findUnique({
     where: { id },
     select: {
@@ -68,4 +70,4 @@ export async function getTaskDetailRowById(id: string): Promise<TaskDetailRow | 
     updated_at: task.updated_at,
     created_at: task.created_at,
   };
-}
+});

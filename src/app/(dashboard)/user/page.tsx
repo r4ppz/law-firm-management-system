@@ -1,14 +1,26 @@
 import { UserTable } from "@/features/users/components/UserTable/UserTable";
+import { getUsersPaginated } from "@/features/users/queries";
+import { Role } from "@/generated/prisma/client";
 import { auth } from "@/lib/auth";
 
 import styles from "./page.module.css";
 
 export default async function UserPage() {
   const session = await auth();
+  const userRole = session?.user?.role;
+
+  const canManage = userRole === Role.Admin || userRole === Role.Dev;
+  const initial = canManage
+    ? await getUsersPaginated({ pageSize: 10 })
+    : { users: [], nextCursor: null };
 
   return (
     <div className={styles.wrapper}>
-      <UserTable sessionUserRole={session?.user?.role ?? undefined} />
+      <UserTable
+        users={initial.users}
+        initialCursor={initial.nextCursor}
+        sessionUserRole={userRole ?? undefined}
+      />
     </div>
   );
 }
