@@ -65,7 +65,7 @@ services:
       /bin/sh -c "
         mc alias set local http://minio:9000 minioadmin minioadmin &&
         mc mb --ignore-existing local/law-firm-files &&
-        mc encrypt set sse-s3 lawfirm-sse local/law-firm-files &&
+        mc encrypt set sse-s3 local/law-firm-files &&
         echo 'Bucket law-firm-files created successfully'
       "
 

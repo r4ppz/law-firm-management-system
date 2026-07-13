@@ -102,7 +102,7 @@ MINIO_KMS_SECRET_KEY=lawfirm-sse:<base64-key>
 MINIO_KMS_AUTO_ENCRYPTION=on
 ```
 
-The `createbuckets` init container also runs `mc encrypt set sse-s3 lawfirm-sse
+The `createbuckets` init container also runs `mc encrypt set sse-s3
 local/law-firm-files` so the bucket itself declares the default encryption rule.
 
 ### Generating the master key
