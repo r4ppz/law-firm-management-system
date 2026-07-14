@@ -178,8 +178,9 @@ export function AddCaseModal({ isOpen, onOpenChange, onSuccess }: AddCaseModalPr
         <Button
           onPress={handleSubmit}
           isDisabled={!name.trim() || !caseTitle.trim() || !caseType.trim() || isPending}
+          isPending={isPending}
         >
-          {isPending ? "Saving..." : "Create"}
+          Create
         </Button>
       </div>
     </Modal>

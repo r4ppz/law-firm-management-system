@@ -66,8 +66,12 @@ export function AddNoteModal({
           <Button variant="secondary" onPress={handleCancel} isDisabled={isPending}>
             Cancel
           </Button>
-          <Button onPress={handleSubmit} isDisabled={!content.trim() || isPending}>
-            {isPending ? "Saving..." : "Save Note"}
+          <Button
+            onPress={handleSubmit}
+            isDisabled={!content.trim() || isPending}
+            isPending={isPending}
+          >
+            Save Note
           </Button>
         </div>
       </div>

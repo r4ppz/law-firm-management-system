@@ -9,10 +9,16 @@ import type { ActionDataResponse, ActionStatusResponse } from "@/lib/action-resp
 import { requireAuth } from "@/lib/auth-guards";
 
 import { createTask, deleteTask, updateTask } from "./mutations";
-import { getActiveUsers, getTaskById, getTaskDetailRowById, type TaskDetailRow } from "./queries";
+import {
+  getActiveUsers,
+  getTaskById,
+  getTaskDetailRowById,
+  type ActiveUserSummary,
+  type TaskDetailRow,
+} from "./queries";
 import { TaskCreatePayloadSchema, TaskIdSchema, TaskUpdatePayloadSchema } from "./schemas";
 
-export async function getActiveUsersAction(): Promise<Array<{ id: string; name: string }>> {
+export async function getActiveUsersAction(): Promise<ActiveUserSummary[]> {
   await requireAuth();
   return getActiveUsers();
 }

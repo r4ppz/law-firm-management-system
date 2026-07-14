@@ -90,6 +90,7 @@ export function AddPaymentModal({
           label="Status"
           value={status}
           onChange={(k) => setStatus(String(k) as PaymentStatus)}
+          isDisabled={isPending}
         >
           {STATUS_OPTIONS.map((s) => (
             <SelectItem key={s} id={s}>
@@ -115,8 +116,12 @@ export function AddPaymentModal({
           <Button variant="secondary" onPress={handleCancel} isDisabled={isPending}>
             Cancel
           </Button>
-          <Button onPress={handleSubmit} isDisabled={!amount.trim() || isPending}>
-            {isPending ? "Saving..." : "Save Payment"}
+          <Button
+            onPress={handleSubmit}
+            isDisabled={!amount.trim() || isPending}
+            isPending={isPending}
+          >
+            Save Payment
           </Button>
         </div>
       </div>

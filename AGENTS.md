@@ -178,4 +178,4 @@ export async function updateRecordAction(payload: TaskPayload): Promise<ActionSt
 
 #### Avoid overengineering:
 
-Do not generate brand-new named interfaces if the function only returns a simple primitive object (like `{ id: string }`) or if it can be cleanly represented using TypeScript's native `Pick<PrismaModel, Keys>`. Only create a new named domain type if the output combines data from multiple sources or requires custom computed fields.
+Do not introduce a new named interface or type alias for trivial object shapes (e.g. `{ id: string }`) or for simple projections that can be expressed with `Pick<PrismaModel, Keys>`. Prefer using `Pick<PrismaModel, Keys>` directly for one-off or local projections. If the projection becomes a meaningful domain concept that is reused across multiple APIs, layers, or modules, give it a semantic name by aliasing the `Pick` (e.g. `type UserSummary = Pick<User, "id" | "name">`) rather than duplicating the property definitions. Only define a custom object type when the output intentionally diverges from the source model—for example, by combining data from multiple sources, adding computed fields, or reshaping the data.

@@ -98,6 +98,7 @@ export function AddMilestoneModal({
           label="Status"
           value={status}
           onChange={(k) => setStatus(String(k) as CaseMilestoneStatus)}
+          isDisabled={isPending}
         >
           {STATUS_OPTIONS.map((s) => (
             <SelectItem key={s} id={s}>
@@ -109,8 +110,12 @@ export function AddMilestoneModal({
           <Button variant="secondary" onPress={handleCancel} isDisabled={isPending}>
             Cancel
           </Button>
-          <Button onPress={handleSubmit} isDisabled={!title.trim() || isPending}>
-            {isPending ? "Saving..." : "Save Milestone"}
+          <Button
+            onPress={handleSubmit}
+            isDisabled={!title.trim() || isPending}
+            isPending={isPending}
+          >
+            Save Milestone
           </Button>
         </div>
       </div>
