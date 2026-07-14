@@ -1,1 +1,21 @@
+#!/bin/sh
+
+# Assume we are skipping until we find an actual update
+skip_tests=true
+
+# Loop through every ref being pushed
+while read local_ref local_sha remote_ref remote_sha
+do
+  # If even one ref has a valid (non-zero) local SHA, we MUST run tests
+  if [ "$local_sha" != "0000000000000000000000000000000000000000" ]; then
+    skip_tests=false
+  fi
+done
+
+if [ "$skip_tests" = true ]; then
+  echo "Only branch deletions detected. Skipping validation and tests."
+  exit 0
+fi
+
+# Run your suite if any actual code updates were found
 pnpm validate && pnpm test
