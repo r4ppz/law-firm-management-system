@@ -121,8 +121,12 @@ export function AddTaskModal({
           <Button variant="secondary" onPress={handleCancel} isDisabled={isPending}>
             Cancel
           </Button>
-          <Button onPress={handleSubmit} isDisabled={!title.trim() || isPending}>
-            {isPending ? "Saving..." : "Save Task"}
+          <Button
+            onPress={handleSubmit}
+            isDisabled={!title.trim() || isPending}
+            isPending={isPending}
+          >
+            Save Task
           </Button>
         </div>
       </div>

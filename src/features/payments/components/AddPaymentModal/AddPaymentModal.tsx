@@ -116,8 +116,12 @@ export function AddPaymentModal({
           <Button variant="secondary" onPress={handleCancel} isDisabled={isPending}>
             Cancel
           </Button>
-          <Button onPress={handleSubmit} isDisabled={!amount.trim() || isPending}>
-            {isPending ? "Saving..." : "Save Payment"}
+          <Button
+            onPress={handleSubmit}
+            isDisabled={!amount.trim() || isPending}
+            isPending={isPending}
+          >
+            Save Payment
           </Button>
         </div>
       </div>

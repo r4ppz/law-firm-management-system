@@ -185,8 +185,12 @@ export function AddConsultationModal({
         <Button variant="secondary" onPress={handleCancel} isDisabled={isPending}>
           Cancel
         </Button>
-        <Button onPress={handleSubmit} isDisabled={!name.trim() || !concern.trim() || isPending}>
-          {isPending ? "Saving..." : "Create"}
+        <Button
+          onPress={handleSubmit}
+          isDisabled={!name.trim() || !concern.trim() || isPending}
+          isPending={isPending}
+        >
+          Create
         </Button>
       </div>
     </Modal>

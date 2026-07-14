@@ -110,8 +110,12 @@ export function AddMilestoneModal({
           <Button variant="secondary" onPress={handleCancel} isDisabled={isPending}>
             Cancel
           </Button>
-          <Button onPress={handleSubmit} isDisabled={!title.trim() || isPending}>
-            {isPending ? "Saving..." : "Save Milestone"}
+          <Button
+            onPress={handleSubmit}
+            isDisabled={!title.trim() || isPending}
+            isPending={isPending}
+          >
+            Save Milestone
           </Button>
         </div>
       </div>

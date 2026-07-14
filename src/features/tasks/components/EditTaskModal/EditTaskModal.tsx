@@ -162,8 +162,9 @@ export function EditTaskModal({
               variant="secondary"
               onPress={handleSave}
               isDisabled={!isValid || !hasChanges || isPending || isDeleting}
+              isPending={isPending}
             >
-              {isPending ? "Saving..." : "Save"}
+              Save
             </Button>
             <Button onPress={() => setShowDeleteConfirm(true)} isDisabled={isPending || isDeleting}>
               {isDeleting ? <ProgressCircle aria-label="Deleting" /> : "Delete"}
