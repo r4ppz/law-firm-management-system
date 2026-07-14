@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { CREATABLE_ROLES } from "@/features/users/constants";
-import { Role } from "@/generated/prisma/client";
+import { Role } from "@/generated/prisma/browser";
 import { SortQuerySchema } from "@/lib/schemas";
 
 export const UserPageQuerySchema = z.object({

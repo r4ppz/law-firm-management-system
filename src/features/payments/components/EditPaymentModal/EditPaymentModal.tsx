@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarDate, getLocalTimeZone } from "@internationalized/date";
+import { CalendarDate } from "@internationalized/date";
 import { useState } from "react";
 import { z } from "zod";
 
@@ -17,6 +17,12 @@ import type { PaymentRow } from "@/features/payments/queries";
 import { PaymentUpdatePayloadSchema } from "@/features/payments/schemas";
 import { PaymentStatus } from "@/generated/prisma/browser";
 import { toCalendarDate } from "@/lib/date";
+import {
+  createFieldValidator,
+  optionalString,
+  selectEnumHandler,
+  toDateValue,
+} from "@/lib/form-utils";
 import { useModalForm } from "@/lib/useModalForm";
 
 import styles from "./EditPaymentModal.module.css";
@@ -53,6 +59,7 @@ export function EditPaymentModal({
     onSuccess,
     successMessage: "Payment updated",
     failureMessage: "Failed to update payment",
+    schema: PaymentUpdatePayloadSchema,
   });
 
   function handleDismiss() {
@@ -61,15 +68,15 @@ export function EditPaymentModal({
   }
 
   async function handleSave() {
-    if (!amount.trim()) return;
+    if (isPending) return;
 
     await submitForm({
       paymentId: payment.id,
       amount: Number.parseFloat(amount),
-      payment_date: paymentDate.toDate(getLocalTimeZone()),
+      payment_date: toDateValue(paymentDate),
       status,
-      payment_method: paymentMethod.trim() || undefined,
-      receipt_number: receiptNumber.trim() || undefined,
+      payment_method: optionalString(paymentMethod),
+      receipt_number: optionalString(receiptNumber),
     });
   }
 
@@ -118,6 +125,8 @@ export function EditPaymentModal({
             value={amount}
             onChange={setAmount}
             placeholder="0.00"
+            validate={createFieldValidator(PaymentUpdatePayloadSchema.shape.amount)}
+            validationBehavior="aria"
             isDisabled={isPending || isDeleting}
           />
           <DateField
@@ -129,7 +138,7 @@ export function EditPaymentModal({
           <Select
             label="Status"
             value={status}
-            onChange={(k) => setStatus(String(k) as PaymentStatus)}
+            onChange={selectEnumHandler(PaymentStatus, setStatus)}
           >
             {STATUS_OPTIONS.map((s) => (
               <SelectItem key={s} id={s}>
@@ -142,6 +151,8 @@ export function EditPaymentModal({
             value={paymentMethod}
             onChange={setPaymentMethod}
             placeholder="e.g. Cash, Credit Card, Bank Transfer"
+            validate={createFieldValidator(PaymentUpdatePayloadSchema.shape.payment_method)}
+            validationBehavior="aria"
             isDisabled={isPending || isDeleting}
           />
           <TextField
@@ -149,6 +160,8 @@ export function EditPaymentModal({
             value={receiptNumber}
             onChange={setReceiptNumber}
             placeholder="Optional receipt number"
+            validate={createFieldValidator(PaymentUpdatePayloadSchema.shape.receipt_number)}
+            validationBehavior="aria"
             isDisabled={isPending || isDeleting}
           />
           <div className={styles.actions}>

@@ -15,6 +15,12 @@ import type { CaseEditData } from "@/features/cases/queries";
 import { CaseWithClientUpdatePayloadSchema } from "@/features/cases/schemas";
 import type { ClientEditData } from "@/features/clients/queries";
 import { CaseStatus } from "@/generated/prisma/browser";
+import {
+  createFieldValidator,
+  optionalString,
+  requiredString,
+  selectEnumHandler,
+} from "@/lib/form-utils";
 import { useModalForm } from "@/lib/useModalForm";
 
 import styles from "./EditCaseModal.module.css";
@@ -59,6 +65,7 @@ export function EditCaseModal({
       onSuccess,
       successMessage: "Case updated",
       failureMessage: "Failed to update case. Please try again.",
+      schema: CaseWithClientUpdatePayloadSchema,
     },
   );
 
@@ -68,22 +75,22 @@ export function EditCaseModal({
   }
 
   async function handleSave() {
-    if (!clientId || !clientName.trim() || !caseTitle.trim() || isPending) return;
+    if (isPending) return;
 
     await submitForm({
       case_id: caseData.id,
       client_id: clientId,
       client: {
-        name: clientName.trim(),
-        email: clientEmail.trim() || undefined,
-        phone_number: clientPhone.trim() || undefined,
-        address: clientAddress.trim() || undefined,
+        name: requiredString(clientName),
+        email: optionalString(clientEmail),
+        phone_number: optionalString(clientPhone),
+        address: optionalString(clientAddress),
       },
       case: {
-        case_title: caseTitle.trim(),
-        case_type: caseType,
+        case_title: requiredString(caseTitle),
+        case_type: requiredString(caseType),
         status,
-        parties_involved: partiesInvolved.trim() || undefined,
+        parties_involved: optionalString(partiesInvolved),
       },
     });
   }
@@ -127,6 +134,10 @@ export function EditCaseModal({
               label="Client Name"
               value={clientName}
               onChange={setClientName}
+              validate={createFieldValidator(
+                CaseWithClientUpdatePayloadSchema.shape.client.shape.name,
+              )}
+              validationBehavior="aria"
               isDisabled={isPending || isDeleting}
             />
             <TextField
@@ -134,6 +145,10 @@ export function EditCaseModal({
               value={clientEmail}
               onChange={setClientEmail}
               placeholder="Optional"
+              validate={createFieldValidator(
+                CaseWithClientUpdatePayloadSchema.shape.client.shape.email,
+              )}
+              validationBehavior="aria"
               isDisabled={isPending || isDeleting}
             />
             <TextField
@@ -141,6 +156,10 @@ export function EditCaseModal({
               value={clientPhone}
               onChange={setClientPhone}
               placeholder="Optional"
+              validate={createFieldValidator(
+                CaseWithClientUpdatePayloadSchema.shape.client.shape.phone_number,
+              )}
+              validationBehavior="aria"
               isDisabled={isPending || isDeleting}
             />
             <TextField
@@ -150,6 +169,10 @@ export function EditCaseModal({
               placeholder="Optional"
               isTextArea
               rows={3}
+              validate={createFieldValidator(
+                CaseWithClientUpdatePayloadSchema.shape.client.shape.address,
+              )}
+              validationBehavior="aria"
               isDisabled={isPending || isDeleting}
             />
           </div>
@@ -159,6 +182,10 @@ export function EditCaseModal({
               label="Case Title"
               value={caseTitle}
               onChange={setCaseTitle}
+              validate={createFieldValidator(
+                CaseWithClientUpdatePayloadSchema.shape.case.shape.case_title,
+              )}
+              validationBehavior="aria"
               isDisabled={isPending || isDeleting}
             />
             <TextField
@@ -166,12 +193,16 @@ export function EditCaseModal({
               value={caseType}
               onChange={setCaseType}
               placeholder="e.g. Civil, Corporate"
+              validate={createFieldValidator(
+                CaseWithClientUpdatePayloadSchema.shape.case.shape.case_type,
+              )}
+              validationBehavior="aria"
               isDisabled={isPending || isDeleting}
             />
             <Select
               label="Status"
               value={status}
-              onChange={(k) => setStatus(String(k) as CaseStatus)}
+              onChange={selectEnumHandler(CaseStatus, setStatus)}
               isDisabled={isPending || isDeleting}
             >
               {STATUS_OPTIONS.map((s) => (
@@ -186,6 +217,10 @@ export function EditCaseModal({
               onChange={setPartiesInvolved}
               isTextArea
               rows={3}
+              validate={createFieldValidator(
+                CaseWithClientUpdatePayloadSchema.shape.case.shape.parties_involved,
+              )}
+              validationBehavior="aria"
               isDisabled={isPending || isDeleting}
             />
           </div>

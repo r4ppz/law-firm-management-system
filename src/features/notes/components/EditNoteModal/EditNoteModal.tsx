@@ -12,6 +12,7 @@ import { queue } from "@/components/ui/Toast/Toast";
 import { deleteNoteAction, updateNoteAction } from "@/features/notes/actions";
 import type { NoteRow } from "@/features/notes/queries";
 import { NoteUpdatePayloadSchema } from "@/features/notes/schemas";
+import { createFieldValidator, requiredString } from "@/lib/form-utils";
 import { useModalForm } from "@/lib/useModalForm";
 
 import styles from "./EditNoteModal.module.css";
@@ -34,6 +35,7 @@ export function EditNoteModal({ isOpen, onOpenChange, onSuccess, note }: EditNot
     onSuccess,
     successMessage: "Note updated",
     failureMessage: "Failed to update note",
+    schema: NoteUpdatePayloadSchema,
   });
 
   function handleDismiss() {
@@ -42,9 +44,9 @@ export function EditNoteModal({ isOpen, onOpenChange, onSuccess, note }: EditNot
   }
 
   async function handleSave() {
-    if (!content.trim() || content.trim() === note.content) return;
+    if (isPending) return;
 
-    await submitForm({ noteId: note.id, content: content.trim() });
+    await submitForm({ noteId: note.id, content: requiredString(content) });
   }
 
   async function handleDelete() {
@@ -87,6 +89,8 @@ export function EditNoteModal({ isOpen, onOpenChange, onSuccess, note }: EditNot
             value={content}
             onChange={setContent}
             placeholder="Enter note content..."
+            validate={createFieldValidator(NoteUpdatePayloadSchema.shape.content)}
+            validationBehavior="aria"
             isDisabled={isPending || isDeleting}
           />
           <div className={styles.actions}>

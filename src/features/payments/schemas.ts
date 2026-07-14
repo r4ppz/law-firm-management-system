@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { PaymentStatus } from "@/generated/prisma/client";
+import { PaymentStatus } from "@/generated/prisma/browser";
 import { exactlyOneParentRefinement } from "@/lib/schemas";
 
 export const PaymentIdSchema = z.object({

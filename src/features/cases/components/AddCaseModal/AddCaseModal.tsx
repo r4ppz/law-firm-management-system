@@ -10,6 +10,12 @@ import { TextField } from "@/components/ui/TextField/TextField";
 import { createCaseWithClientAction } from "@/features/cases/actions";
 import { CaseWithClientCreatePayloadSchema } from "@/features/cases/schemas";
 import { CaseStatus } from "@/generated/prisma/browser";
+import {
+  createFieldValidator,
+  optionalString,
+  requiredString,
+  selectEnumHandler,
+} from "@/lib/form-utils";
 import { useModalForm } from "@/lib/useModalForm";
 
 import styles from "./AddCaseModal.module.css";
@@ -64,6 +70,7 @@ export function AddCaseModal({ isOpen, onOpenChange, onSuccess }: AddCaseModalPr
     onSuccess,
     successMessage: "Case created",
     failureMessage: "Failed to create case. Please try again.",
+    schema: CaseWithClientCreatePayloadSchema,
     reset: () => {
       setClient(resetClient());
       setCaseFields(resetCase());
@@ -79,20 +86,20 @@ export function AddCaseModal({ isOpen, onOpenChange, onSuccess }: AddCaseModalPr
   }
 
   async function handleSubmit() {
-    if (!name.trim() || !caseTitle.trim() || !caseType.trim() || isPending) return;
+    if (isPending) return;
 
     await submitForm({
       client: {
-        name: name.trim(),
-        email: email.trim() || undefined,
-        phone_number: phone.trim() || undefined,
-        address: address.trim() || undefined,
+        name: requiredString(name),
+        email: optionalString(email),
+        phone_number: optionalString(phone),
+        address: optionalString(address),
       },
       case: {
-        case_title: caseTitle.trim(),
-        case_type: caseType,
+        case_title: requiredString(caseTitle),
+        case_type: requiredString(caseType),
         status,
-        parties_involved: partiesInvolved.trim() || undefined,
+        parties_involved: optionalString(partiesInvolved),
       },
     });
   }
@@ -106,6 +113,10 @@ export function AddCaseModal({ isOpen, onOpenChange, onSuccess }: AddCaseModalPr
             value={name}
             onChange={(v) => setClientField("name", v)}
             placeholder="Full name"
+            validate={createFieldValidator(
+              CaseWithClientCreatePayloadSchema.shape.client.shape.name,
+            )}
+            validationBehavior="aria"
             isDisabled={isPending}
           />
           <TextField
@@ -113,6 +124,10 @@ export function AddCaseModal({ isOpen, onOpenChange, onSuccess }: AddCaseModalPr
             value={email}
             onChange={(v) => setClientField("email", v)}
             placeholder="Optional"
+            validate={createFieldValidator(
+              CaseWithClientCreatePayloadSchema.shape.client.shape.email,
+            )}
+            validationBehavior="aria"
             isDisabled={isPending}
           />
           <TextField
@@ -120,6 +135,10 @@ export function AddCaseModal({ isOpen, onOpenChange, onSuccess }: AddCaseModalPr
             value={phone}
             onChange={(v) => setClientField("phone", v)}
             placeholder="Optional"
+            validate={createFieldValidator(
+              CaseWithClientCreatePayloadSchema.shape.client.shape.phone_number,
+            )}
+            validationBehavior="aria"
             isDisabled={isPending}
           />
           <TextField
@@ -129,6 +148,10 @@ export function AddCaseModal({ isOpen, onOpenChange, onSuccess }: AddCaseModalPr
             placeholder="Optional"
             isTextArea
             rows={3}
+            validate={createFieldValidator(
+              CaseWithClientCreatePayloadSchema.shape.client.shape.address,
+            )}
+            validationBehavior="aria"
             isDisabled={isPending}
           />
         </div>
@@ -139,6 +162,10 @@ export function AddCaseModal({ isOpen, onOpenChange, onSuccess }: AddCaseModalPr
             value={caseTitle}
             onChange={(v) => setCaseField("caseTitle", v)}
             placeholder="Case title"
+            validate={createFieldValidator(
+              CaseWithClientCreatePayloadSchema.shape.case.shape.case_title,
+            )}
+            validationBehavior="aria"
             isDisabled={isPending}
           />
           <TextField
@@ -146,12 +173,16 @@ export function AddCaseModal({ isOpen, onOpenChange, onSuccess }: AddCaseModalPr
             value={caseType}
             onChange={(v) => setCaseField("caseType", v)}
             placeholder="e.g. Civil, Corporate"
+            validate={createFieldValidator(
+              CaseWithClientCreatePayloadSchema.shape.case.shape.case_type,
+            )}
+            validationBehavior="aria"
             isDisabled={isPending}
           />
           <Select
             label="Status"
             value={status}
-            onChange={(k) => setCaseField("status", String(k) as CaseStatus)}
+            onChange={selectEnumHandler(CaseStatus, (value) => setCaseField("status", value))}
             isDisabled={isPending}
           >
             {STATUS_OPTIONS.map((s) => (
@@ -167,6 +198,10 @@ export function AddCaseModal({ isOpen, onOpenChange, onSuccess }: AddCaseModalPr
             placeholder="Optional..."
             isTextArea
             rows={3}
+            validate={createFieldValidator(
+              CaseWithClientCreatePayloadSchema.shape.case.shape.parties_involved,
+            )}
+            validationBehavior="aria"
             isDisabled={isPending}
           />
         </div>

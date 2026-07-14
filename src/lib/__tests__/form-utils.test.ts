@@ -1,0 +1,96 @@
+import { CalendarDate } from "@internationalized/date";
+import { describe, expect, it, vi } from "vitest";
+import { z } from "zod";
+
+import {
+  coerceEnum,
+  createFieldValidator,
+  keysToSet,
+  optionalString,
+  requiredString,
+  selectEnumHandler,
+  toDateValue,
+} from "@/lib/form-utils";
+
+const SampleStatus = { Active: "Active", Inactive: "Inactive" } as const;
+
+describe("optionalString", () => {
+  it("trims and returns undefined for empty/whitespace values", () => {
+    expect(optionalString("")).toBeUndefined();
+    expect(optionalString("   ")).toBeUndefined();
+    expect(optionalString("ok")).toBe("ok");
+    expect(optionalString("  ok  ")).toBe("ok");
+  });
+});
+
+describe("requiredString", () => {
+  it("trims without dropping defined values", () => {
+    expect(requiredString("  name  ")).toBe("name");
+    expect(requiredString("x")).toBe("x");
+  });
+});
+
+describe("coerceEnum", () => {
+  it("maps a select key to its enum value", () => {
+    expect(coerceEnum("Active", SampleStatus)).toBe("Active");
+    expect(coerceEnum("Inactive", SampleStatus)).toBe("Inactive");
+  });
+});
+
+describe("selectEnumHandler", () => {
+  it("invokes the callback with the coerced enum value", () => {
+    const onChange = vi.fn();
+    selectEnumHandler(SampleStatus, onChange)("Active");
+    expect(onChange).toHaveBeenCalledWith("Active");
+  });
+
+  it("ignores null selection", () => {
+    const onChange = vi.fn();
+    selectEnumHandler(SampleStatus, onChange)(null);
+    expect(onChange).not.toHaveBeenCalled();
+  });
+});
+
+describe("keysToSet", () => {
+  it("converts iterable keys into a string set", () => {
+    expect(keysToSet(["a", "b"])).toEqual(new Set(["a", "b"]));
+    expect(keysToSet(new Set(["x"]))).toEqual(new Set(["x"]));
+  });
+});
+
+describe("toDateValue", () => {
+  it("converts a CalendarDate to a Date in the local timezone", () => {
+    const date = new CalendarDate(2024, 6, 15);
+    expect(toDateValue(date)).toBeInstanceOf(Date);
+    expect(toDateValue(date).getFullYear()).toBe(2024);
+  });
+});
+
+describe("createFieldValidator", () => {
+  const schema = z.object({
+    title: z.string().trim().min(1).max(10),
+    note: z.string().trim().min(1).max(5).optional(),
+  });
+
+  it("returns null for valid values", () => {
+    const validate = createFieldValidator(schema.shape.title);
+    expect(validate("hello")).toBeNull();
+  });
+
+  it("returns an error message for invalid values", () => {
+    const validate = createFieldValidator(schema.shape.title);
+    expect(typeof validate("")).toBe("string");
+    expect(typeof validate("way too long value")).toBe("string");
+  });
+
+  it("treats empty input as undefined so optional fields pass", () => {
+    const validate = createFieldValidator(schema.shape.note);
+    expect(validate("")).toBeNull();
+    expect(validate("  ")).toBeNull();
+  });
+
+  it("flags non-empty optional values that exceed the limit", () => {
+    const validate = createFieldValidator(schema.shape.note);
+    expect(typeof validate("too long")).toBe("string");
+  });
+});

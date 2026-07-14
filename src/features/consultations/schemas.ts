@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { ConsultationStatus } from "@/generated/prisma/client";
+import { ConsultationStatus } from "@/generated/prisma/browser";
 import { ClientDataSchema, SortQuerySchema } from "@/lib/schemas";
 
 export const ConsultationPageQuerySchema = z.object({

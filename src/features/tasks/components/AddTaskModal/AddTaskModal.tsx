@@ -11,6 +11,13 @@ import { createTaskAction } from "@/features/tasks/actions";
 import type { ActiveUserSummary } from "@/features/tasks/queries";
 import { TaskCreatePayloadSchema } from "@/features/tasks/schemas";
 import { TaskStatus } from "@/generated/prisma/browser";
+import {
+  createFieldValidator,
+  keysToSet,
+  optionalString,
+  requiredString,
+  selectEnumHandler,
+} from "@/lib/form-utils";
 import { useModalForm } from "@/lib/useModalForm";
 
 import styles from "./AddTaskModal.module.css";
@@ -45,6 +52,7 @@ export function AddTaskModal({
     onSuccess,
     successMessage: "Task created",
     failureMessage: "Failed to create task",
+    schema: TaskCreatePayloadSchema,
     reset: () => {
       setTitle("");
       setDescription("");
@@ -54,11 +62,11 @@ export function AddTaskModal({
   });
 
   async function handleSubmit() {
-    if (!title.trim()) return;
+    if (isPending) return;
 
     await submitForm({
-      title: title.trim(),
-      description: description.trim() || undefined,
+      title: requiredString(title),
+      description: optionalString(description),
       status,
       case_id: caseId,
       assignee_ids: Array.from(assigneeIds),
@@ -73,6 +81,8 @@ export function AddTaskModal({
           value={title}
           onChange={setTitle}
           placeholder="Enter task title..."
+          validate={createFieldValidator(TaskCreatePayloadSchema.shape.title)}
+          validationBehavior="aria"
           isDisabled={isPending}
         />
         <TextField
@@ -82,12 +92,14 @@ export function AddTaskModal({
           value={description}
           onChange={setDescription}
           placeholder="Optional description..."
+          validate={createFieldValidator(TaskCreatePayloadSchema.shape.description)}
+          validationBehavior="aria"
           isDisabled={isPending}
         />
         <Select
           label="Status"
           value={status}
-          onChange={(k) => setStatus(String(k) as TaskStatus)}
+          onChange={selectEnumHandler(TaskStatus, setStatus)}
           isDisabled={isPending}
         >
           {STATUS_OPTIONS.map((s) => (
@@ -100,7 +112,7 @@ export function AddTaskModal({
           label="Assignees"
           selectionMode="multiple"
           value={Array.from(assigneeIds)}
-          onChange={(keys) => setAssigneeIds(new Set(keys.map(String)))}
+          onChange={(keys) => setAssigneeIds(keysToSet(keys))}
           placeholder="Select assignees..."
           items={users}
           isDisabled={isPending}

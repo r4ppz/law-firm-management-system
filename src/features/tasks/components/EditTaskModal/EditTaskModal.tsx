@@ -14,6 +14,13 @@ import { deleteTaskAction, updateTaskAction } from "@/features/tasks/actions";
 import type { ActiveUserSummary, TaskDetailRow } from "@/features/tasks/queries";
 import { TaskUpdatePayloadSchema } from "@/features/tasks/schemas";
 import { TaskStatus } from "@/generated/prisma/browser";
+import {
+  createFieldValidator,
+  keysToSet,
+  optionalString,
+  requiredString,
+  selectEnumHandler,
+} from "@/lib/form-utils";
 import { useModalForm } from "@/lib/useModalForm";
 
 import styles from "./EditTaskModal.module.css";
@@ -49,6 +56,7 @@ export function EditTaskModal({
     onSuccess,
     successMessage: "Task updated",
     failureMessage: "Failed to update task",
+    schema: TaskUpdatePayloadSchema,
   });
 
   function handleDismiss() {
@@ -57,12 +65,12 @@ export function EditTaskModal({
   }
 
   async function handleSave() {
-    if (!title.trim()) return;
+    if (isPending) return;
 
     await submitForm({
       taskId: task.id,
-      title: title.trim(),
-      description: description.trim() || undefined,
+      title: requiredString(title),
+      description: optionalString(description),
       status,
       assignee_ids: Array.from(assigneeIds),
     });
@@ -113,6 +121,8 @@ export function EditTaskModal({
             value={title}
             onChange={setTitle}
             placeholder="Enter task title..."
+            validate={createFieldValidator(TaskUpdatePayloadSchema.shape.title)}
+            validationBehavior="aria"
             isDisabled={isPending || isDeleting}
           />
           <TextField
@@ -122,12 +132,14 @@ export function EditTaskModal({
             value={description}
             onChange={setDescription}
             placeholder="Optional description..."
+            validate={createFieldValidator(TaskUpdatePayloadSchema.shape.description)}
+            validationBehavior="aria"
             isDisabled={isPending || isDeleting}
           />
           <Select
             label="Status"
             value={status}
-            onChange={(k) => setStatus(String(k) as TaskStatus)}
+            onChange={selectEnumHandler(TaskStatus, setStatus)}
             isDisabled={isPending || isDeleting}
           >
             {STATUS_OPTIONS.map((s) => (
@@ -140,7 +152,7 @@ export function EditTaskModal({
             label="Assignees"
             selectionMode="multiple"
             value={Array.from(assigneeIds)}
-            onChange={(keys) => setAssigneeIds(new Set(keys.map(String)))}
+            onChange={(keys) => setAssigneeIds(keysToSet(keys))}
             placeholder="Select assignees..."
             items={users}
             isDisabled={isPending || isDeleting}

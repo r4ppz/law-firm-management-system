@@ -14,6 +14,12 @@ import { createConsultationWithClientAction } from "@/features/consultations/act
 import { ConsultationWithClientCreatePayloadSchema } from "@/features/consultations/schemas";
 import { ConsultationStatus } from "@/generated/prisma/browser";
 import { combineDateTime } from "@/lib/date";
+import {
+  createFieldValidator,
+  optionalString,
+  requiredString,
+  selectEnumHandler,
+} from "@/lib/form-utils";
 import { useModalForm } from "@/lib/useModalForm";
 
 import styles from "./AddConsultationModal.module.css";
@@ -72,6 +78,7 @@ export function AddConsultationModal({
     onSuccess,
     successMessage: "Consultation created",
     failureMessage: "Failed to create consultation. Please try again.",
+    schema: ConsultationWithClientCreatePayloadSchema,
     reset: () => {
       setClient(resetClient());
       setConsultation(resetConsultation());
@@ -83,17 +90,17 @@ export function AddConsultationModal({
   }
 
   async function handleSubmit() {
-    if (!name.trim() || !concern.trim() || isPending) return;
+    if (isPending) return;
 
     await submitForm({
       client: {
-        name: name.trim(),
-        email: email.trim() || undefined,
-        phone_number: phone.trim() || undefined,
-        address: address.trim() || undefined,
+        name: requiredString(name),
+        email: optionalString(email),
+        phone_number: optionalString(phone),
+        address: optionalString(address),
       },
       consultation: {
-        concern: concern.trim(),
+        concern: requiredString(concern),
         booking_datetime: combineDateTime(date, time),
         status,
       },
@@ -114,6 +121,10 @@ export function AddConsultationModal({
             value={name}
             onChange={(v) => setClientField("name", v)}
             placeholder="Full name"
+            validate={createFieldValidator(
+              ConsultationWithClientCreatePayloadSchema.shape.client.shape.name,
+            )}
+            validationBehavior="aria"
             isDisabled={isPending}
           />
           <TextField
@@ -121,6 +132,10 @@ export function AddConsultationModal({
             value={email}
             onChange={(v) => setClientField("email", v)}
             placeholder="Optional"
+            validate={createFieldValidator(
+              ConsultationWithClientCreatePayloadSchema.shape.client.shape.email,
+            )}
+            validationBehavior="aria"
             isDisabled={isPending}
           />
           <TextField
@@ -128,6 +143,10 @@ export function AddConsultationModal({
             value={phone}
             onChange={(v) => setClientField("phone", v)}
             placeholder="Optional"
+            validate={createFieldValidator(
+              ConsultationWithClientCreatePayloadSchema.shape.client.shape.phone_number,
+            )}
+            validationBehavior="aria"
             isDisabled={isPending}
           />
           <TextField
@@ -137,6 +156,10 @@ export function AddConsultationModal({
             placeholder="Optional"
             isTextArea
             rows={3}
+            validate={createFieldValidator(
+              ConsultationWithClientCreatePayloadSchema.shape.client.shape.address,
+            )}
+            validationBehavior="aria"
             isDisabled={isPending}
           />
         </div>
@@ -149,6 +172,10 @@ export function AddConsultationModal({
             placeholder="Consultation concern"
             isTextArea
             rows={4}
+            validate={createFieldValidator(
+              ConsultationWithClientCreatePayloadSchema.shape.consultation.shape.concern,
+            )}
+            validationBehavior="aria"
             isDisabled={isPending}
           />
           <DatePicker
@@ -168,9 +195,9 @@ export function AddConsultationModal({
           <Select
             label="Status"
             value={status}
-            onChange={(k) =>
-              setConsultation((p) => ({ ...p, status: String(k) as ConsultationStatus }))
-            }
+            onChange={selectEnumHandler(ConsultationStatus, (value) =>
+              setConsultation((p) => ({ ...p, status: value })),
+            )}
             isDisabled={isPending}
           >
             {STATUS_OPTIONS.map((s) => (

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { TaskStatus } from "@/generated/prisma/client";
+import { TaskStatus } from "@/generated/prisma/browser";
 
 export const TaskIdSchema = z.object({
   taskId: z.uuid(),

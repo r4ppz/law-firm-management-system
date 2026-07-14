@@ -22,6 +22,12 @@ import type { ConsultationEditData } from "@/features/consultations/queries";
 import { ConsultationWithClientUpdatePayloadSchema } from "@/features/consultations/schemas";
 import { ConsultationStatus } from "@/generated/prisma/browser";
 import { combineDateTime, toCalendarDate, toTimeValue } from "@/lib/date";
+import {
+  createFieldValidator,
+  optionalString,
+  requiredString,
+  selectEnumHandler,
+} from "@/lib/form-utils";
 import { useModalForm } from "@/lib/useModalForm";
 
 import styles from "./EditConsultationModal.module.css";
@@ -76,6 +82,7 @@ export function EditConsultationModal({
     onSuccess,
     successMessage: "Consultation updated",
     failureMessage: "Failed to update consultation. Please try again.",
+    schema: ConsultationWithClientUpdatePayloadSchema,
   });
 
   function handleDismiss() {
@@ -84,19 +91,19 @@ export function EditConsultationModal({
   }
 
   async function handleSave() {
-    if (!clientId || !clientName.trim() || !fields.concern.trim() || isPending) return;
+    if (isPending) return;
 
     await submitForm({
       consultation_id: consultation.id,
       client_id: clientId,
       client: {
-        name: clientName.trim(),
-        email: clientEmail.trim() || undefined,
-        phone_number: clientPhone.trim() || undefined,
-        address: clientAddress.trim() || undefined,
+        name: requiredString(clientName),
+        email: optionalString(clientEmail),
+        phone_number: optionalString(clientPhone),
+        address: optionalString(clientAddress),
       },
       consultation: {
-        concern: fields.concern.trim(),
+        concern: requiredString(fields.concern),
         booking_datetime: combineDateTime(fields.date, fields.time),
         status: fields.status,
       },
@@ -141,6 +148,10 @@ export function EditConsultationModal({
               label="Client Name"
               value={clientName}
               onChange={setClientName}
+              validate={createFieldValidator(
+                ConsultationWithClientUpdatePayloadSchema.shape.client.shape.name,
+              )}
+              validationBehavior="aria"
               isDisabled={isPending || isDeleting}
             />
             <TextField
@@ -148,6 +159,10 @@ export function EditConsultationModal({
               value={clientEmail}
               onChange={setClientEmail}
               placeholder="Optional"
+              validate={createFieldValidator(
+                ConsultationWithClientUpdatePayloadSchema.shape.client.shape.email,
+              )}
+              validationBehavior="aria"
               isDisabled={isPending || isDeleting}
             />
             <TextField
@@ -155,6 +170,10 @@ export function EditConsultationModal({
               value={clientPhone}
               onChange={setClientPhone}
               placeholder="Optional"
+              validate={createFieldValidator(
+                ConsultationWithClientUpdatePayloadSchema.shape.client.shape.phone_number,
+              )}
+              validationBehavior="aria"
               isDisabled={isPending || isDeleting}
             />
             <TextField
@@ -164,6 +183,10 @@ export function EditConsultationModal({
               placeholder="Optional"
               isTextArea
               rows={3}
+              validate={createFieldValidator(
+                ConsultationWithClientUpdatePayloadSchema.shape.client.shape.address,
+              )}
+              validationBehavior="aria"
               isDisabled={isPending || isDeleting}
             />
           </div>
@@ -175,6 +198,10 @@ export function EditConsultationModal({
               onChange={(v) => setFields((p) => ({ ...p, concern: v }))}
               isTextArea
               rows={4}
+              validate={createFieldValidator(
+                ConsultationWithClientUpdatePayloadSchema.shape.consultation.shape.concern,
+              )}
+              validationBehavior="aria"
               isDisabled={isPending || isDeleting}
             />
             <DatePicker
@@ -192,9 +219,9 @@ export function EditConsultationModal({
             <Select
               label="Status"
               value={fields.status}
-              onChange={(k) =>
-                setFields((p) => ({ ...p, status: String(k) as ConsultationStatus }))
-              }
+              onChange={selectEnumHandler(ConsultationStatus, (value) =>
+                setFields((p) => ({ ...p, status: value })),
+              )}
               isDisabled={isPending || isDeleting}
             >
               {STATUS_OPTIONS.map((s) => (

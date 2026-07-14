@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarDate, getLocalTimeZone } from "@internationalized/date";
+import { CalendarDate } from "@internationalized/date";
 import { useState } from "react";
 import { z } from "zod";
 
@@ -17,6 +17,13 @@ import type { MilestoneRow } from "@/features/milestones/queries";
 import { MilestoneUpdatePayloadSchema } from "@/features/milestones/schemas";
 import { CaseMilestoneStatus } from "@/generated/prisma/browser";
 import { toCalendarDate } from "@/lib/date";
+import {
+  createFieldValidator,
+  optionalString,
+  requiredString,
+  selectEnumHandler,
+  toDateValue,
+} from "@/lib/form-utils";
 import { useModalForm } from "@/lib/useModalForm";
 
 import styles from "./EditMilestoneModal.module.css";
@@ -52,6 +59,7 @@ export function EditMilestoneModal({
     onSuccess,
     successMessage: "Milestone updated",
     failureMessage: "Failed to update milestone",
+    schema: MilestoneUpdatePayloadSchema,
   });
 
   function handleDismiss() {
@@ -60,15 +68,13 @@ export function EditMilestoneModal({
   }
 
   async function handleSave() {
-    if (!title.trim()) return;
-
-    const date = dueDate.toDate(getLocalTimeZone());
+    if (isPending) return;
 
     await submitForm({
       milestoneId: milestone.id,
-      title: title.trim(),
-      description: description.trim() || undefined,
-      due_date: date,
+      title: requiredString(title),
+      description: optionalString(description),
+      due_date: toDateValue(dueDate),
       status,
     });
   }
@@ -117,6 +123,8 @@ export function EditMilestoneModal({
             value={title}
             onChange={setTitle}
             placeholder="Milestone title"
+            validate={createFieldValidator(MilestoneUpdatePayloadSchema.shape.title)}
+            validationBehavior="aria"
             isDisabled={isPending || isDeleting}
           />
           <TextField
@@ -126,6 +134,8 @@ export function EditMilestoneModal({
             placeholder="Optional description"
             isTextArea
             rows={3}
+            validate={createFieldValidator(MilestoneUpdatePayloadSchema.shape.description)}
+            validationBehavior="aria"
             isDisabled={isPending || isDeleting}
           />
           <DateField
@@ -137,7 +147,7 @@ export function EditMilestoneModal({
           <Select
             label="Status"
             value={status}
-            onChange={(k) => setStatus(String(k) as CaseMilestoneStatus)}
+            onChange={selectEnumHandler(CaseMilestoneStatus, setStatus)}
           >
             {STATUS_OPTIONS.map((s) => (
               <SelectItem key={s} id={s}>

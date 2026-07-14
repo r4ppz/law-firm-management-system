@@ -4,7 +4,6 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/Button/Button";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog/ConfirmDialog";
-import { FieldError, Form } from "@/components/ui/Form/Form";
 import { Modal } from "@/components/ui/Modal/Modal";
 import { Select, SelectItem } from "@/components/ui/Select/Select";
 import { TextField } from "@/components/ui/TextField/TextField";
@@ -12,9 +11,17 @@ import { queue } from "@/components/ui/Toast/Toast";
 import { checkDeveloperEmail, createUserAction, updateUserAction } from "@/features/users/actions";
 import { CREATABLE_ROLES, roleLabels } from "@/features/users/constants";
 import type { UserRow } from "@/features/users/queries";
+import { CreateUserSchema } from "@/features/users/schemas";
 import type { Role } from "@/generated/prisma/browser";
+import { createFieldValidator, requiredString, selectEnumHandler } from "@/lib/form-utils";
+import { useModalForm } from "@/lib/useModalForm";
 
 import styles from "./UserFormModal.module.css";
+
+const ROLE_ENUM = Object.fromEntries(CREATABLE_ROLES.map((role) => [role, role])) as Record<
+  Role,
+  Role
+>;
 
 interface UserFormModalProps {
   mode: "add" | "edit";
@@ -25,66 +32,46 @@ interface UserFormModalProps {
 }
 
 export function UserFormModal({ mode, user, isOpen, onOpenChange, onSuccess }: UserFormModalProps) {
-  const [error, setError] = useState<string | null>(null);
-  const [isPending, setIsPending] = useState(false);
+  const isEdit = mode === "edit" && !!user;
+
+  const [email, setEmail] = useState(user?.email ?? "");
+  const [role, setRole] = useState<Role | null>(user?.role ?? null);
   const [pendingDevEmail, setPendingDevEmail] = useState<string | null>(null);
 
-  async function handleSubmit(formData: FormData) {
-    setIsPending(true);
-    setError(null);
+  const { isPending, submitForm } = useModalForm<{ email: string; role: Role; userId?: string }>({
+    submit: async (args) =>
+      isEdit
+        ? updateUserAction({ userId: args.userId!, email: args.email, role: args.role })
+        : createUserAction({ email: args.email, role: args.role }),
+    onOpenChange,
+    onSuccess,
+    successMessage: isEdit ? "User updated" : "User created",
+    failureMessage: "Failed to save user",
+    schema: CreateUserSchema,
+  });
 
-    try {
-      const email = formData.get("email") as string;
-      const role = formData.get("role") as Role;
+  async function handleSubmit() {
+    if (isPending) return;
+    if (!email || !role) return;
 
-      if (!email || !role) {
-        setError("All fields are required.");
+    if (mode === "add") {
+      const isDev = await checkDeveloperEmail(email);
+      if (isDev) {
+        setPendingDevEmail(email);
         return;
       }
-
-      if (mode === "add") {
-        const isDev = await checkDeveloperEmail(email);
-        if (isDev) {
-          setPendingDevEmail(email);
-          return;
-        }
-      }
-
-      const result =
-        mode === "edit" && user
-          ? await updateUserAction({ userId: user.id, email, role })
-          : await createUserAction({ email, role });
-
-      if (result.error) {
-        queue.add({ title: result.error });
-        setError(result.error);
-        return;
-      }
-
-      queue.add(
-        { title: mode === "edit" ? "User updated" : "User created", description: email },
-        { timeout: 5000 },
-      );
-      onSuccess?.();
-      onOpenChange(false);
-    } catch {
-      setError("An unexpected error occurred.");
-      queue.add({ title: "An unexpected error occurred." }, { timeout: 5000 });
-    } finally {
-      setIsPending(false);
     }
+
+    await submitForm({ email: requiredString(email), role, userId: user?.id });
   }
 
   async function handleDevConfirm() {
     if (!pendingDevEmail) return;
-    setIsPending(true);
-    setError(null);
 
     try {
-      const result = await createUserAction({ email: pendingDevEmail, role: "Dev" });
+      const result = await createUserAction({ email: pendingDevEmail, role: role ?? "Dev" });
       if (result.error) {
         queue.add({ title: result.error });
-        setError(result.error);
       } else {
         queue.add(
           { title: "Developer account activated", description: pendingDevEmail },
@@ -94,11 +81,9 @@ export function UserFormModal({ mode, user, isOpen, onOpenChange, onSuccess }: U
         onOpenChange(false);
       }
     } catch {
-      setError("An unexpected error occurred.");
       queue.add({ title: "An unexpected error occurred." }, { timeout: 5000 });
     } finally {
       setPendingDevEmail(null);
-      setIsPending(false);
     }
   }
 
@@ -109,32 +94,33 @@ export function UserFormModal({ mode, user, isOpen, onOpenChange, onSuccess }: U
       isOpen={isOpen}
       onOpenChange={onOpenChange}
     >
-      <Form action={handleSubmit} className={styles.form}>
+      <div className={styles.form}>
         <TextField
           label="Email"
-          name="email"
           type="email"
-          isRequired
-          defaultValue={user?.email ?? ""}
+          value={email}
+          onChange={setEmail}
           placeholder="user@example.com"
-          className={styles.field}
+          validate={createFieldValidator(CreateUserSchema.shape.email)}
+          validationBehavior="aria"
+          isDisabled={isPending}
         />
 
         <Select
           label="Role"
-          name="role"
-          isRequired
-          defaultValue={user?.role ?? null}
-          className={styles.field}
+          value={role}
+          onChange={selectEnumHandler(ROLE_ENUM, setRole)}
+          placeholder="Select a role"
+          validate={createFieldValidator(CreateUserSchema.shape.role)}
+          validationBehavior="aria"
+          isDisabled={isPending}
         >
-          {CREATABLE_ROLES.map((role) => (
-            <SelectItem id={role} key={role}>
-              {roleLabels[role]}
+          {CREATABLE_ROLES.map((option) => (
+            <SelectItem id={option} key={option}>
+              {roleLabels[option]}
             </SelectItem>
           ))}
         </Select>
-
-        {error && <FieldError className={styles.formError}>{error}</FieldError>}
 
         <div className={styles.actions}>
           <Button
@@ -142,14 +128,22 @@ export function UserFormModal({ mode, user, isOpen, onOpenChange, onSuccess }: U
             type="button"
             variant="secondary"
             onPress={() => onOpenChange(false)}
+            isDisabled={isPending}
           >
             Cancel
           </Button>
-          <Button className={styles.button} type="submit" variant="primary" isPending={isPending}>
+          <Button
+            className={styles.button}
+            type="button"
+            variant="primary"
+            onPress={handleSubmit}
+            isDisabled={!email || !role || isPending}
+            isPending={isPending}
+          >
             {mode === "edit" ? "Update" : "Save"}
           </Button>
         </div>
-      </Form>
+      </div>
 
       <ConfirmDialog
         isOpen={!!pendingDevEmail}

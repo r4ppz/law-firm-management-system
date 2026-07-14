@@ -8,6 +8,7 @@ import { Modal } from "@/components/ui/Modal/Modal";
 import { TextField } from "@/components/ui/TextField/TextField";
 import { createNoteAction } from "@/features/notes/actions";
 import { NoteCreatePayloadSchema } from "@/features/notes/schemas";
+import { createFieldValidator, requiredString } from "@/lib/form-utils";
 import { useModalForm } from "@/lib/useModalForm";
 
 import styles from "./AddNoteModal.module.css";
@@ -37,14 +38,15 @@ export function AddNoteModal({
     onSuccess,
     successMessage: "Note added",
     failureMessage: "Failed to add note",
+    schema: NoteCreatePayloadSchema,
     reset: () => setContent(""),
   });
 
   async function handleSubmit() {
-    if (!content.trim()) return;
+    if (isPending) return;
 
     await submitForm({
-      content: content.trim(),
+      content: requiredString(content),
       case_id: caseId ?? null,
       consultation_id: consultationId ?? null,
     });
@@ -60,6 +62,8 @@ export function AddNoteModal({
           value={content}
           onChange={setContent}
           placeholder="Enter note content..."
+          validate={createFieldValidator(NoteCreatePayloadSchema.shape.content)}
+          validationBehavior="aria"
           isDisabled={isPending}
         />
         <div className={styles.actions}>

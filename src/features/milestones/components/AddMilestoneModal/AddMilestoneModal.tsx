@@ -12,6 +12,13 @@ import { TextField } from "@/components/ui/TextField/TextField";
 import { createMilestoneAction } from "@/features/milestones/actions";
 import { MilestoneCreatePayloadSchema } from "@/features/milestones/schemas";
 import { CaseMilestoneStatus } from "@/generated/prisma/browser";
+import {
+  createFieldValidator,
+  optionalString,
+  requiredString,
+  selectEnumHandler,
+  toDateValue,
+} from "@/lib/form-utils";
 import { useModalForm } from "@/lib/useModalForm";
 
 import styles from "./AddMilestoneModal.module.css";
@@ -44,6 +51,7 @@ export function AddMilestoneModal({
     onSuccess,
     successMessage: "Milestone added",
     failureMessage: "Failed to add milestone",
+    schema: MilestoneCreatePayloadSchema,
     reset: () => {
       setTitle("");
       setDescription("");
@@ -53,12 +61,12 @@ export function AddMilestoneModal({
   });
 
   async function handleSubmit() {
-    if (!title.trim()) return;
+    if (isPending) return;
 
     await submitForm({
-      title: title.trim(),
-      description: description.trim() || undefined,
-      due_date: dueDate.toDate(getLocalTimeZone()),
+      title: requiredString(title),
+      description: optionalString(description),
+      due_date: toDateValue(dueDate),
       status,
       case_id: caseId,
     });
@@ -77,6 +85,8 @@ export function AddMilestoneModal({
           value={title}
           onChange={setTitle}
           placeholder="Milestone title"
+          validate={createFieldValidator(MilestoneCreatePayloadSchema.shape.title)}
+          validationBehavior="aria"
           isDisabled={isPending}
         />
         <TextField
@@ -86,6 +96,8 @@ export function AddMilestoneModal({
           placeholder="Optional description"
           isTextArea
           rows={3}
+          validate={createFieldValidator(MilestoneCreatePayloadSchema.shape.description)}
+          validationBehavior="aria"
           isDisabled={isPending}
         />
         <DateField
@@ -97,7 +109,7 @@ export function AddMilestoneModal({
         <Select
           label="Status"
           value={status}
-          onChange={(k) => setStatus(String(k) as CaseMilestoneStatus)}
+          onChange={selectEnumHandler(CaseMilestoneStatus, setStatus)}
           isDisabled={isPending}
         >
           {STATUS_OPTIONS.map((s) => (

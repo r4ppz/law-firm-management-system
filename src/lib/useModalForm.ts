@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import type { ZodType } from "zod";
 
 import { queue } from "@/components/ui/Toast/Toast";
 import type { ActionStatusResponse } from "@/lib/action-response";
@@ -12,6 +13,7 @@ interface UseModalFormOptions<TArgs> {
   failureMessage: string;
   onSuccess?: () => void;
   reset?: () => void;
+  schema?: ZodType;
 }
 
 interface UseModalFormReturn<TArgs> {
@@ -34,11 +36,18 @@ export function useModalForm<TArgs>({
   failureMessage,
   onSuccess,
   reset,
+  schema,
 }: UseModalFormOptions<TArgs>): UseModalFormReturn<TArgs> {
   const [isPending, setIsPending] = useState(false);
 
   async function submitForm(args: TArgs) {
     if (!submit) return;
+
+    if (schema && !schema.safeParse(args).success) {
+      queue.add({ title: failureMessage }, { timeout: 5000 });
+      return;
+    }
+
     setIsPending(true);
 
     try {
