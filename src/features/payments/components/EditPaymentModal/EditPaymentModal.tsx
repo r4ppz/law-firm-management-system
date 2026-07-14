@@ -2,6 +2,7 @@
 
 import { CalendarDate } from "@internationalized/date";
 import { useState } from "react";
+import { Form } from "react-aria-components";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/Button/Button";
@@ -109,8 +110,6 @@ export function EditPaymentModal({
     paymentMethod.trim() !== (payment.payment_method ?? "") ||
     receiptNumber.trim() !== (payment.receipt_number ?? "");
 
-  const isValid = amount.trim().length > 0;
-
   return (
     <>
       <Modal
@@ -119,65 +118,67 @@ export function EditPaymentModal({
         onOpenChange={handleDismiss}
         className={styles.modal}
       >
-        <div className={styles.content}>
-          <TextField
-            label="Amount"
-            value={amount}
-            onChange={setAmount}
-            placeholder="0.00"
-            validate={createFieldValidator(PaymentUpdatePayloadSchema.shape.amount)}
-            validationBehavior="aria"
-            isDisabled={isPending || isDeleting}
-          />
-          <DateField
-            label="Payment Date"
-            value={paymentDate}
-            onChange={(v) => v && setPaymentDate(v)}
-            isDisabled={isPending || isDeleting}
-          />
-          <Select
-            label="Status"
-            value={status}
-            onChange={selectEnumHandler(PaymentStatus, setStatus)}
-          >
-            {STATUS_OPTIONS.map((s) => (
-              <SelectItem key={s} id={s}>
-                {s}
-              </SelectItem>
-            ))}
-          </Select>
-          <TextField
-            label="Payment Method"
-            value={paymentMethod}
-            onChange={setPaymentMethod}
-            placeholder="e.g. Cash, Credit Card, Bank Transfer"
-            validate={createFieldValidator(PaymentUpdatePayloadSchema.shape.payment_method)}
-            validationBehavior="aria"
-            isDisabled={isPending || isDeleting}
-          />
-          <TextField
-            label="Receipt Number"
-            value={receiptNumber}
-            onChange={setReceiptNumber}
-            placeholder="Optional receipt number"
-            validate={createFieldValidator(PaymentUpdatePayloadSchema.shape.receipt_number)}
-            validationBehavior="aria"
-            isDisabled={isPending || isDeleting}
-          />
-          <div className={styles.actions}>
-            <Button
-              variant="secondary"
-              onPress={handleSave}
-              isDisabled={!isValid || (!hasChanges && !isPending) || isPending || isDeleting}
-              isPending={isPending}
+        <Form onSubmit={handleSave}>
+          <div className={styles.content}>
+            <TextField
+              label="Amount"
+              value={amount}
+              onChange={setAmount}
+              placeholder="0.00"
+              validate={createFieldValidator(PaymentUpdatePayloadSchema.shape.amount)}
+              isDisabled={isPending || isDeleting}
+            />
+            <DateField
+              label="Payment Date"
+              value={paymentDate}
+              onChange={(v) => v && setPaymentDate(v)}
+              isDisabled={isPending || isDeleting}
+            />
+            <Select
+              label="Status"
+              value={status}
+              onChange={selectEnumHandler(PaymentStatus, setStatus)}
             >
-              Save
-            </Button>
-            <Button onPress={() => setShowDeleteConfirm(true)} isDisabled={isPending || isDeleting}>
-              {isDeleting ? <ProgressCircle aria-label="Deleting" /> : "Delete"}
-            </Button>
+              {STATUS_OPTIONS.map((s) => (
+                <SelectItem key={s} id={s}>
+                  {s}
+                </SelectItem>
+              ))}
+            </Select>
+            <TextField
+              label="Payment Method"
+              value={paymentMethod}
+              onChange={setPaymentMethod}
+              placeholder="e.g. Cash, Credit Card, Bank Transfer"
+              validate={createFieldValidator(PaymentUpdatePayloadSchema.shape.payment_method)}
+              isDisabled={isPending || isDeleting}
+            />
+            <TextField
+              label="Receipt Number"
+              value={receiptNumber}
+              onChange={setReceiptNumber}
+              placeholder="Optional receipt number"
+              validate={createFieldValidator(PaymentUpdatePayloadSchema.shape.receipt_number)}
+              isDisabled={isPending || isDeleting}
+            />
+            <div className={styles.actions}>
+              <Button
+                variant="secondary"
+                type="submit"
+                isDisabled={!hasChanges || isPending || isDeleting}
+                isPending={isPending}
+              >
+                Save
+              </Button>
+              <Button
+                onPress={() => setShowDeleteConfirm(true)}
+                isDisabled={isPending || isDeleting}
+              >
+                {isDeleting ? <ProgressCircle aria-label="Deleting" /> : "Delete"}
+              </Button>
+            </div>
           </div>
-        </div>
+        </Form>
       </Modal>
 
       <ConfirmDialog

@@ -2,6 +2,7 @@
 
 import { CalendarDate } from "@internationalized/date";
 import { useState } from "react";
+import { Form } from "react-aria-components";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/Button/Button";
@@ -107,8 +108,6 @@ export function EditMilestoneModal({
     dueDate.compare(toCalendarDate(milestone.due_date)) !== 0 ||
     status !== (milestone.status as CaseMilestoneStatus);
 
-  const isValid = title.trim().length > 0;
-
   return (
     <>
       <Modal
@@ -117,58 +116,61 @@ export function EditMilestoneModal({
         onOpenChange={handleDismiss}
         className={styles.modal}
       >
-        <div className={styles.content}>
-          <TextField
-            label="Title"
-            value={title}
-            onChange={setTitle}
-            placeholder="Milestone title"
-            validate={createFieldValidator(MilestoneUpdatePayloadSchema.shape.title)}
-            validationBehavior="aria"
-            isDisabled={isPending || isDeleting}
-          />
-          <TextField
-            label="Description"
-            value={description}
-            onChange={setDescription}
-            placeholder="Optional description"
-            isTextArea
-            rows={3}
-            validate={createFieldValidator(MilestoneUpdatePayloadSchema.shape.description)}
-            validationBehavior="aria"
-            isDisabled={isPending || isDeleting}
-          />
-          <DateField
-            label="Due Date"
-            value={dueDate}
-            onChange={(v) => v && setDueDate(v)}
-            isDisabled={isPending || isDeleting}
-          />
-          <Select
-            label="Status"
-            value={status}
-            onChange={selectEnumHandler(CaseMilestoneStatus, setStatus)}
-          >
-            {STATUS_OPTIONS.map((s) => (
-              <SelectItem key={s} id={s}>
-                {s}
-              </SelectItem>
-            ))}
-          </Select>
-          <div className={styles.actions}>
-            <Button
-              variant="secondary"
-              onPress={handleSave}
-              isDisabled={!isValid || (!hasChanges && !isPending) || isPending || isDeleting}
-              isPending={isPending}
+        <Form onSubmit={handleSave}>
+          <div className={styles.content}>
+            <TextField
+              label="Title"
+              value={title}
+              onChange={setTitle}
+              placeholder="Milestone title"
+              validate={createFieldValidator(MilestoneUpdatePayloadSchema.shape.title)}
+              isDisabled={isPending || isDeleting}
+            />
+            <TextField
+              label="Description"
+              value={description}
+              onChange={setDescription}
+              placeholder="Optional description"
+              isTextArea
+              rows={3}
+              validate={createFieldValidator(MilestoneUpdatePayloadSchema.shape.description)}
+              isDisabled={isPending || isDeleting}
+            />
+            <DateField
+              label="Due Date"
+              value={dueDate}
+              onChange={(v) => v && setDueDate(v)}
+              isDisabled={isPending || isDeleting}
+            />
+            <Select
+              label="Status"
+              value={status}
+              onChange={selectEnumHandler(CaseMilestoneStatus, setStatus)}
             >
-              Save
-            </Button>
-            <Button onPress={() => setShowDeleteConfirm(true)} isDisabled={isPending || isDeleting}>
-              {isDeleting ? <ProgressCircle aria-label="Deleting" /> : "Delete"}
-            </Button>
+              {STATUS_OPTIONS.map((s) => (
+                <SelectItem key={s} id={s}>
+                  {s}
+                </SelectItem>
+              ))}
+            </Select>
+            <div className={styles.actions}>
+              <Button
+                variant="secondary"
+                type="submit"
+                isDisabled={!hasChanges || isPending || isDeleting}
+                isPending={isPending}
+              >
+                Save
+              </Button>
+              <Button
+                onPress={() => setShowDeleteConfirm(true)}
+                isDisabled={isPending || isDeleting}
+              >
+                {isDeleting ? <ProgressCircle aria-label="Deleting" /> : "Delete"}
+              </Button>
+            </div>
           </div>
-        </div>
+        </Form>
       </Modal>
 
       <ConfirmDialog

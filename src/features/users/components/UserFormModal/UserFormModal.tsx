@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Form } from "react-aria-components";
 
 import { Button } from "@/components/ui/Button/Button";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog/ConfirmDialog";
@@ -94,56 +95,55 @@ export function UserFormModal({ mode, user, isOpen, onOpenChange, onSuccess }: U
       isOpen={isOpen}
       onOpenChange={onOpenChange}
     >
-      <div className={styles.form}>
-        <TextField
-          label="Email"
-          type="email"
-          value={email}
-          onChange={setEmail}
-          placeholder="user@example.com"
-          validate={createFieldValidator(CreateUserSchema.shape.email)}
-          validationBehavior="aria"
-          isDisabled={isPending}
-        />
+      <Form onSubmit={handleSubmit}>
+        <div className={styles.form}>
+          <TextField
+            label="Email"
+            type="email"
+            value={email}
+            onChange={setEmail}
+            placeholder="user@example.com"
+            validate={createFieldValidator(CreateUserSchema.shape.email)}
+            isDisabled={isPending}
+          />
 
-        <Select
-          label="Role"
-          value={role}
-          onChange={selectEnumHandler(ROLE_ENUM, setRole)}
-          placeholder="Select a role"
-          validate={createFieldValidator(CreateUserSchema.shape.role)}
-          validationBehavior="aria"
-          isDisabled={isPending}
-        >
-          {CREATABLE_ROLES.map((option) => (
-            <SelectItem id={option} key={option}>
-              {roleLabels[option]}
-            </SelectItem>
-          ))}
-        </Select>
-
-        <div className={styles.actions}>
-          <Button
-            className={styles.button}
-            type="button"
-            variant="secondary"
-            onPress={() => onOpenChange(false)}
+          <Select
+            label="Role"
+            value={role}
+            onChange={selectEnumHandler(ROLE_ENUM, setRole)}
+            placeholder="Select a role"
+            validate={createFieldValidator(CreateUserSchema.shape.role)}
             isDisabled={isPending}
           >
-            Cancel
-          </Button>
-          <Button
-            className={styles.button}
-            type="button"
-            variant="primary"
-            onPress={handleSubmit}
-            isDisabled={!email || !role || isPending}
-            isPending={isPending}
-          >
-            {mode === "edit" ? "Update" : "Save"}
-          </Button>
+            {CREATABLE_ROLES.map((option) => (
+              <SelectItem id={option} key={option}>
+                {roleLabels[option]}
+              </SelectItem>
+            ))}
+          </Select>
+
+          <div className={styles.actions}>
+            <Button
+              className={styles.button}
+              type="button"
+              variant="secondary"
+              onPress={() => onOpenChange(false)}
+              isDisabled={isPending}
+            >
+              Cancel
+            </Button>
+            <Button
+              className={styles.button}
+              type="submit"
+              variant="primary"
+              isDisabled={isPending}
+              isPending={isPending}
+            >
+              {mode === "edit" ? "Update" : "Save"}
+            </Button>
+          </div>
         </div>
-      </div>
+      </Form>
 
       <ConfirmDialog
         isOpen={!!pendingDevEmail}

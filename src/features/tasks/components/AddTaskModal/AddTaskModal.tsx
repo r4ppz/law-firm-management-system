@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Form } from "react-aria-components";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/Button/Button";
@@ -75,74 +76,70 @@ export function AddTaskModal({
 
   return (
     <Modal title="Add Task" isOpen={isOpen} onOpenChange={handleCancel} className={styles.modal}>
-      <div className={styles.content}>
-        <TextField
-          label="Title"
-          value={title}
-          onChange={setTitle}
-          placeholder="Enter task title..."
-          validate={createFieldValidator(TaskCreatePayloadSchema.shape.title)}
-          validationBehavior="aria"
-          isDisabled={isPending}
-        />
-        <TextField
-          label="Description"
-          isTextArea
-          rows={3}
-          value={description}
-          onChange={setDescription}
-          placeholder="Optional description..."
-          validate={createFieldValidator(TaskCreatePayloadSchema.shape.description)}
-          validationBehavior="aria"
-          isDisabled={isPending}
-        />
-        <Select
-          label="Status"
-          value={status}
-          onChange={selectEnumHandler(TaskStatus, setStatus)}
-          isDisabled={isPending}
-        >
-          {STATUS_OPTIONS.map((s) => (
-            <SelectItem key={s} id={s}>
-              {s}
-            </SelectItem>
-          ))}
-        </Select>
-        <Select
-          label="Assignees"
-          selectionMode="multiple"
-          value={Array.from(assigneeIds)}
-          onChange={(keys) => setAssigneeIds(keysToSet(keys))}
-          placeholder="Select assignees..."
-          items={users}
-          isDisabled={isPending}
-        >
-          {(user) => <SelectItem id={user.id}>{user.name}</SelectItem>}
-        </Select>
-        {assigneeIds.size > 0 && (
-          <ul className={styles.selectedAssignees}>
-            {users
-              .filter((u) => assigneeIds.has(u.id))
-              .map((u) => (
-                <li key={u.id} className={styles.selectedAssignee}>
-                  {u.name}
-                </li>
-              ))}
-          </ul>
-        )}
-        <div className={styles.actions}>
-          <Button variant="secondary" onPress={handleCancel} isDisabled={isPending}>
-            Cancel
-          </Button>
-          <Button
-            onPress={handleSubmit}
-            isDisabled={!title.trim() || isPending}
-            isPending={isPending}
+      <Form onSubmit={handleSubmit}>
+        <div className={styles.content}>
+          <TextField
+            label="Title"
+            value={title}
+            onChange={setTitle}
+            placeholder="Enter task title..."
+            validate={createFieldValidator(TaskCreatePayloadSchema.shape.title)}
+            isDisabled={isPending}
+          />
+          <TextField
+            label="Description"
+            isTextArea
+            rows={3}
+            value={description}
+            onChange={setDescription}
+            placeholder="Optional description..."
+            validate={createFieldValidator(TaskCreatePayloadSchema.shape.description)}
+            isDisabled={isPending}
+          />
+          <Select
+            label="Status"
+            value={status}
+            onChange={selectEnumHandler(TaskStatus, setStatus)}
+            isDisabled={isPending}
           >
-            Save Task
-          </Button>
+            {STATUS_OPTIONS.map((s) => (
+              <SelectItem key={s} id={s}>
+                {s}
+              </SelectItem>
+            ))}
+          </Select>
+          <Select
+            label="Assignees"
+            selectionMode="multiple"
+            value={Array.from(assigneeIds)}
+            onChange={(keys) => setAssigneeIds(keysToSet(keys))}
+            placeholder="Select assignees..."
+            items={users}
+            isDisabled={isPending}
+          >
+            {(user) => <SelectItem id={user.id}>{user.name}</SelectItem>}
+          </Select>
+          {assigneeIds.size > 0 && (
+            <ul className={styles.selectedAssignees}>
+              {users
+                .filter((u) => assigneeIds.has(u.id))
+                .map((u) => (
+                  <li key={u.id} className={styles.selectedAssignee}>
+                    {u.name}
+                  </li>
+                ))}
+            </ul>
+          )}
+          <div className={styles.actions}>
+            <Button variant="secondary" type="button" onPress={handleCancel} isDisabled={isPending}>
+              Cancel
+            </Button>
+            <Button type="submit" isDisabled={isPending} isPending={isPending}>
+              Save Task
+            </Button>
+          </div>
         </div>
-      </div>
+      </Form>
     </Modal>
   );
 }

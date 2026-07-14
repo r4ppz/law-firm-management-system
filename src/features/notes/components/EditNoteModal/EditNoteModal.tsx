@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Form } from "react-aria-components";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/Button/Button";
@@ -72,7 +73,6 @@ export function EditNoteModal({ isOpen, onOpenChange, onSuccess, note }: EditNot
   }
 
   const hasChanges = content.trim() !== note.content;
-  const isValid = content.trim().length > 0;
 
   return (
     <>
@@ -82,31 +82,35 @@ export function EditNoteModal({ isOpen, onOpenChange, onSuccess, note }: EditNot
         onOpenChange={handleDismiss}
         className={styles.modal}
       >
-        <div className={styles.content}>
-          <TextField
-            isTextArea
-            rows={5}
-            value={content}
-            onChange={setContent}
-            placeholder="Enter note content..."
-            validate={createFieldValidator(NoteUpdatePayloadSchema.shape.content)}
-            validationBehavior="aria"
-            isDisabled={isPending || isDeleting}
-          />
-          <div className={styles.actions}>
-            <Button
-              variant="secondary"
-              onPress={handleSave}
-              isDisabled={!isValid || !hasChanges || isPending || isDeleting}
-              isPending={isPending}
-            >
-              Save
-            </Button>
-            <Button onPress={() => setShowDeleteConfirm(true)} isDisabled={isPending || isDeleting}>
-              {isDeleting ? <ProgressCircle aria-label="Deleting" /> : "Delete"}
-            </Button>
+        <Form onSubmit={handleSave}>
+          <div className={styles.content}>
+            <TextField
+              isTextArea
+              rows={5}
+              value={content}
+              onChange={setContent}
+              placeholder="Enter note content..."
+              validate={createFieldValidator(NoteUpdatePayloadSchema.shape.content)}
+              isDisabled={isPending || isDeleting}
+            />
+            <div className={styles.actions}>
+              <Button
+                variant="secondary"
+                type="submit"
+                isDisabled={!hasChanges || isPending || isDeleting}
+                isPending={isPending}
+              >
+                Save
+              </Button>
+              <Button
+                onPress={() => setShowDeleteConfirm(true)}
+                isDisabled={isPending || isDeleting}
+              >
+                {isDeleting ? <ProgressCircle aria-label="Deleting" /> : "Delete"}
+              </Button>
+            </div>
           </div>
-        </div>
+        </Form>
       </Modal>
 
       <ConfirmDialog

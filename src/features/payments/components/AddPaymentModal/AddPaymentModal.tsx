@@ -2,6 +2,7 @@
 
 import { CalendarDate, getLocalTimeZone, today } from "@internationalized/date";
 import { useState } from "react";
+import { Form } from "react-aria-components";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/Button/Button";
@@ -79,65 +80,60 @@ export function AddPaymentModal({
 
   return (
     <Modal title="Add Payment" isOpen={isOpen} onOpenChange={handleCancel} className={styles.modal}>
-      <div className={styles.content}>
-        <TextField
-          label="Amount"
-          value={amount}
-          onChange={setAmount}
-          placeholder="0.00"
-          validate={createFieldValidator(PaymentCreatePayloadSchema.shape.amount)}
-          validationBehavior="aria"
-          isDisabled={isPending}
-        />
-        <DateField
-          label="Payment Date"
-          value={paymentDate}
-          onChange={(v) => v && setPaymentDate(v)}
-          isDisabled={isPending}
-        />
-        <Select
-          label="Status"
-          value={status}
-          onChange={selectEnumHandler(PaymentStatus, setStatus)}
-          isDisabled={isPending}
-        >
-          {STATUS_OPTIONS.map((s) => (
-            <SelectItem key={s} id={s}>
-              {s}
-            </SelectItem>
-          ))}
-        </Select>
-        <TextField
-          label="Payment Method"
-          value={paymentMethod}
-          onChange={setPaymentMethod}
-          placeholder="e.g. Cash, Credit Card, Bank Transfer"
-          validate={createFieldValidator(PaymentCreatePayloadSchema.shape.payment_method)}
-          validationBehavior="aria"
-          isDisabled={isPending}
-        />
-        <TextField
-          label="Receipt Number"
-          value={receiptNumber}
-          onChange={setReceiptNumber}
-          placeholder="Optional receipt number"
-          validate={createFieldValidator(PaymentCreatePayloadSchema.shape.receipt_number)}
-          validationBehavior="aria"
-          isDisabled={isPending}
-        />
-        <div className={styles.actions}>
-          <Button variant="secondary" onPress={handleCancel} isDisabled={isPending}>
-            Cancel
-          </Button>
-          <Button
-            onPress={handleSubmit}
-            isDisabled={!amount.trim() || isPending}
-            isPending={isPending}
+      <Form onSubmit={handleSubmit}>
+        <div className={styles.content}>
+          <TextField
+            label="Amount"
+            value={amount}
+            onChange={setAmount}
+            placeholder="0.00"
+            validate={createFieldValidator(PaymentCreatePayloadSchema.shape.amount)}
+            isDisabled={isPending}
+          />
+          <DateField
+            label="Payment Date"
+            value={paymentDate}
+            onChange={(v) => v && setPaymentDate(v)}
+            isDisabled={isPending}
+          />
+          <Select
+            label="Status"
+            value={status}
+            onChange={selectEnumHandler(PaymentStatus, setStatus)}
+            isDisabled={isPending}
           >
-            Save Payment
-          </Button>
+            {STATUS_OPTIONS.map((s) => (
+              <SelectItem key={s} id={s}>
+                {s}
+              </SelectItem>
+            ))}
+          </Select>
+          <TextField
+            label="Payment Method"
+            value={paymentMethod}
+            onChange={setPaymentMethod}
+            placeholder="e.g. Cash, Credit Card, Bank Transfer"
+            validate={createFieldValidator(PaymentCreatePayloadSchema.shape.payment_method)}
+            isDisabled={isPending}
+          />
+          <TextField
+            label="Receipt Number"
+            value={receiptNumber}
+            onChange={setReceiptNumber}
+            placeholder="Optional receipt number"
+            validate={createFieldValidator(PaymentCreatePayloadSchema.shape.receipt_number)}
+            isDisabled={isPending}
+          />
+          <div className={styles.actions}>
+            <Button variant="secondary" type="button" onPress={handleCancel} isDisabled={isPending}>
+              Cancel
+            </Button>
+            <Button type="submit" isDisabled={isPending} isPending={isPending}>
+              Save Payment
+            </Button>
+          </div>
         </div>
-      </div>
+      </Form>
     </Modal>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Form } from "react-aria-components";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/Button/Button";
@@ -105,8 +106,6 @@ export function EditTaskModal({
     status !== (task.status as TaskStatus) ||
     !areSetsEqual(assigneeIds, new Set(task.assignee_ids));
 
-  const isValid = title.trim().length > 0;
-
   return (
     <>
       <Modal
@@ -115,75 +114,78 @@ export function EditTaskModal({
         onOpenChange={handleDismiss}
         className={styles.modal}
       >
-        <div className={styles.content}>
-          <TextField
-            label="Title"
-            value={title}
-            onChange={setTitle}
-            placeholder="Enter task title..."
-            validate={createFieldValidator(TaskUpdatePayloadSchema.shape.title)}
-            validationBehavior="aria"
-            isDisabled={isPending || isDeleting}
-          />
-          <TextField
-            label="Description"
-            isTextArea
-            rows={3}
-            value={description}
-            onChange={setDescription}
-            placeholder="Optional description..."
-            validate={createFieldValidator(TaskUpdatePayloadSchema.shape.description)}
-            validationBehavior="aria"
-            isDisabled={isPending || isDeleting}
-          />
-          <Select
-            label="Status"
-            value={status}
-            onChange={selectEnumHandler(TaskStatus, setStatus)}
-            isDisabled={isPending || isDeleting}
-          >
-            {STATUS_OPTIONS.map((s) => (
-              <SelectItem key={s} id={s}>
-                {s}
-              </SelectItem>
-            ))}
-          </Select>
-          <Select
-            label="Assignees"
-            selectionMode="multiple"
-            value={Array.from(assigneeIds)}
-            onChange={(keys) => setAssigneeIds(keysToSet(keys))}
-            placeholder="Select assignees..."
-            items={users}
-            isDisabled={isPending || isDeleting}
-          >
-            {(user) => <SelectItem id={user.id}>{user.name}</SelectItem>}
-          </Select>
-          {assigneeIds.size > 0 && (
-            <ul className={styles.selectedAssignees}>
-              {users
-                .filter((u) => assigneeIds.has(u.id))
-                .map((u) => (
-                  <li key={u.id} className={styles.selectedAssignee}>
-                    {u.name}
-                  </li>
-                ))}
-            </ul>
-          )}
-          <div className={styles.actions}>
-            <Button
-              variant="secondary"
-              onPress={handleSave}
-              isDisabled={!isValid || !hasChanges || isPending || isDeleting}
-              isPending={isPending}
+        <Form onSubmit={handleSave}>
+          <div className={styles.content}>
+            <TextField
+              label="Title"
+              value={title}
+              onChange={setTitle}
+              placeholder="Enter task title..."
+              validate={createFieldValidator(TaskUpdatePayloadSchema.shape.title)}
+              isDisabled={isPending || isDeleting}
+            />
+            <TextField
+              label="Description"
+              isTextArea
+              rows={3}
+              value={description}
+              onChange={setDescription}
+              placeholder="Optional description..."
+              validate={createFieldValidator(TaskUpdatePayloadSchema.shape.description)}
+              isDisabled={isPending || isDeleting}
+            />
+            <Select
+              label="Status"
+              value={status}
+              onChange={selectEnumHandler(TaskStatus, setStatus)}
+              isDisabled={isPending || isDeleting}
             >
-              Save
-            </Button>
-            <Button onPress={() => setShowDeleteConfirm(true)} isDisabled={isPending || isDeleting}>
-              {isDeleting ? <ProgressCircle aria-label="Deleting" /> : "Delete"}
-            </Button>
+              {STATUS_OPTIONS.map((s) => (
+                <SelectItem key={s} id={s}>
+                  {s}
+                </SelectItem>
+              ))}
+            </Select>
+            <Select
+              label="Assignees"
+              selectionMode="multiple"
+              value={Array.from(assigneeIds)}
+              onChange={(keys) => setAssigneeIds(keysToSet(keys))}
+              placeholder="Select assignees..."
+              items={users}
+              isDisabled={isPending || isDeleting}
+            >
+              {(user) => <SelectItem id={user.id}>{user.name}</SelectItem>}
+            </Select>
+            {assigneeIds.size > 0 && (
+              <ul className={styles.selectedAssignees}>
+                {users
+                  .filter((u) => assigneeIds.has(u.id))
+                  .map((u) => (
+                    <li key={u.id} className={styles.selectedAssignee}>
+                      {u.name}
+                    </li>
+                  ))}
+              </ul>
+            )}
+            <div className={styles.actions}>
+              <Button
+                variant="secondary"
+                type="submit"
+                isDisabled={!hasChanges || isPending || isDeleting}
+                isPending={isPending}
+              >
+                Save
+              </Button>
+              <Button
+                onPress={() => setShowDeleteConfirm(true)}
+                isDisabled={isPending || isDeleting}
+              >
+                {isDeleting ? <ProgressCircle aria-label="Deleting" /> : "Delete"}
+              </Button>
+            </div>
           </div>
-        </div>
+        </Form>
       </Modal>
 
       <ConfirmDialog
