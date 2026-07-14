@@ -4,6 +4,13 @@ import { PrismaPg } from "@prisma/adapter-pg";
 
 import { PrismaClient } from "../generated/prisma/client";
 
+/**
+ * Prisma client singleton.
+ *
+ * Wraps `PrismaClient` with the `@prisma/adapter-pg` driver so the app talks to
+ * PostgreSQL over a connection pool. Import this instance from Server-only code
+ * (queries/mutations); never import it into client components.
+ */
 const adapter = new PrismaPg({
   connectionString: process.env.DATABASE_URL!,
 });

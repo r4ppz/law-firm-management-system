@@ -6,19 +6,31 @@ import type { ZodType } from "zod";
 import { queue } from "@/components/ui/Toast/Toast";
 import type { ActionStatusResponse } from "@/lib/action-response";
 
+/** Configuration for {@link useModalForm}. */
 interface UseModalFormOptions<TArgs> {
+  /** Server Action invoked with the payload; omit to render a read-only form. */
   submit?: (args: TArgs) => Promise<ActionStatusResponse>;
+  /** Called to close the modal (on success or cancel). */
   onOpenChange: (open: boolean) => void;
+  /** Toast shown when the action succeeds. */
   successMessage: string;
+  /** Toast shown when the action fails or is rejected by `schema`. */
   failureMessage: string;
+  /** Optional callback run after a successful submission. */
   onSuccess?: () => void;
+  /** Optional reset invoked on cancel and after a successful submission. */
   reset?: () => void;
+  /** Optional Zod schema used to short-circuit submission with a toast on invalid input. */
   schema?: ZodType;
 }
 
+/** Return value of {@link useModalForm}. */
 interface UseModalFormReturn<TArgs> {
+  /** True while a submission is in flight. */
   isPending: boolean;
+  /** Validates (when `schema` is set) then invokes `submit`, handling toasts and lifecycle. */
   submitForm: (args: TArgs) => Promise<void>;
+  /** Closes the modal, resetting state unless a submission is pending. */
   handleCancel: () => void;
 }
 

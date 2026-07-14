@@ -8,6 +8,16 @@ import {
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
+/**
+ * S3-compatible object storage client.
+ *
+ * Lazily constructs a singleton `S3Client` from environment variables and
+ * exposes helpers to generate presigned upload/download URLs and manage keys.
+ * All file bytes are transferred client-side directly to the bucket via the
+ * presigned URLs; this module never streams payloads through the runtime.
+ */
+
+/** Reads a required S3 env var, throwing a clear error when it is missing. */
 function getRequiredEnvVar(name: string): string {
   const value = process.env[name];
   if (!value) {
@@ -16,6 +26,7 @@ function getRequiredEnvVar(name: string): string {
   return value;
 }
 
+/** Constructs a configured {@link S3Client} from the S3 environment variables. */
 function getS3Client() {
   const endpoint = getRequiredEnvVar("S3_ENDPOINT");
   const region = getRequiredEnvVar("S3_REGION");
@@ -33,6 +44,7 @@ function getS3Client() {
 
 let s3Client: S3Client;
 
+/** Returns the lazily-initialized singleton S3 client. */
 function s3(): S3Client {
   if (!s3Client) {
     s3Client = getS3Client();
@@ -40,10 +52,12 @@ function s3(): S3Client {
   return s3Client;
 }
 
+/** Returns the configured S3 bucket name. */
 function bucket(): string {
   return getRequiredEnvVar("S3_BUCKET");
 }
 
+/** Builds a storage key of the form `${parentType}/${parentId}/${uuid}.${ext}`. */
 export function generateKey(parentType: string, parentId: string, fileName: string): string {
   const dotIndex = fileName.lastIndexOf(".");
   const ext =
@@ -52,6 +66,7 @@ export function generateKey(parentType: string, parentId: string, fileName: stri
   return `${parentType}/${parentId}/${uuid}.${ext}`;
 }
 
+/** Deletes the object stored at the given key. */
 export async function deleteFile(key: string) {
   await s3().send(
     new DeleteObjectCommand({
@@ -61,6 +76,7 @@ export async function deleteFile(key: string) {
   );
 }
 
+/** Returns whether an object exists at the given key (false on a 404). */
 export async function objectExists(key: string): Promise<boolean> {
   try {
     await s3().send(new HeadObjectCommand({ Bucket: bucket(), Key: key }));
@@ -74,6 +90,7 @@ export async function objectExists(key: string): Promise<boolean> {
 const UPLOAD_URL_EXPIRY_S = 300;
 const DOWNLOAD_URL_EXPIRY_S = 3600;
 
+/** Generates a presigned PUT URL the client uses to upload a file directly. */
 export async function getPresignedUploadUrl(
   key: string,
   contentType: string,
@@ -90,10 +107,12 @@ export async function getPresignedUploadUrl(
   );
 }
 
+/** Strips control characters and quotes that are unsafe for a download filename. */
 function sanitizeFilename(name: string): string {
   return name.replace(/["\\]/g, "").replace(/[\x00-\x1f]/g, "");
 }
 
+/** Generates a presigned GET URL the client uses to download a file directly. */
 export async function getPresignedDownloadUrl(
   key: string,
   fileName?: string,
