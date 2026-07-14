@@ -41,10 +41,8 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Create CalVer tag and release
+      - name: Generate CalVer version
         id: calver
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           DATE_TAG="v$(date +'%Y.%m.%d')"
           LAST=$(git tag -l "${DATE_TAG}.*" | sort -V | tail -1)
@@ -54,11 +52,8 @@ jobs:
             PATCH=$(( ${LAST##*.} + 1 ))
           fi
           TAG="${DATE_TAG}.${PATCH}"
-          gh release create "$TAG" \
-            --generate-notes \
-            --target "${{ github.sha }}" \
-            --title "$TAG"
           echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
 
       - name: Sync package.json version
         if: steps.calver.outputs.version != ''
@@ -67,7 +62,21 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          npm version --no-git-tag-version "$VERSION"
+          npm pkg set version="$VERSION"
           git add package.json
           git commit -m "chore: bump package.json to $VERSION [skip ci]"
-          git push
+
+      - name: Push version sync commit
+        if: steps.calver.outputs.version != ''
+        run: git push
+
+      - name: Create CalVer tag and release
+        if: steps.calver.outputs.version != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.calver.outputs.tag }}
+        run: |
+          gh release create "$TAG" \
+            --generate-notes \
+            --target "$(git rev-parse HEAD)" \
+            --title "$TAG"
