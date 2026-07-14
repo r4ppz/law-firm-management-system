@@ -1,6 +1,6 @@
 import { CalendarDate, getLocalTimeZone } from "@internationalized/date";
 import type { Key } from "react-aria-components";
-import type { ZodType } from "zod";
+import { z, type ZodType } from "zod";
 
 /**
  * Shared normalization and validation helpers for modal forms.
@@ -53,6 +53,69 @@ export function selectEnumHandler<E extends Record<string, string>>(
 /** Collects React Aria selection `Key`s into a `Set<string>`. */
 export function keysToSet(keys: Iterable<Key>): Set<string> {
   return new Set(Array.from(keys, String));
+}
+
+/**
+ * Builds a required, trimmed string schema with user-facing validation
+ * messages. An empty/whitespace value surfaces `${label} is required`; an
+ * over-length value surfaces `${label} must be at most ${max} characters`.
+ */
+export function requiredText(max: number, label: string): z.ZodString {
+  return z
+    .string({ error: `${label} is required` })
+    .trim()
+    .min(1, `${label} is required`)
+    .max(max, `${label} must be at most ${max} characters`);
+}
+
+/**
+ * Builds an optional, trimmed string schema with an over-length message.
+ */
+export function optionalText(max: number, label: string): z.ZodOptional<z.ZodString>;
+
+/**
+ * Builds an optional, trimmed string schema that defaults to an empty string
+ * when `withDefault` is true.
+ */
+export function optionalText(
+  max: number,
+  label: string,
+  withDefault: true,
+): z.ZodDefault<z.ZodOptional<z.ZodString>>;
+export function optionalText(max: number, label: string, withDefault = false) {
+  const base = z.string().trim().max(max, `${label} must be at most ${max} characters`).optional();
+  return withDefault ? base.default("") : base;
+}
+
+/**
+ * Builds a positive number schema (coerced from input) with user-facing
+ * messages for non-numeric, non-positive, and over-maximum values.
+ */
+export function positiveNumber(max: number, label: string) {
+  return z.coerce
+    .number({ error: `Enter a valid ${label.toLowerCase()}` })
+    .positive(`${label} must be greater than 0`)
+    .max(max, `${label} must not exceed ${max}`);
+}
+
+/**
+ * Builds a required enum schema with a user-facing message when the value is
+ * missing or outside the allowed set.
+ */
+export function requiredEnum<E extends Record<string, string>>(enumObject: E, label: string) {
+  return z.enum(enumObject, { error: `Select a ${label.toLowerCase()}` });
+}
+
+/**
+ * Builds a required, trimmed email schema with user-facing messages for
+ * malformed or over-length values.
+ */
+export function emailText(label: string) {
+  return z
+    .email({ error: `Enter a valid ${label.toLowerCase()}` })
+    .trim()
+    .min(1, `${label} is required`)
+    .max(255, `${label} must be at most 255 characters`);
 }
 
 /**
