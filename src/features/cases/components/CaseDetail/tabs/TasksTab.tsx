@@ -1,7 +1,7 @@
 "use client";
 
 import clsx from "clsx";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { type ColumnDef } from "@/components/ui/DataTable/DataTable";
 import { ServerDataTable } from "@/components/ui/ServerDataTable/ServerDataTable";
@@ -53,6 +53,7 @@ export function TasksTab({ caseId }: Props) {
   const [editTask, setEditTask] = useState<TaskDetailRow | null>(null);
   const [users, setUsers] = useState<ActiveUserSummary[]>([]);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const latestRequest = useRef(0);
 
   const handleRefresh = useCallback(() => setRefreshTrigger((n) => n + 1), []);
 
@@ -78,14 +79,17 @@ export function TasksTab({ caseId }: Props) {
   }, []);
 
   async function handleRowAction(id: string) {
+    const requestId = ++latestRequest.current;
     try {
       const data = await getTaskDetailRowByIdAction(id);
+      if (requestId !== latestRequest.current) return;
       if (data) {
         setEditTask(data);
       } else {
         queue.add({ title: "Task not found" }, { timeout: 5000 });
       }
     } catch {
+      if (requestId !== latestRequest.current) return;
       queue.add({ title: "Failed to load task" }, { timeout: 5000 });
     }
   }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 
 import { type ColumnDef } from "@/components/ui/DataTable/DataTable";
 import { ServerDataTable } from "@/components/ui/ServerDataTable/ServerDataTable";
@@ -26,18 +26,22 @@ export function NotesTab({ caseId }: Props) {
   const [isAddOpen, setAddOpen] = useState(false);
   const [editNote, setEditNote] = useState<NoteRow | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const latestRequest = useRef(0);
 
   const handleRefresh = useCallback(() => setRefreshKey((k) => k + 1), []);
 
   async function handleRowAction(id: string) {
+    const requestId = ++latestRequest.current;
     try {
       const data = await getNoteRowByIdAction(id);
+      if (requestId !== latestRequest.current) return;
       if (data) {
         setEditNote(data);
       } else {
         queue.add({ title: "Note not found" }, { timeout: 5000 });
       }
     } catch {
+      if (requestId !== latestRequest.current) return;
       queue.add({ title: "Failed to load note" }, { timeout: 5000 });
     }
   }
