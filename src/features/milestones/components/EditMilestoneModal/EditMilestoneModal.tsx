@@ -147,6 +147,7 @@ export function EditMilestoneModal({
               label="Status"
               value={status}
               onChange={selectEnumHandler(CaseMilestoneStatus, setStatus)}
+              isDisabled={isPending || isDeleting}
             >
               {STATUS_OPTIONS.map((s) => (
                 <SelectItem key={s} id={s}>

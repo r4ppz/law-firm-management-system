@@ -139,6 +139,7 @@ export function EditPaymentModal({
               label="Status"
               value={status}
               onChange={selectEnumHandler(PaymentStatus, setStatus)}
+              isDisabled={isPending || isDeleting}
             >
               {STATUS_OPTIONS.map((s) => (
                 <SelectItem key={s} id={s}>
