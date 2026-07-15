@@ -6,7 +6,7 @@ export const CREATABLE_ROLES = [
   "Lawyer",
   "Paralegal",
   "ProcessServer",
-] as const;
+] as const satisfies readonly Role[];
 
 export const roleLabels: Record<Role, string> = {
   Dev: "Dev",

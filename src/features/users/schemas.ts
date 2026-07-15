@@ -12,19 +12,20 @@ export const UserPageQuerySchema = z.object({
   sort: SortQuerySchema.optional(),
 });
 
+const CreatableRoleSchema = requiredEnum(Role, "Role").refine(
+  (r) => (CREATABLE_ROLES as readonly Role[]).includes(r),
+  { message: "Role is not creatable" },
+);
+
 export const CreateUserSchema = z.object({
   email: emailText("Email"),
-  role: requiredEnum(Role, "Role").refine((r) => (CREATABLE_ROLES as readonly Role[]).includes(r), {
-    message: "Role is not creatable",
-  }),
+  role: CreatableRoleSchema,
 });
 
 export const UpdateUserSchema = z.object({
   userId: z.uuid(),
   email: emailText("Email"),
-  role: requiredEnum(Role, "Role").refine((r) => (CREATABLE_ROLES as readonly Role[]).includes(r), {
-    message: "Role is not creatable",
-  }),
+  role: CreatableRoleSchema,
 });
 
 export const DeactivateUserSchema = z.object({

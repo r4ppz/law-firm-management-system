@@ -20,7 +20,11 @@ interface UseModalFormOptions<TArgs> {
   onSuccess?: () => void;
   /** Optional reset invoked on cancel and after a successful submission. */
   reset?: () => void;
-  /** Optional Zod schema used to short-circuit submission with a toast on invalid input. */
+  /**
+   * Optional Zod schema used to short-circuit submission with a toast on invalid
+   * input. Should accept a value of `TArgs` — Zod v4's covariant `Input` parameter
+   * makes this a documentation-era convention rather than a compile-time constraint.
+   */
   schema?: ZodType;
 }
 

@@ -7,7 +7,7 @@ export interface ActionStatusResponse {
 }
 
 /**
- * Status envelope that additionally carries the created or updated record.
+ * Status envelope that additionally carries an optionally typed success payload.
  *
  * @typeParam T - The shape of the payload carried on success.
  */
