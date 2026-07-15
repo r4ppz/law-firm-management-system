@@ -12,7 +12,7 @@ import { queue } from "@/components/ui/Toast/Toast";
 import { checkDeveloperEmail, createUserAction, updateUserAction } from "@/features/users/actions";
 import { CREATABLE_ROLES, roleLabels } from "@/features/users/constants";
 import type { UserRow } from "@/features/users/queries";
-import { CreateUserSchema } from "@/features/users/schemas";
+import { CreateUserSchema, UpdateUserSchema } from "@/features/users/schemas";
 import type { Role } from "@/generated/prisma/browser";
 import { createFieldValidator, requiredString, selectEnumHandler } from "@/lib/form-utils";
 import { useModalForm } from "@/lib/useModalForm";
@@ -49,7 +49,7 @@ export function UserFormModal({ mode, user, isOpen, onOpenChange, onSuccess }: U
     onSuccess,
     successMessage: isEdit ? "User updated" : "User created",
     failureMessage: "Failed to save user",
-    schema: CreateUserSchema,
+    schema: isEdit ? UpdateUserSchema : CreateUserSchema,
   });
 
   async function handleSubmit(event: React.SyntheticEvent) {
