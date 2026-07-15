@@ -118,7 +118,7 @@
 
 ### Async & Error Handling
 
-- Prefer `async`/`await` with `try-catch` over promise chains (`.then()`/`.catch()`) across the entire codebase, especially in asynchronous code. Avoid `.then()`/`.catch()` method chaining.
+- Default to `async/await` with `try...catch` for asynchronous code. Preserve or use `.then()/.catch()` only when it is the idiomatic, clearer, or required approach for the specific code pattern.
 - Never let a promise rejection go unhandled. In client components, surface failures through the toast `queue` (`queue.add(...)`) or appropriate error UI. In Server Actions, follow the existing Action Response Convention (catch and return a structured `ActionStatusResponse`).
 - Inside `useEffect`, wrap async work in a locally-scoped `async function` and invoke it (use `void` for fire-and-forget calls to keep intent explicit).
 
