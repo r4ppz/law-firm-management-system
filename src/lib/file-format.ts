@@ -1,6 +1,11 @@
 /** File-size and MIME-type presentation helpers for document attachments. */
 
-/** Formats a byte count as a human-readable size (e.g. "1.5 MB"); `null` yields "Unknown". */
+/**
+ * Formats a byte count as a human-readable size (e.g. "1.5 MB"); `null` yields "Unknown".
+ *
+ * @param bytes - The byte count, or `null`/`undefined`.
+ * @returns A human-readable size string.
+ */
 export function formatFileSize(bytes: number | null): string {
   if (bytes === null || bytes === undefined) return "Unknown";
   if (bytes === 0) return "0 B";
@@ -21,7 +26,12 @@ export function formatFileSize(bytes: number | null): string {
 /** Coarse classification of a MIME type into a display category. */
 export type FileCategory = "pdf" | "doc" | "xls" | "ppt" | "img" | "zip" | "txt" | "unknown";
 
-/** Maps a MIME type string to its {@link FileCategory}. */
+/**
+ * Maps a MIME type string to its {@link FileCategory}.
+ *
+ * @param fileType - The MIME type string (e.g. "application/pdf").
+ * @returns The matching file category.
+ */
 export function classifyFileType(fileType: string): FileCategory {
   const type = fileType.toLowerCase();
 
@@ -68,7 +78,12 @@ const FILE_TYPE_LABELS: Record<FileCategory, string> = {
   unknown: "",
 };
 
-/** Returns a short human-readable label for a MIME type (e.g. "PDF", "XLSX"). */
+/**
+ * Returns a short human-readable label for a MIME type (e.g. "PDF", "XLSX").
+ *
+ * @param fileType - The MIME type string.
+ * @returns A short label, or the fallback suffix if unknown.
+ */
 export function formatFileType(fileType: string): string {
   const category = classifyFileType(fileType);
   const label = FILE_TYPE_LABELS[category];

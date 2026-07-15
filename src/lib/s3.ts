@@ -57,7 +57,14 @@ function bucket(): string {
   return getRequiredEnvVar("S3_BUCKET");
 }
 
-/** Builds a storage key of the form `${parentType}/${parentId}/${uuid}.${ext}`. */
+/**
+ * Builds a storage key of the form `${parentType}/${parentId}/${uuid}.${ext}`.
+ *
+ * @param parentType - The parent resource type (e.g. "cases").
+ * @param parentId - The parent resource UUID.
+ * @param fileName - Original file name used to derive the extension.
+ * @returns A unique S3 object key.
+ */
 export function generateKey(parentType: string, parentId: string, fileName: string): string {
   const dotIndex = fileName.lastIndexOf(".");
   const ext =
@@ -66,7 +73,11 @@ export function generateKey(parentType: string, parentId: string, fileName: stri
   return `${parentType}/${parentId}/${uuid}.${ext}`;
 }
 
-/** Deletes the object stored at the given key. */
+/**
+ * Deletes the object stored at the given key.
+ *
+ * @param key - The S3 object key to delete.
+ */
 export async function deleteFile(key: string) {
   await s3().send(
     new DeleteObjectCommand({
@@ -76,7 +87,12 @@ export async function deleteFile(key: string) {
   );
 }
 
-/** Returns whether an object exists at the given key (false on a 404). */
+/**
+ * Returns whether an object exists at the given key (false on a 404).
+ *
+ * @param key - The S3 object key to check.
+ * @returns True if the object exists, false if a 404 is returned.
+ */
 export async function objectExists(key: string): Promise<boolean> {
   try {
     await s3().send(new HeadObjectCommand({ Bucket: bucket(), Key: key }));
@@ -90,7 +106,14 @@ export async function objectExists(key: string): Promise<boolean> {
 const UPLOAD_URL_EXPIRY_S = 300;
 const DOWNLOAD_URL_EXPIRY_S = 3600;
 
-/** Generates a presigned PUT URL the client uses to upload a file directly. */
+/**
+ * Generates a presigned PUT URL the client uses to upload a file directly.
+ *
+ * @param key - The S3 object key to upload to.
+ * @param contentType - The MIME type of the file being uploaded.
+ * @param expiresIn - Expiry in seconds (default 300).
+ * @returns A presigned URL string.
+ */
 export async function getPresignedUploadUrl(
   key: string,
   contentType: string,
@@ -112,7 +135,14 @@ function sanitizeFilename(name: string): string {
   return name.replace(/["\\]/g, "").replace(/[\x00-\x1f]/g, "");
 }
 
-/** Generates a presigned GET URL the client uses to download a file directly. */
+/**
+ * Generates a presigned GET URL the client uses to download a file directly.
+ *
+ * @param key - The S3 object key to download.
+ * @param fileName - Optional download filename (sets Content-Disposition).
+ * @param expiresIn - Expiry in seconds (default 3600).
+ * @returns A presigned URL string.
+ */
 export async function getPresignedDownloadUrl(
   key: string,
   fileName?: string,

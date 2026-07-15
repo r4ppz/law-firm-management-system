@@ -40,6 +40,9 @@ interface UseModalFormReturn<TArgs> {
  * Callers must provide the `TArgs` generic explicitly (e.g.
  * `useModalForm<z.input<typeof SomeSchema>>`) because `submit` cannot infer it
  * from the payload — omitting it widens `submitForm` arguments to `unknown`.
+ *
+ * @typeParam TArgs - The payload type accepted by the Server Action.
+ * @returns An object with `isPending`, `submitForm`, and `handleCancel`.
  */
 export function useModalForm<TArgs>({
   submit,

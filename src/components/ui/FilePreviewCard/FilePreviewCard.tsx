@@ -12,7 +12,7 @@ import {
 } from "react-icons/fa6";
 import type { IconType } from "react-icons/lib";
 
-import { classifyFileType, formatFileSize, type FileCategory } from "@/lib/format";
+import { classifyFileType, formatFileSize, type FileCategory } from "@/lib/file-format";
 
 import styles from "./FilePreviewCard.module.css";
 

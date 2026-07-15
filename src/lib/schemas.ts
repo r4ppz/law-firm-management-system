@@ -38,6 +38,9 @@ interface ParentRefinementPayload {
 /**
  * Zod refinement asserting that exactly one parent (`case_id` XOR
  * `consultation_id`) is present.
+ *
+ * @param payload - The parent identifiers; must include exactly one of `case_id` or `consultation_id`.
+ * @returns True when exactly one parent is provided (XOR), false when both or neither are set.
  */
 export function exactlyOneParentRefinement(payload: ParentRefinementPayload): boolean {
   const { case_id, consultation_id } = payload;

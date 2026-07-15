@@ -11,6 +11,8 @@ export interface AuthenticatedUser {
 /**
  * Enforces an authenticated session and returns the verified user.
  *
+ * @returns The authenticated user projection.
+ *
  * Throws `"Unauthorized"` when the session is missing any required field
  * (`id`, `email`, `role`, `name`). Use at the top of Server Actions that need
  * the current user regardless of role.

@@ -6,7 +6,11 @@ export interface ActionStatusResponse {
   error?: string;
 }
 
-/** Status envelope that additionally carries the created or updated record. */
+/**
+ * Status envelope that additionally carries the created or updated record.
+ *
+ * @typeParam T - The shape of the payload carried on success.
+ */
 export interface ActionDataResponse<T> extends ActionStatusResponse {
   /** Payload returned to the caller on success (e.g. the persisted record). */
   data?: T;

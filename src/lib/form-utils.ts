@@ -10,18 +10,33 @@ import { z, type ZodType } from "zod";
  * or schema derivation inline.
  */
 
-/** Returns the trimmed string, or `undefined` when empty/whitespace-only. */
+/**
+ * Returns the trimmed string, or `undefined` when empty/whitespace-only.
+ *
+ * @param value - The raw input string.
+ * @returns The trimmed string, or `undefined` if only whitespace.
+ */
 export function optionalString(value: string): string | undefined {
   const trimmed = value.trim();
   return trimmed.length > 0 ? trimmed : undefined;
 }
 
-/** Returns the trimmed string, guaranteeing a non-empty value for required fields. */
+/**
+ * Trims the input. Non-empty validation is handled downstream by `requiredText`.
+ *
+ * @param value - The raw input string.
+ * @returns The trimmed string.
+ */
 export function requiredString(value: string): string {
   return value.trim();
 }
 
-/** Converts an `@internationalized/date` `CalendarDate` to a local-timezone `Date`. */
+/**
+ * Converts an `@internationalized/date` `CalendarDate` to a local-timezone `Date`.
+ *
+ * @param date - The calendar date from a DatePicker.
+ * @returns A JavaScript Date in the local timezone.
+ */
 export function toDateValue(date: CalendarDate): Date {
   return date.toDate(getLocalTimeZone());
 }
@@ -29,6 +44,11 @@ export function toDateValue(date: CalendarDate): Date {
 /**
  * Resolves a React Aria `Key` (or `null`) to its corresponding enum member,
  * falling back to the first enum member when the key is missing.
+ *
+ * @typeParam E - The enum const-object (e.g. `typeof TaskStatus`).
+ * @param key - The selected key, or `null`.
+ * @param enumObject - The enum const-object to look up.
+ * @returns The matching enum member, or the first member when key is `null`.
  */
 export function coerceEnum<E extends Record<string, string>>(
   key: Key | null,
@@ -40,6 +60,11 @@ export function coerceEnum<E extends Record<string, string>>(
 /**
  * Builds a `Select` `onChange` handler that maps the selected `Key` to an enum
  * member and forwards it to `onChange`. Null selections are ignored.
+ *
+ * @typeParam E - The enum const-object (e.g. `typeof TaskStatus`).
+ * @param enumObject - The enum const-object to map keys against.
+ * @param onChange - Callback receiving the resolved enum member.
+ * @returns A handler compatible with `Select`'s `onSelectionChange`.
  */
 export function selectEnumHandler<E extends Record<string, string>>(
   enumObject: E,
@@ -50,7 +75,12 @@ export function selectEnumHandler<E extends Record<string, string>>(
   };
 }
 
-/** Collects React Aria selection `Key`s into a `Set<string>`. */
+/**
+ * Collects React Aria selection `Key`s into a `Set<string>`.
+ *
+ * @param keys - An iterable of React Aria `Key`s (e.g. from `selectedKeys`).
+ * @returns A `Set` of stringified keys.
+ */
 export function keysToSet(keys: Iterable<Key>): Set<string> {
   return new Set(Array.from(keys, String));
 }
@@ -59,6 +89,10 @@ export function keysToSet(keys: Iterable<Key>): Set<string> {
  * Builds a required, trimmed string schema with user-facing validation
  * messages. An empty/whitespace value surfaces `${label} is required`; an
  * over-length value surfaces `${label} must be at most ${max} characters`.
+ *
+ * @param max - Maximum allowed characters.
+ * @param label - Human-readable field name (capitalized).
+ * @returns A Zod string schema.
  */
 export function requiredText(max: number, label: string): z.ZodString {
   return z
@@ -82,6 +116,12 @@ export function optionalText(
   label: string,
   withDefault: true,
 ): z.ZodDefault<z.ZodOptional<z.ZodString>>;
+/**
+ * @param max - Maximum allowed characters.
+ * @param label - Human-readable field name (capitalized).
+ * @param withDefault - When true, defaults to an empty string.
+ * @returns An optional Zod string schema, optionally with a default.
+ */
 export function optionalText(max: number, label: string, withDefault = false) {
   const base = z.string().trim().max(max, `${label} must be at most ${max} characters`).optional();
   return withDefault ? base.default("") : base;
@@ -90,6 +130,10 @@ export function optionalText(max: number, label: string, withDefault = false) {
 /**
  * Builds a positive number schema (coerced from input) with user-facing
  * messages for non-numeric, non-positive, and over-maximum values.
+ *
+ * @param max - Maximum allowed value (inclusive).
+ * @param label - Human-readable field name (capitalized).
+ * @returns A Zod number schema that coerces from string input.
  */
 export function positiveNumber(max: number, label: string) {
   return z.coerce
@@ -101,6 +145,11 @@ export function positiveNumber(max: number, label: string) {
 /**
  * Builds a required enum schema with a user-facing message when the value is
  * missing or outside the allowed set.
+ *
+ * @typeParam E - The enum const-object (e.g. `typeof TaskStatus`).
+ * @param enumObject - The enum const-object to derive allowed values from.
+ * @param label - Human-readable field name (capitalized).
+ * @returns A Zod enum schema.
  */
 export function requiredEnum<E extends Record<string, string>>(enumObject: E, label: string) {
   return z.enum(enumObject, { error: `Select a ${label.toLowerCase()}` });
@@ -109,19 +158,27 @@ export function requiredEnum<E extends Record<string, string>>(enumObject: E, la
 /**
  * Builds a required, trimmed email schema with user-facing messages for
  * malformed or over-length values.
+ *
+ * @param label - Human-readable field name (capitalized, e.g. "Email").
+ * @returns A Zod string schema with email validation.
  */
 export function emailText(label: string) {
   return z
-    .email({ error: `Enter a valid ${label.toLowerCase()}` })
+    .string()
     .trim()
     .min(1, `${label} is required`)
-    .max(255, `${label} must be at most 255 characters`);
+    .max(255, `${label} must be at most 255 characters`)
+    .pipe(z.email({ error: `Enter a valid ${label.toLowerCase()}` }));
 }
 
 /**
  * Derives a React Aria `validate` function from a Zod sub-schema. Empty
  * strings are normalized to `undefined` so optional fields validate cleanly,
  * returning `null` on success or the first issue message on failure.
+ *
+ * @typeParam S - The Zod schema type to validate against.
+ * @param schema - A Zod schema (e.g. `requiredString`).
+ * @returns A validate function compatible with RAC `validate` props.
  */
 export function createFieldValidator<S extends ZodType>(schema: S) {
   return (value: unknown): string | null => {
