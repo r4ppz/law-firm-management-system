@@ -1,0 +1,76 @@
+import { NotificationType } from "@/generated/prisma/browser";
+import { sendEmail } from "@/lib/email";
+import {
+  caseAssignedTemplate,
+  consultationCreatedTemplate,
+  consultationUpdatedTemplate,
+  milestoneTemplate,
+  taskAssignedTemplate,
+  taskUpdatedTemplate,
+} from "@/lib/email-templates";
+import { prisma } from "@/lib/prisma";
+
+import { createNotifications } from "./mutations";
+import type { NotificationDispatchPayload } from "./schemas";
+
+function pickTemplate(type: NotificationType) {
+  switch (type) {
+    case NotificationType.ConsultationCreated:
+    case NotificationType.ConsultationReminder:
+      return consultationCreatedTemplate;
+    case NotificationType.ConsultationUpdated:
+      return consultationUpdatedTemplate;
+    case NotificationType.MilestoneDueSoon:
+    case NotificationType.MilestoneCompleted:
+    case NotificationType.MilestoneOverdue:
+      return milestoneTemplate;
+    case NotificationType.TaskAssigned:
+      return taskAssignedTemplate;
+    case NotificationType.TaskStatusChanged:
+      return taskUpdatedTemplate;
+    case NotificationType.CaseAssigned:
+      return caseAssignedTemplate;
+    default:
+      return null;
+  }
+}
+
+export async function dispatchNotifications(
+  payload: NotificationDispatchPayload,
+  actorUserId: string,
+) {
+  const result = await createNotifications(payload);
+
+  const actor = await prisma.user.findUnique({
+    where: { id: actorUserId },
+    select: { name: true },
+  });
+  const actorName = actor?.name ?? "System";
+
+  const recipients = await prisma.user.findMany({
+    where: { id: { in: payload.userIds } },
+    select: { id: true, name: true, email: true },
+  });
+
+  const template = pickTemplate(payload.type);
+
+  for (const user of recipients) {
+    try {
+      if (!user.email || !template) continue;
+
+      const html = template({
+        toName: user.name ?? user.email,
+        actorName,
+        title: payload.title,
+        message: payload.message,
+        actionUrl: payload.actionUrl,
+      });
+
+      await sendEmail({ to: user.email, subject: payload.title, html });
+    } catch (err) {
+      console.error(`Failed to send email notification to user ${user.id}:`, err);
+    }
+  }
+
+  return result;
+}

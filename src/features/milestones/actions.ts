@@ -5,6 +5,9 @@ import { after } from "next/server";
 import { z } from "zod";
 
 import { createAuditLog } from "@/features/audit/mutations";
+import { getCaseAssigneeIds } from "@/features/cases/queries";
+import { dispatchNotifications } from "@/features/notifications/dispatch";
+import { NotificationType } from "@/generated/prisma/browser";
 import type { ActionDataResponse, ActionStatusResponse } from "@/lib/action-response";
 import { requireAuth } from "@/lib/auth-guards";
 
@@ -49,15 +52,33 @@ export async function createMilestoneAction(
       created_by_user_id: session.id,
     });
 
-    after(() =>
-      createAuditLog({
+    after(async () => {
+      await createAuditLog({
         actorUserId: session.id,
         action: "milestone.created",
         entityType: "Case",
         entityId: case_id,
         details: `Created milestone: "${title}"`,
-      }).catch(console.error),
-    );
+      }).catch(console.error);
+
+      try {
+        const assigneeIds = await getCaseAssigneeIds(case_id);
+        await dispatchNotifications(
+          {
+            userIds: assigneeIds,
+            type: NotificationType.MilestoneDueSoon,
+            title: `New milestone: ${title}`,
+            message: `Milestone "${title}" was created and is due ${due_date.toLocaleDateString()}`,
+            actionUrl: `/case/${case_id}`,
+            caseId: case_id,
+            milestoneId: milestone.id,
+          },
+          session.id,
+        );
+      } catch (err) {
+        console.error("Failed to dispatch notification:", err);
+      }
+    });
 
     revalidatePath(`/case/${case_id}`);
 
@@ -90,15 +111,37 @@ export async function updateMilestoneAction(
       status,
     });
 
-    after(() =>
-      createAuditLog({
+    after(async () => {
+      await createAuditLog({
         actorUserId: session.id,
         action: "milestone.updated",
         entityType: "Case",
         entityId: existing.case_id,
         details: `Updated milestone: "${title}"`,
-      }).catch(console.error),
-    );
+      }).catch(console.error);
+
+      try {
+        const assigneeIds = await getCaseAssigneeIds(existing.case_id);
+        const notificationType =
+          status === "Done"
+            ? NotificationType.MilestoneCompleted
+            : NotificationType.MilestoneDueSoon;
+        await dispatchNotifications(
+          {
+            userIds: assigneeIds,
+            type: notificationType,
+            title: `Milestone ${status === "Done" ? "completed" : "updated"}: ${title}`,
+            message: `Milestone "${title}" status changed to ${status}`,
+            actionUrl: `/case/${existing.case_id}`,
+            caseId: existing.case_id,
+            milestoneId: existing.id,
+          },
+          session.id,
+        );
+      } catch (err) {
+        console.error("Failed to dispatch notification:", err);
+      }
+    });
 
     revalidatePath(`/case/${existing.case_id}`);
 
