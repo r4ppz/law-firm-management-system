@@ -10,7 +10,7 @@ export const TaskIdSchema = z.object({
 export const TaskCreatePayloadSchema = z.object({
   title: requiredText(500, "Title"),
   description: optionalText(10000, "Description"),
-  status: z.enum(TaskStatus).optional().default(TaskStatus.Pending),
+  status: requiredEnum(TaskStatus, "Status").optional().default(TaskStatus.Pending),
   case_id: z.uuid(),
   assignee_ids: z.array(z.uuid()).optional(),
 });

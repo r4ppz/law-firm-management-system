@@ -11,7 +11,9 @@ export const MilestoneCreatePayloadSchema = z.object({
   title: requiredText(500, "Title"),
   description: optionalText(10000, "Description"),
   due_date: z.coerce.date(),
-  status: z.enum(CaseMilestoneStatus).optional().default(CaseMilestoneStatus.Pending),
+  status: requiredEnum(CaseMilestoneStatus, "Status")
+    .optional()
+    .default(CaseMilestoneStatus.Pending),
   case_id: z.uuid(),
 });
 
