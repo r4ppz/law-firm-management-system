@@ -61,7 +61,8 @@ export function AddMilestoneModal({
     },
   });
 
-  async function handleSubmit() {
+  async function handleSubmit(event: React.SyntheticEvent) {
+    event.preventDefault();
     if (isPending) return;
 
     await submitForm({

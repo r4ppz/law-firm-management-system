@@ -86,7 +86,8 @@ export function AddCaseModal({ isOpen, onOpenChange, onSuccess }: AddCaseModalPr
     setCaseFields((prev) => ({ ...prev, [key]: value }));
   }
 
-  async function handleSubmit() {
+  async function handleSubmit(event: React.SyntheticEvent) {
+    event.preventDefault();
     if (isPending) return;
 
     await submitForm({

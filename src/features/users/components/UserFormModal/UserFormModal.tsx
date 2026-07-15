@@ -51,7 +51,8 @@ export function UserFormModal({ mode, user, isOpen, onOpenChange, onSuccess }: U
     schema: CreateUserSchema,
   });
 
-  async function handleSubmit() {
+  async function handleSubmit(event: React.SyntheticEvent) {
+    event.preventDefault();
     if (isPending) return;
     if (!email || !role) return;
 

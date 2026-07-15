@@ -90,7 +90,8 @@ export function AddConsultationModal({
     setClient((prev) => ({ ...prev, [key]: value }));
   }
 
-  async function handleSubmit() {
+  async function handleSubmit(event: React.SyntheticEvent) {
+    event.preventDefault();
     if (isPending) return;
 
     await submitForm({

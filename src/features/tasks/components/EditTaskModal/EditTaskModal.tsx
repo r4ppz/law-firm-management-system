@@ -65,7 +65,8 @@ export function EditTaskModal({
     onOpenChange(false);
   }
 
-  async function handleSave() {
+  async function handleSave(event: React.SyntheticEvent) {
+    event.preventDefault();
     if (isPending) return;
 
     await submitForm({
