@@ -17,7 +17,7 @@ import {
   toDateValue,
 } from "@/lib/form-utils";
 
-const SampleStatus = { Active: "Active", Inactive: "Inactive" } as const;
+const SampleStatus = { Active: "active", Inactive: "inactive" } as const;
 
 describe("optionalString", () => {
   it("trims and returns undefined for empty/whitespace values", () => {
@@ -37,8 +37,8 @@ describe("requiredString", () => {
 
 describe("coerceEnum", () => {
   it("maps a select key to its enum value", () => {
-    expect(coerceEnum("Active", SampleStatus)).toBe("Active");
-    expect(coerceEnum("Inactive", SampleStatus)).toBe("Inactive");
+    expect(coerceEnum("Active", SampleStatus)).toBe("active");
+    expect(coerceEnum("Inactive", SampleStatus)).toBe("inactive");
   });
 });
 
@@ -46,7 +46,7 @@ describe("selectEnumHandler", () => {
   it("invokes the callback with the coerced enum value", () => {
     const onChange = vi.fn();
     selectEnumHandler(SampleStatus, onChange)("Active");
-    expect(onChange).toHaveBeenCalledWith("Active");
+    expect(onChange).toHaveBeenCalledWith("active");
   });
 
   it("ignores null selection", () => {

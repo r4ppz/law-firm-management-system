@@ -88,6 +88,10 @@ export function useModalForm<TArgs>({
     }
   }
 
+  /**
+   * Resets the form state and closes the modal.
+   * Performs no action while a submission is in flight.
+   */
   function handleCancel() {
     if (isPending) return;
     reset?.();

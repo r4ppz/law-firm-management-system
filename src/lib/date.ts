@@ -8,6 +8,9 @@ const DATE_ONLY_RE = /^\d{4}-\d{2}-\d{2}$/;
  * Parses a `Date` or ISO string into a local-timezone `Date`.
  * Date-only strings (`YYYY-MM-DD`) are treated as local calendar dates
  * to avoid the UTC-to-local shift that `new Date("YYYY-MM-DD")` produces.
+ *
+ * @param date - A Date object or ISO 8601 string.
+ * @returns A Date object in the local timezone.
  */
 function toLocalDate(date: Date | string): Date {
   if (typeof date !== "string") return date;

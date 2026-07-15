@@ -26,7 +26,11 @@ function getRequiredEnvVar(name: string): string {
   return value;
 }
 
-/** Constructs a configured {@link S3Client} from the S3 environment variables. */
+/**
+ * Constructs a configured {@link S3Client} from the S3 environment variables.
+ *
+ * @returns A configured S3Client instance.
+ */
 function getS3Client() {
   const endpoint = getRequiredEnvVar("S3_ENDPOINT");
   const region = getRequiredEnvVar("S3_REGION");
@@ -44,7 +48,11 @@ function getS3Client() {
 
 let s3Client: S3Client;
 
-/** Returns the lazily-initialized singleton S3 client. */
+/**
+ * Returns the lazily-initialized singleton S3 client.
+ *
+ * @returns The singleton S3Client instance.
+ */
 function s3(): S3Client {
   if (!s3Client) {
     s3Client = getS3Client();
@@ -52,7 +60,11 @@ function s3(): S3Client {
   return s3Client;
 }
 
-/** Returns the configured S3 bucket name. */
+/**
+ * Returns the configured S3 bucket name.
+ *
+ * @returns The S3 bucket name string.
+ */
 function bucket(): string {
   return getRequiredEnvVar("S3_BUCKET");
 }
@@ -130,7 +142,12 @@ export async function getPresignedUploadUrl(
   );
 }
 
-/** Strips control characters and quotes that are unsafe for a download filename. */
+/**
+ * Strips control characters and quotes that are unsafe for a download filename.
+ *
+ * @param name - The raw filename to sanitize.
+ * @returns The sanitized filename string.
+ */
 function sanitizeFilename(name: string): string {
   return name.replace(/["\\]/g, "").replace(/[\x00-\x1f]/g, "");
 }
