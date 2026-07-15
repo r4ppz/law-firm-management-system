@@ -20,8 +20,8 @@ import { useModalForm } from "@/lib/useModalForm";
 import styles from "./UserFormModal.module.css";
 
 const ROLE_ENUM = Object.fromEntries(CREATABLE_ROLES.map((role) => [role, role])) as Record<
-  Role,
-  Role
+  (typeof CREATABLE_ROLES)[number],
+  (typeof CREATABLE_ROLES)[number]
 >;
 
 interface UserFormModalProps {

@@ -1,12 +1,12 @@
 import type { Role } from "@/generated/prisma/client";
 
-export const CREATABLE_ROLES: Role[] = [
+export const CREATABLE_ROLES = [
   "Admin",
   "BranchManager",
   "Lawyer",
   "Paralegal",
   "ProcessServer",
-];
+] as const;
 
 export const roleLabels: Record<Role, string> = {
   Dev: "Dev",
