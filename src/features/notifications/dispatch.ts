@@ -54,21 +54,23 @@ export async function dispatchNotifications(
 
   const template = pickTemplate(payload.type);
 
-  for (const user of recipients) {
-    try {
-      if (!user.email || !template) continue;
+  if (template) {
+    for (const user of recipients) {
+      try {
+        if (!user.email) continue;
 
-      const html = template({
-        toName: user.name ?? user.email,
-        actorName,
-        title: payload.title,
-        message: payload.message,
-        actionUrl: payload.actionUrl,
-      });
+        const html = template({
+          toName: user.name ?? user.email,
+          actorName,
+          title: payload.title,
+          message: payload.message,
+          actionUrl: payload.actionUrl,
+        });
 
-      await sendEmail({ to: user.email, subject: payload.title, html });
-    } catch (err) {
-      console.error(`Failed to send email notification to user ${user.id}:`, err);
+        await sendEmail({ to: user.email, subject: payload.title, html });
+      } catch (err) {
+        console.error(`Failed to send email notification to user ${user.id}:`, err);
+      }
     }
   }
 
