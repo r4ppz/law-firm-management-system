@@ -2,6 +2,8 @@ import "dotenv/config";
 
 import { PrismaPg } from "@prisma/adapter-pg";
 
+import { getRequiredEnvVar } from "@/lib/env";
+
 import { PrismaClient } from "../generated/prisma/client";
 
 /**
@@ -12,7 +14,7 @@ import { PrismaClient } from "../generated/prisma/client";
  * (queries/mutations); never import it into client components.
  */
 const adapter = new PrismaPg({
-  connectionString: process.env.DATABASE_URL!,
+  connectionString: getRequiredEnvVar("DATABASE_URL"),
 });
 
 export const prisma = new PrismaClient({ adapter });

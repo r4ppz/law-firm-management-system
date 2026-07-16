@@ -8,6 +8,8 @@ import {
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
+import { getEnvBoolean, getRequiredEnvVar } from "@/lib/env";
+
 /**
  * S3-compatible object storage client.
  *
@@ -16,15 +18,6 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
  * All file bytes are transferred client-side directly to the bucket via the
  * presigned URLs; this module never streams payloads through the runtime.
  */
-
-/** Reads a required S3 env var, throwing a clear error when it is missing. */
-function getRequiredEnvVar(name: string): string {
-  const value = process.env[name];
-  if (!value) {
-    throw new Error(`Missing required S3 environment variable: ${name}. Check your .env file.`);
-  }
-  return value;
-}
 
 /**
  * Constructs a configured {@link S3Client} from the S3 environment variables.
@@ -36,7 +29,7 @@ function getS3Client() {
   const region = getRequiredEnvVar("S3_REGION");
   const accessKeyId = getRequiredEnvVar("S3_ACCESS_KEY");
   const secretAccessKey = getRequiredEnvVar("S3_SECRET_KEY");
-  const forcePathStyle = process.env.S3_FORCE_PATH_STYLE === "true";
+  const forcePathStyle = getEnvBoolean("S3_FORCE_PATH_STYLE");
 
   return new S3Client({
     region,

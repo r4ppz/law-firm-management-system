@@ -7,24 +7,17 @@
 
 import nodemailer from "nodemailer";
 
-/** Reads a required email env var, throwing a clear error when it is missing. */
-function getRequiredEnvVar(name: string): string {
-  const value = process.env[name];
-  if (!value) {
-    throw new Error(`Missing required email environment variable: ${name}. Check your .env file.`);
-  }
-  return value;
-}
+import { getEnvBoolean, getOptionalInteger, getRequiredEnvVar } from "@/lib/env";
 
 /** Assembles the SMTP configuration object from environment variables. */
 function getEmailConfig() {
   return {
     host: getRequiredEnvVar("EMAIL_HOST"),
-    port: Number(process.env.EMAIL_PORT) || 587,
+    port: getOptionalInteger("EMAIL_PORT", 587),
     user: getRequiredEnvVar("EMAIL_USER"),
     pass: getRequiredEnvVar("EMAIL_PASS"),
     from: getRequiredEnvVar("EMAIL_FROM"),
-    secure: process.env.EMAIL_SECURE === "true",
+    secure: getEnvBoolean("EMAIL_SECURE"),
   };
 }
 
