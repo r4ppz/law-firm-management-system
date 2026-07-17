@@ -93,7 +93,7 @@ export function formatDateTime(date: Date | string): string {
 export function timeAgo(date: Date | string): string {
   const d = toLocalDate(date);
   const diffMs = Date.now() - d.getTime();
-  const diffSec = Math.floor(diffMs / 1000);
+  const diffSec = Math.max(0, Math.floor(diffMs / 1000));
 
   if (diffSec < 60) return `${diffSec}s ago`;
   const diffMin = Math.floor(diffSec / 60);
