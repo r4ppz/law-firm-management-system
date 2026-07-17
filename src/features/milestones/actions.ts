@@ -53,13 +53,17 @@ export async function createMilestoneAction(
     });
 
     after(async () => {
-      await createAuditLog({
-        actorUserId: session.id,
-        action: "milestone.created",
-        entityType: "Case",
-        entityId: case_id,
-        details: `Created milestone: "${title}"`,
-      }).catch(console.error);
+      try {
+        await createAuditLog({
+          actorUserId: session.id,
+          action: "milestone.created",
+          entityType: "Case",
+          entityId: case_id,
+          details: `Created milestone: "${title}"`,
+        });
+      } catch (err) {
+        console.error("Failed to log milestone.created audit for Case", case_id, err);
+      }
 
       try {
         const assigneeIds = await getCaseAssigneeIds(case_id);
@@ -112,13 +116,17 @@ export async function updateMilestoneAction(
     });
 
     after(async () => {
-      await createAuditLog({
-        actorUserId: session.id,
-        action: "milestone.updated",
-        entityType: "Case",
-        entityId: existing.case_id,
-        details: `Updated milestone: "${title}"`,
-      }).catch(console.error);
+      try {
+        await createAuditLog({
+          actorUserId: session.id,
+          action: "milestone.updated",
+          entityType: "Case",
+          entityId: existing.case_id,
+          details: `Updated milestone: "${title}"`,
+        });
+      } catch (err) {
+        console.error("Failed to log milestone.updated audit for Case", existing.case_id, err);
+      }
 
       try {
         const assigneeIds = await getCaseAssigneeIds(existing.case_id);

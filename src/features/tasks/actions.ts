@@ -55,13 +55,17 @@ export async function createTaskAction(
     });
 
     after(async () => {
-      await createAuditLog({
-        actorUserId: session.id,
-        action: "task.created",
-        entityType: "Case",
-        entityId: case_id,
-        details: `Created task: "${title}"`,
-      }).catch(console.error);
+      try {
+        await createAuditLog({
+          actorUserId: session.id,
+          action: "task.created",
+          entityType: "Case",
+          entityId: case_id,
+          details: `Created task: "${title}"`,
+        });
+      } catch (err) {
+        console.error("Failed to log task.created audit for Case", case_id, err);
+      }
 
       try {
         const assigneeIds = parsed.data.assignee_ids ?? [];
@@ -109,13 +113,17 @@ export async function updateTaskAction(
     await updateTask(taskId, { title, description, status, assignee_ids });
 
     after(async () => {
-      await createAuditLog({
-        actorUserId: session.id,
-        action: "task.updated",
-        entityType: "Case",
-        entityId: existing.case_id,
-        details: `Updated task: "${title}"`,
-      }).catch(console.error);
+      try {
+        await createAuditLog({
+          actorUserId: session.id,
+          action: "task.updated",
+          entityType: "Case",
+          entityId: existing.case_id,
+          details: `Updated task: "${title}"`,
+        });
+      } catch (err) {
+        console.error("Failed to log task.updated audit for Case", existing.case_id, err);
+      }
 
       try {
         const assigneeIds = parsed.data.assignee_ids ?? [];

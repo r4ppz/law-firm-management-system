@@ -206,13 +206,17 @@ export async function createCaseAction(
     });
 
     after(async () => {
-      await createAuditLog({
-        actorUserId: session.id,
-        action: "case.created",
-        entityType: "Case",
-        entityId: createdCase.id,
-        details: `Created case: "${case_title}"`,
-      }).catch(console.error);
+      try {
+        await createAuditLog({
+          actorUserId: session.id,
+          action: "case.created",
+          entityType: "Case",
+          entityId: createdCase.id,
+          details: `Created case: "${case_title}"`,
+        });
+      } catch (err) {
+        console.error("Failed to log case.created audit for Case", createdCase.id, err);
+      }
 
       try {
         const adminIds = await getActiveUserIdsByRoles([Role.Admin, Role.BranchManager]);
@@ -261,13 +265,17 @@ export async function createCaseWithClientAction(
     });
 
     after(async () => {
-      await createAuditLog({
-        actorUserId: session.id,
-        action: "case.created",
-        entityType: "Case",
-        entityId: createdWithClient.id,
-        details: `Created case: "${caseData.case_title}" with client: "${client.name}"`,
-      }).catch(console.error);
+      try {
+        await createAuditLog({
+          actorUserId: session.id,
+          action: "case.created",
+          entityType: "Case",
+          entityId: createdWithClient.id,
+          details: `Created case: "${caseData.case_title}" with client: "${client.name}"`,
+        });
+      } catch (err) {
+        console.error("Failed to log case.created audit for Case", createdWithClient.id, err);
+      }
 
       try {
         const adminIds = await getActiveUserIdsByRoles([Role.Admin, Role.BranchManager]);

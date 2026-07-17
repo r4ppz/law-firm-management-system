@@ -173,13 +173,21 @@ export async function createConsultationAction(
     });
 
     after(async () => {
-      await createAuditLog({
-        actorUserId: session.id,
-        action: "consultation.created",
-        entityType: "Consultation",
-        entityId: createdConsultation.id,
-        details: `Created consultation: "${concern}"`,
-      }).catch(console.error);
+      try {
+        await createAuditLog({
+          actorUserId: session.id,
+          action: "consultation.created",
+          entityType: "Consultation",
+          entityId: createdConsultation.id,
+          details: `Created consultation: "${concern}"`,
+        });
+      } catch (err) {
+        console.error(
+          "Failed to log consultation.created audit for Consultation",
+          createdConsultation.id,
+          err,
+        );
+      }
 
       try {
         const adminIds = await getActiveUserIdsByRoles([Role.Admin, Role.BranchManager]);
@@ -225,13 +233,21 @@ export async function createConsultationWithClientAction(
     });
 
     after(async () => {
-      await createAuditLog({
-        actorUserId: session.id,
-        action: "consultation.created",
-        entityType: "Consultation",
-        entityId: createdWithClient.id,
-        details: `Created consultation: "${parsed.data.consultation.concern}" with client: "${parsed.data.client.name}"`,
-      }).catch(console.error);
+      try {
+        await createAuditLog({
+          actorUserId: session.id,
+          action: "consultation.created",
+          entityType: "Consultation",
+          entityId: createdWithClient.id,
+          details: `Created consultation: "${parsed.data.consultation.concern}" with client: "${parsed.data.client.name}"`,
+        });
+      } catch (err) {
+        console.error(
+          "Failed to log consultation.created audit for Consultation",
+          createdWithClient.id,
+          err,
+        );
+      }
 
       try {
         const adminIds = await getActiveUserIdsByRoles([Role.Admin, Role.BranchManager]);
@@ -278,13 +294,21 @@ export async function updateConsultationAction(
     await updateConsultation({ consultationId, client_id, concern, booking_datetime, status });
 
     after(async () => {
-      await createAuditLog({
-        actorUserId: session.id,
-        action: "consultation.updated",
-        entityType: "Consultation",
-        entityId: consultationId,
-        details: `Updated consultation: "${concern}"`,
-      }).catch(console.error);
+      try {
+        await createAuditLog({
+          actorUserId: session.id,
+          action: "consultation.updated",
+          entityType: "Consultation",
+          entityId: consultationId,
+          details: `Updated consultation: "${concern}"`,
+        });
+      } catch (err) {
+        console.error(
+          "Failed to log consultation.updated audit for Consultation",
+          consultationId,
+          err,
+        );
+      }
 
       try {
         const adminIds = await getActiveUserIdsByRoles([Role.Admin, Role.BranchManager]);
@@ -334,13 +358,21 @@ export async function updateConsultationWithClientAction(
     });
 
     after(async () => {
-      await createAuditLog({
-        actorUserId: session.id,
-        action: "consultation.updated",
-        entityType: "Consultation",
-        entityId: consultation_id,
-        details: `Updated consultation: "${consultation.concern}" with client: "${client.name}"`,
-      }).catch(console.error);
+      try {
+        await createAuditLog({
+          actorUserId: session.id,
+          action: "consultation.updated",
+          entityType: "Consultation",
+          entityId: consultation_id,
+          details: `Updated consultation: "${consultation.concern}" with client: "${client.name}"`,
+        });
+      } catch (err) {
+        console.error(
+          "Failed to log consultation.updated audit for Consultation",
+          consultation_id,
+          err,
+        );
+      }
 
       try {
         const adminIds = await getActiveUserIdsByRoles([Role.Admin, Role.BranchManager]);
