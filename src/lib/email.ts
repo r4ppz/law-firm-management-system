@@ -9,7 +9,11 @@ import nodemailer from "nodemailer";
 
 import { getEnvBoolean, getOptionalInteger, getRequiredEnvVar } from "@/lib/env";
 
-/** Assembles the SMTP configuration object from environment variables. */
+/**
+ * Assembles the SMTP configuration object from environment variables.
+ *
+ * @returns The SMTP configuration object with host, port, credentials, and from address.
+ */
 function getEmailConfig() {
   return {
     host: getRequiredEnvVar("EMAIL_HOST"),
@@ -38,7 +42,11 @@ function createTransport(config: ReturnType<typeof getEmailConfig>) {
 
 let transporter: nodemailer.Transporter;
 
-/** Returns the singleton Nodemailer transporter, creating it on first call. */
+/**
+ * Returns the singleton Nodemailer transporter, creating it on first call.
+ *
+ * @returns A configured Nodemailer transport singleton.
+ */
 function getTransporter(): nodemailer.Transporter {
   if (!transporter) {
     const config = getEmailConfig();
@@ -61,6 +69,7 @@ export interface SendEmailPayload {
  * Sends an email through the configured SMTP transport.
  *
  * @param payload - The recipient, subject, and HTML body.
+ * @returns A promise that resolves once the email is sent.
  */
 export async function sendEmail(payload: SendEmailPayload): Promise<void> {
   const config = getEmailConfig();
