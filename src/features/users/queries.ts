@@ -21,6 +21,23 @@ const userSelect = {
   created_at: true,
 } as const;
 
+export const getUserNameById = cache(async (id: string): Promise<string | null> => {
+  const user = await prisma.user.findUnique({
+    where: { id },
+    select: { name: true },
+  });
+  return user?.name ?? null;
+});
+
+export const getUsersByIds = cache(
+  async (ids: string[]): Promise<{ id: string; name: string | null; email: string | null }[]> => {
+    return prisma.user.findMany({
+      where: { id: { in: ids } },
+      select: { id: true, name: true, email: true },
+    });
+  },
+);
+
 export const getUserById = cache(
   async (
     id: string,

@@ -1,3 +1,4 @@
+import { getUserNameById, getUsersByIds } from "@/features/users/queries";
 import { NotificationType } from "@/generated/prisma/browser";
 import { sendEmail } from "@/lib/email";
 import {
@@ -8,7 +9,6 @@ import {
   taskAssignedTemplate,
   taskUpdatedTemplate,
 } from "@/lib/email-templates";
-import { prisma } from "@/lib/prisma";
 
 import { createNotifications } from "./mutations";
 import type { NotificationDispatchPayload } from "./schemas";
@@ -41,16 +41,9 @@ export async function dispatchNotifications(
 ) {
   const result = await createNotifications(payload);
 
-  const actor = await prisma.user.findUnique({
-    where: { id: actorUserId },
-    select: { name: true },
-  });
-  const actorName = actor?.name ?? "System";
+  const actorName = (await getUserNameById(actorUserId)) ?? "System";
 
-  const recipients = await prisma.user.findMany({
-    where: { id: { in: payload.userIds } },
-    select: { id: true, name: true, email: true },
-  });
+  const recipients = await getUsersByIds(payload.userIds);
 
   const template = pickTemplate(payload.type);
 
