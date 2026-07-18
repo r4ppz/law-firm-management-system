@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Dialog, DialogTrigger, Heading } from "react-aria-components";
 import { FaBell } from "react-icons/fa6";
 
@@ -29,6 +29,8 @@ export function NotificationBell({ initialUnreadCount }: NotificationBellProps) 
   const [notifications, setNotifications] = useState<NotificationRow[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const pendingIdsRef = useRef(new Set<string>());
+  const [pendingIds, setPendingIds] = useState(new Set<string>());
 
   useEffect(() => {
     let cancelled = false;
@@ -58,6 +60,9 @@ export function NotificationBell({ initialUnreadCount }: NotificationBellProps) 
   }, [isOpen]);
 
   async function handleMarkRead(notificationId: string, actionUrl: string | null) {
+    if (pendingIdsRef.current.has(notificationId)) return;
+    pendingIdsRef.current.add(notificationId);
+    setPendingIds(new Set(pendingIdsRef.current));
     try {
       const result = await markNotificationReadAction({ notificationId });
       if (result.success) {
@@ -74,6 +79,9 @@ export function NotificationBell({ initialUnreadCount }: NotificationBellProps) 
       }
     } catch {
       queue.add({ title: "Failed to mark notification as read" }, { timeout: 5000 });
+    } finally {
+      pendingIdsRef.current.delete(notificationId);
+      setPendingIds(new Set(pendingIdsRef.current));
     }
   }
 
@@ -127,6 +135,7 @@ export function NotificationBell({ initialUnreadCount }: NotificationBellProps) 
                   key={n.id}
                   type="button"
                   className={styles.item}
+                  disabled={pendingIds.has(n.id)}
                   onClick={() => handleMarkRead(n.id, n.action_url)}
                 >
                   <div className={styles.itemContent}>
