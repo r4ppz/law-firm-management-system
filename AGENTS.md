@@ -3,6 +3,7 @@
 - Never commit, push, or create PRs unless explicitly asked.
 - Read the actual file first. Don't assume you know what's in it.
 - After making changes, run `pnpm validate` + `pnpm build` and loop (fix issues, re-run until passing).
+- Stop validating/linting/building on trivial changes like DOCS, CSS, TEXT, maybe format.
 
 ## Commands
 
