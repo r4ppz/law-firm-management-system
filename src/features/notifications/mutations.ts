@@ -10,7 +10,7 @@ type TransactionClient = Omit<
 export async function createNotifications(
   data: NotificationDispatchPayload,
   tx?: TransactionClient,
-) {
+): Promise<{ count: number }> {
   const client = tx || prisma;
 
   const records = data.userIds.map((userId) => ({
@@ -29,14 +29,14 @@ export async function createNotifications(
   return { count: result.count };
 }
 
-export async function markNotificationRead(notificationId: string, userId: string) {
+export async function markNotificationRead(notificationId: string, userId: string): Promise<void> {
   await prisma.notification.updateMany({
     where: { id: notificationId, user_id: userId },
     data: { is_read: true },
   });
 }
 
-export async function markAllNotificationsRead(userId: string) {
+export async function markAllNotificationsRead(userId: string): Promise<void> {
   await prisma.notification.updateMany({
     where: { user_id: userId, is_read: false },
     data: { is_read: true },
