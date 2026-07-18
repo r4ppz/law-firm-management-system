@@ -38,7 +38,7 @@
 
 - `src/app/page.tsx` — unauthenticated login page.
 - `src/app/(dashboard)/` — authenticated section (Sidebar + Header shared layout). Dashboard routes: `dashboard/`, `case/`, `consultation/`, `user/`.
-- API Routes — Restricted strictly to framework orchestration (`src/app/api/auth/[...nextauth]/route.ts`). Do not create custom REST endpoints under any circumstances.
+- API Routes — Restricted strictly to framework orchestration (`src/app/api/auth/[...nextauth]/route.ts`) and scheduled job webhooks (e.g. `src/app/api/cron/*/route.ts`). Do not create custom REST endpoints for application data under any circumstances.
 - Server Actions (`actions.ts`) — The primary mechanism for all data mutation, form submission, and infrastructure execution (including generating storage presigned URLs). Every structural modification to application state must route through a Server Action.
 - `src/features/` — domain logic organized by feature (`auth/`, `users/`, `consultations/`, `cases/`, etc.).
   - Each domain contains `actions.ts` (orchestration, validation, and authorization), `queries.ts` (Prisma read operations), and `mutations.ts` (Prisma write operations).
