@@ -5,7 +5,6 @@ import { useState } from "react";
 import { Button } from "@/components/ui/Button/Button";
 import { DropZone } from "@/components/ui/DropZone/DropZone";
 import { Modal } from "@/components/ui/Modal/Modal";
-import { ProgressCircle } from "@/components/ui/ProgressCircle/ProgressCircle";
 import { queue } from "@/components/ui/Toast/Toast";
 import {
   confirmDocumentUploadAction,
@@ -204,27 +203,20 @@ export function UploadDocumentModal({
           </Button>
 
           {failedEntries.length > 0 && pendingEntries.length === 0 ? (
-            <Button onPress={handleRetryFailed} isDisabled={isBusy || failedEntries.length === 0}>
-              {isBusy ? (
-                <>
-                  <ProgressCircle aria-label="Uploading" /> Uploading...
-                </>
-              ) : (
-                `Retry Failed (${failedEntries.length})`
-              )}
+            <Button
+              onPress={handleRetryFailed}
+              isDisabled={isBusy || failedEntries.length === 0}
+              isPending={isBusy}
+            >
+              {`Retry Failed (${failedEntries.length})`}
             </Button>
           ) : (
             <Button
               onPress={handleSubmitAll}
               isDisabled={!hasFiles || pendingEntries.length === 0 || isBusy}
+              isPending={isBusy}
             >
-              {isBusy ? (
-                <>
-                  <ProgressCircle aria-label="Uploading" /> Uploading...
-                </>
-              ) : (
-                `Upload All (${pendingEntries.length})`
-              )}
+              {`Upload All (${pendingEntries.length})`}
             </Button>
           )}
         </div>

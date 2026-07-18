@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 
+import { ProgressCircle } from "@/components/ui/ProgressCircle/ProgressCircle";
 import { CaseDetail } from "@/features/cases/components/CaseDetail/CaseDetail";
 import { getCaseOverviewById } from "@/features/cases/queries";
 
@@ -15,7 +16,7 @@ export default async function CaseDetailPage({ params }: Props) {
 
   return (
     <div className={styles.detailPage}>
-      <Suspense fallback={<div>Loading...</div>}>
+      <Suspense fallback={<ProgressCircle aria-label="Loading..." />}>
         <CaseDetail overview={overview} />
       </Suspense>
     </div>

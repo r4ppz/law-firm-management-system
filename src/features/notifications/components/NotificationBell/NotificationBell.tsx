@@ -7,6 +7,7 @@ import { FaBell } from "react-icons/fa6";
 
 import { Button } from "@/components/ui/Button/Button";
 import { Popover } from "@/components/ui/Popover/Popover";
+import { ProgressCircle } from "@/components/ui/ProgressCircle/ProgressCircle";
 import { queue } from "@/components/ui/Toast/Toast";
 import {
   getUnreadNotificationsAction,
@@ -126,7 +127,9 @@ export function NotificationBell({ initialUnreadCount }: NotificationBellProps) 
 
           <div className={styles.list}>
             {isLoading ? (
-              <div className={styles.loading}>Loading…</div>
+              <div className={styles.empty}>
+                <ProgressCircle aria-label="Loading..." />
+              </div>
             ) : notifications.length === 0 ? (
               <div className={styles.empty}>No notifications</div>
             ) : (
