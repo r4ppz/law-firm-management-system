@@ -64,24 +64,6 @@ export async function createMilestoneAction(
       } catch (err) {
         console.error("Failed to log milestone.created audit for Case", case_id, err);
       }
-
-      try {
-        const assigneeIds = await getCaseAssigneeIds(case_id);
-        await dispatchNotifications(
-          {
-            userIds: assigneeIds,
-            type: NotificationType.MilestoneDueSoon,
-            title: `New milestone: ${title}`,
-            message: `Milestone "${title}" was created and is due ${due_date.toLocaleDateString()}`,
-            actionUrl: `/case/${case_id}`,
-            caseId: case_id,
-            milestoneId: milestone.id,
-          },
-          session.id,
-        );
-      } catch (err) {
-        console.error("Failed to dispatch notification:", err);
-      }
     });
 
     revalidatePath(`/case/${case_id}`);
