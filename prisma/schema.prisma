@@ -140,6 +140,8 @@ model Consultation {
   status             ConsultationStatus
   created_at         DateTime           @default(now())
   updated_at         DateTime           @updatedAt
+  reminder_days      Int?
+  last_reminded_at   DateTime?
 
   client        Client         @relation(fields: [client_id], references: [id])
   createdBy     User           @relation(fields: [created_by_user_id], references: [id])
@@ -253,6 +255,8 @@ model CaseMilestone {
   created_by_user_id String              @db.Uuid
   created_at         DateTime            @default(now())
   updated_at         DateTime            @updatedAt
+  reminder_days      Int?
+  last_reminded_at   DateTime?
 
   case          Case           @relation(fields: [case_id], references: [id], onDelete: Cascade)
   createdBy     User           @relation(fields: [created_by_user_id], references: [id])
