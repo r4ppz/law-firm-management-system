@@ -128,26 +128,28 @@ export async function updateMilestoneAction(
         console.error("Failed to log milestone.updated audit for Case", existing.case_id, err);
       }
 
-      try {
-        const assigneeIds = await getCaseAssigneeIds(existing.case_id);
-        const notificationType =
-          status === "Done"
-            ? NotificationType.MilestoneCompleted
-            : NotificationType.MilestoneDueSoon;
-        await dispatchNotifications(
-          {
-            userIds: assigneeIds,
-            type: notificationType,
-            title: `Milestone ${status === "Done" ? "completed" : "updated"}: ${title}`,
-            message: `Milestone "${title}" status changed to ${status}`,
-            actionUrl: `/case/${existing.case_id}`,
-            caseId: existing.case_id,
-            milestoneId: existing.id,
-          },
-          session.id,
-        );
-      } catch (err) {
-        console.error("Failed to dispatch notification:", err);
+      if (existing.status !== status) {
+        try {
+          const assigneeIds = await getCaseAssigneeIds(existing.case_id);
+          const notificationType =
+            status === "Done"
+              ? NotificationType.MilestoneCompleted
+              : NotificationType.MilestoneDueSoon;
+          await dispatchNotifications(
+            {
+              userIds: assigneeIds,
+              type: notificationType,
+              title: `Milestone ${status === "Done" ? "completed" : "updated"}: ${title}`,
+              message: `Milestone "${title}" status changed to ${status}`,
+              actionUrl: `/case/${existing.case_id}`,
+              caseId: existing.case_id,
+              milestoneId: existing.id,
+            },
+            session.id,
+          );
+        } catch (err) {
+          console.error("Failed to dispatch notification:", err);
+        }
       }
     });
 
