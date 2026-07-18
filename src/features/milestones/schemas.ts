@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { CaseMilestoneStatus } from "@/generated/prisma/browser";
-import { optionalText, requiredEnum, requiredText } from "@/lib/form-utils";
+import { nonNegativeInteger, optionalText, requiredEnum, requiredText } from "@/lib/form-utils";
 
 export const MilestoneIdSchema = z.object({
   milestoneId: z.uuid(),
@@ -15,7 +15,7 @@ export const MilestoneCreatePayloadSchema = z.object({
     .optional()
     .default(CaseMilestoneStatus.Pending),
   case_id: z.uuid(),
-  reminder_days: z.number().int().min(0).nullable().optional(),
+  reminder_days: nonNegativeInteger("Reminder days").nullable().optional(),
 });
 
 export const MilestoneUpdatePayloadSchema = z.object({
@@ -24,5 +24,5 @@ export const MilestoneUpdatePayloadSchema = z.object({
   description: optionalText(10000, "Description"),
   due_date: z.coerce.date(),
   status: requiredEnum(CaseMilestoneStatus, "Status"),
-  reminder_days: z.number().int().min(0).nullable().optional(),
+  reminder_days: nonNegativeInteger("Reminder days").nullable().optional(),
 });
