@@ -1,6 +1,13 @@
 "use client";
 
-import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type Dispatch,
+  type SetStateAction,
+} from "react";
 
 import { getUnreadNotificationCountAction } from "../actions";
 
@@ -8,14 +15,21 @@ export function useUnreadCount(
   initialCount: number,
 ): readonly [number, Dispatch<SetStateAction<number>>] {
   const [count, setCount] = useState(initialCount);
+  const seqRef = useRef(0);
+
+  const wrappedSetCount: Dispatch<SetStateAction<number>> = useCallback((value) => {
+    seqRef.current += 1;
+    setCount(value);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
 
     async function poll() {
+      const seq = ++seqRef.current;
       try {
         const newCount = await getUnreadNotificationCountAction();
-        if (!cancelled) setCount(newCount);
+        if (!cancelled && seq === seqRef.current) setCount(newCount);
       } catch {
         // Swallow server-action errors during silent polling
       }
@@ -43,5 +57,5 @@ export function useUnreadCount(
     };
   }, []);
 
-  return [count, setCount] as const;
+  return [count, wrappedSetCount] as const;
 }
