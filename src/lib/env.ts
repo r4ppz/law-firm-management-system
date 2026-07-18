@@ -96,7 +96,7 @@ export function getOptionalInteger(name: string, fallback: number): number {
 export function getRequiredFloat(name: string): number {
   const raw = getRequiredEnvVar(name);
   const parsed = Number(raw);
-  if (Number.isNaN(parsed)) {
+  if (!Number.isFinite(parsed)) {
     throw new Error(`Environment variable ${name} must be a number, got: ${raw}`);
   }
   return parsed;
@@ -114,7 +114,7 @@ export function getOptionalFloat(name: string, fallback: number): number {
   const raw = process.env[name]?.trim();
   if (raw === undefined || raw === "") return fallback;
   const parsed = Number(raw);
-  if (Number.isNaN(parsed)) {
+  if (!Number.isFinite(parsed)) {
     throw new Error(`Environment variable ${name} must be a number, got: ${raw}`);
   }
   return parsed;

@@ -10,8 +10,8 @@ import {
   taskUpdatedTemplate,
 } from "@/lib/email-templates";
 
-import { createNotifications } from "./mutations";
-import type { NotificationDispatchPayload } from "./schemas";
+import { createNotifications } from "@/features/notifications/mutations";
+import type { NotificationDispatchPayload } from "@/features/notifications/schemas";
 
 function pickTemplate(type: NotificationType) {
   switch (type) {

@@ -3,7 +3,7 @@
 - Never commit, push, or create PRs unless explicitly asked.
 - Read the actual file first. Don't assume you know what's in it.
 - After making changes, run `pnpm validate` + `pnpm build` and loop (fix issues, re-run until passing).
-- Stop validating/linting/building on trivial changes like DOCS, CSS, TEXT, maybe format.
+- Stop validating/linting/building on trivial changes like DOCS, trivial CSS (e.g. spacing, colors on existing rules), TEXT, maybe format. Do NOT skip validation for substantive CSS changes (new components, layout changes, structural modifications).
 
 ## Commands
 

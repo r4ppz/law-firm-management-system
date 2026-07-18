@@ -177,13 +177,25 @@ The scheduler supports two deployment models:
 ### Setting up on Vercel (optional)
 
 1. Add `CRON_SECRET` to your Vercel project environment variables.
-2. In the Vercel Dashboard, navigate to **Deployments** → **Settings** → **Cron Jobs**.
-3. Add a cron job:
-   - **Path:** `/api/cron/reminders`
-   - **Schedule:** `0 * * * *` (hourly — Pro plan) or `0 0 * * *` (daily — Hobby plan)
-   - **Header:** `Authorization: Bearer <CRON_SECRET>`
+2. Define the cron job in `vercel.json`:
+
+   ```json
+   {
+     "crons": [
+       {
+         "path": "/api/cron/reminders",
+         "schedule": "0 * * * *"
+       }
+     ]
+   }
+   ```
+
+   Use `0 * * * *` for hourly execution (Pro plan) or `0 0 * * *` for daily (Hobby plan).
+
+3. Redeploy your project for cron changes to take effect.
 
 > Hobby accounts are limited to cron jobs that run once per day. Expressions running more frequently will fail during deployment.
+> The cron endpoint validates requests using the `CRON_SECRET` environment variable automatically.
 
 ## Available Commands
 
