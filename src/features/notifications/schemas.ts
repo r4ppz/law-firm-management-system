@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { NotificationType } from "@/generated/prisma/browser";
 import { optionalText, requiredEnum, requiredText } from "@/lib/form-utils";
+import { LimitSchema } from "@/lib/schemas";
 
 export const NotificationMarkReadSchema = z.object({
   notificationId: z.uuid(),
@@ -22,3 +23,10 @@ export const NotificationDispatchSchema = z.object({
 });
 
 export type NotificationDispatchPayload = z.infer<typeof NotificationDispatchSchema>;
+
+/** Payload for fetching unread notifications with a client-specified limit. */
+export const UnreadNotificationsSchema = z.object({
+  limit: LimitSchema,
+});
+
+export type UnreadNotificationsPayload = z.infer<typeof UnreadNotificationsSchema>;

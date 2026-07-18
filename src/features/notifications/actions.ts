@@ -14,7 +14,11 @@ import {
   getUnreadNotifications,
   type NotificationRow,
 } from "./queries";
-import { NotificationDispatchSchema, NotificationMarkReadSchema } from "./schemas";
+import {
+  NotificationDispatchSchema,
+  NotificationMarkReadSchema,
+  UnreadNotificationsSchema,
+} from "./schemas";
 
 export async function getNotificationsPaginatedAction(
   params: z.input<typeof PageQuerySchema>,
@@ -37,9 +41,17 @@ export async function getUnreadNotificationCountAction(): Promise<number> {
   return getUnreadNotificationCount(session.id);
 }
 
-export async function getUnreadNotificationsAction(limit?: number): Promise<NotificationRow[]> {
+export async function getUnreadNotificationsAction(
+  params: z.input<typeof UnreadNotificationsSchema> = {},
+): Promise<NotificationRow[]> {
   const session = await requireAuth();
-  return getUnreadNotifications(session.id, limit);
+
+  const parsed = UnreadNotificationsSchema.safeParse(params);
+  if (!parsed.success) {
+    throw new Error("Invalid parameters");
+  }
+
+  return getUnreadNotifications(session.id, parsed.data.limit);
 }
 
 export async function markNotificationReadAction(
