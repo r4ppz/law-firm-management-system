@@ -102,6 +102,22 @@ function button(url: string, label: string): string {
 }
 
 /**
+ * Email template for consultation reminders with upcoming-consultation heading.
+ *
+ * @param ctx - Template context.
+ * @returns A complete HTML email string.
+ */
+export function consultationReminderTemplate(ctx: TemplateContext): string {
+  const body = `
+<p style="color:#333333;line-height:1.6;margin:0 0 12px">Hi ${escapeHtml(ctx.toName)},</p>
+<p style="color:#333333;line-height:1.6;margin:0 0 12px">This is a reminder that you have an upcoming consultation.</p>
+<p style="color:#555555;line-height:1.6;margin:0 0 12px;font-style:italic">&ldquo;${escapeHtml(ctx.message)}&rdquo;</p>
+${ctx.actionUrl ? button(ctx.actionUrl, "View Consultation") : ""}`.trim();
+
+  return emailLayout("Upcoming Consultation Reminder", body);
+}
+
+/**
  * Email template for when a consultation is created.
  *
  * @param ctx - Template context.

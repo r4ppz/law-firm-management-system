@@ -4,6 +4,7 @@ import { sendEmail } from "@/lib/email";
 import {
   caseAssignedTemplate,
   consultationCreatedTemplate,
+  consultationReminderTemplate,
   consultationUpdatedTemplate,
   milestoneTemplate,
   taskAssignedTemplate,
@@ -16,8 +17,9 @@ import type { NotificationDispatchPayload } from "@/features/notifications/schem
 function pickTemplate(type: NotificationType) {
   switch (type) {
     case NotificationType.ConsultationCreated:
-    case NotificationType.ConsultationReminder:
       return consultationCreatedTemplate;
+    case NotificationType.ConsultationReminder:
+      return consultationReminderTemplate;
     case NotificationType.ConsultationUpdated:
       return consultationUpdatedTemplate;
     case NotificationType.MilestoneDueSoon:
@@ -46,9 +48,14 @@ export async function dispatchNotifications(
 
   try {
     actorName = (await getUserNameById({ id: actorUserId })) ?? "System";
+  } catch (err) {
+    console.error("Failed to resolve actor name:", err);
+  }
+
+  try {
     recipients = await getUsersByIds({ ids: payload.userIds });
   } catch (err) {
-    console.error("Failed to enrich notification with actor/recipient data:", err);
+    console.error("Failed to resolve recipients:", err);
   }
 
   const template = pickTemplate(payload.type);
