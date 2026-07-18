@@ -21,7 +21,9 @@ export function useUnreadCount(
       }
     }
 
-    const intervalId = setInterval(poll, 30_000);
+    const intervalId = setInterval(() => {
+      void poll();
+    }, 30_000);
 
     function handleVisibilityChange() {
       if (document.visibilityState === "visible") void poll();
