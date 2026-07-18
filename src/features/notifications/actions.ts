@@ -2,11 +2,10 @@
 
 import { z } from "zod";
 
-import type { ActionDataResponse, ActionStatusResponse } from "@/lib/action-response";
+import type { ActionStatusResponse } from "@/lib/action-response";
 import { requireAuth } from "@/lib/auth-guards";
 import { PageQuerySchema } from "@/lib/schemas";
 
-import { dispatchNotifications } from "./dispatch";
 import { markAllNotificationsRead, markNotificationRead } from "./mutations";
 import {
   getNotificationsPaginated,
@@ -14,11 +13,7 @@ import {
   getUnreadNotifications,
   type NotificationRow,
 } from "./queries";
-import {
-  NotificationDispatchSchema,
-  NotificationMarkReadSchema,
-  UnreadNotificationsSchema,
-} from "./schemas";
+import { NotificationMarkReadSchema, UnreadNotificationsSchema } from "./schemas";
 
 export async function getNotificationsPaginatedAction(
   params: z.input<typeof PageQuerySchema>,
@@ -80,23 +75,5 @@ export async function markAllNotificationsReadAction(): Promise<ActionStatusResp
     return { success: true };
   } catch {
     return { success: false, error: "Failed to mark notifications as read" };
-  }
-}
-
-export async function dispatchNotificationAction(
-  payload: z.input<typeof NotificationDispatchSchema>,
-): Promise<ActionDataResponse<{ count: number }>> {
-  const session = await requireAuth();
-
-  const parsed = NotificationDispatchSchema.safeParse(payload);
-  if (!parsed.success) {
-    return { success: false, error: "Invalid notification data" };
-  }
-
-  try {
-    const result = await dispatchNotifications(parsed.data, session.id);
-    return { success: true, data: { count: result.count } };
-  } catch {
-    return { success: false, error: "Failed to dispatch notifications" };
   }
 }
