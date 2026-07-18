@@ -46,7 +46,7 @@ export const getNotificationsPaginated = cache(
       skip: cursor ? 1 : 0,
       ...(cursor ? { cursor: { id: cursor } } : {}),
       where: { user_id: userId },
-      orderBy: { created_at: "desc" },
+      orderBy: [{ created_at: "desc" }, { id: "desc" }],
       select: notificationSelect,
     });
 
@@ -70,7 +70,7 @@ export const getUnreadNotifications = cache(
   async (userId: string, limit = 30): Promise<NotificationRow[]> => {
     return prisma.notification.findMany({
       where: { user_id: userId, is_read: false },
-      orderBy: { created_at: "desc" },
+      orderBy: [{ created_at: "desc" }, { id: "desc" }],
       take: limit,
       select: notificationSelect,
     });
