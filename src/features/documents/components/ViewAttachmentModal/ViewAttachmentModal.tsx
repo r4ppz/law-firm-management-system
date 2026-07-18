@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/Button/Button";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog/ConfirmDialog";
 import { FilePreviewCard } from "@/components/ui/FilePreviewCard/FilePreviewCard";
 import { Modal } from "@/components/ui/Modal/Modal";
-import { ProgressCircle } from "@/components/ui/ProgressCircle/ProgressCircle";
 import { queue } from "@/components/ui/Toast/Toast";
 import { deleteDocumentAction, getDocumentDownloadUrlAction } from "@/features/documents/actions";
 import type { DocumentDetailRow } from "@/features/documents/queries";
@@ -91,11 +90,20 @@ export function ViewAttachmentModal({
           />
 
           <div className={styles.actions}>
-            <Button variant="secondary" onPress={handleDownload} isDisabled={isBusy}>
-              {isDownloading ? "Opening..." : "Download"}
+            <Button
+              variant="secondary"
+              onPress={handleDownload}
+              isDisabled={isBusy}
+              isPending={isDownloading}
+            >
+              Download
             </Button>
-            <Button onPress={() => setShowDeleteConfirm(true)} isDisabled={isBusy}>
-              {isDeleting ? <ProgressCircle aria-label="Deleting" /> : "Delete"}
+            <Button
+              onPress={() => setShowDeleteConfirm(true)}
+              isDisabled={isBusy}
+              isPending={isDeleting}
+            >
+              Delete
             </Button>
           </div>
         </div>

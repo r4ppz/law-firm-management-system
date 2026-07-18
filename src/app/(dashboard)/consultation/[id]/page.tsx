@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 
+import { ProgressCircle } from "@/components/ui/ProgressCircle/ProgressCircle";
 import { ConsultationDetail } from "@/features/consultations/components/ConsultationDetail/ConsultationDetail";
 import { getConsultationOverviewById } from "@/features/consultations/queries";
 
@@ -15,7 +16,7 @@ export default async function ConsultationDetailPage({ params }: Props) {
 
   return (
     <div className={styles.detailPage}>
-      <Suspense fallback={<div>Loading...</div>}>
+      <Suspense fallback={<ProgressCircle aria-label="Loading..." />}>
         <ConsultationDetail overview={overview} />
       </Suspense>
     </div>
