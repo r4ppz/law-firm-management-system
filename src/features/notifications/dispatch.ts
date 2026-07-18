@@ -45,8 +45,8 @@ export async function dispatchNotifications(
   let recipients: Awaited<ReturnType<typeof getUsersByIds>> = [];
 
   try {
-    actorName = (await getUserNameById(actorUserId)) ?? "System";
-    recipients = await getUsersByIds(payload.userIds);
+    actorName = (await getUserNameById({ id: actorUserId })) ?? "System";
+    recipients = await getUsersByIds({ ids: payload.userIds });
   } catch (err) {
     console.error("Failed to enrich notification with actor/recipient data:", err);
   }

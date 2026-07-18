@@ -4,13 +4,16 @@ import { Role, type User } from "@/generated/prisma/browser";
 import { prisma } from "@/lib/prisma";
 import type { PageQuery } from "@/lib/types";
 
-export const getActiveUserIdsByRoles = cache(async (roles: Role[]): Promise<string[]> => {
-  const users = await prisma.user.findMany({
-    where: { is_active: true, role: { in: roles } },
-    select: { id: true },
-  });
-  return users.map((u) => u.id);
-});
+export const getActiveUserIdsByRoles = cache(
+  async (payload: { roles: Role[] }): Promise<string[]> => {
+    const { roles } = payload;
+    const users = await prisma.user.findMany({
+      where: { is_active: true, role: { in: roles } },
+      select: { id: true },
+    });
+    return users.map((u) => u.id);
+  },
+);
 
 const userSelect = {
   id: true,
@@ -21,7 +24,8 @@ const userSelect = {
   created_at: true,
 } as const;
 
-export const getUserNameById = cache(async (id: string): Promise<string | null> => {
+export const getUserNameById = cache(async (payload: { id: string }): Promise<string | null> => {
+  const { id } = payload;
   const user = await prisma.user.findUnique({
     where: { id },
     select: { name: true },
@@ -30,7 +34,10 @@ export const getUserNameById = cache(async (id: string): Promise<string | null> 
 });
 
 export const getUsersByIds = cache(
-  async (ids: string[]): Promise<{ id: string; name: string | null; email: string | null }[]> => {
+  async (payload: {
+    ids: string[];
+  }): Promise<{ id: string; name: string | null; email: string | null }[]> => {
+    const { ids } = payload;
     return prisma.user.findMany({
       where: { id: { in: ids } },
       select: { id: true, name: true, email: true },

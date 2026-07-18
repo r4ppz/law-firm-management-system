@@ -219,7 +219,7 @@ export async function createCaseAction(
       }
 
       try {
-        const adminIds = await getActiveUserIdsByRoles([Role.Admin, Role.BranchManager]);
+        const adminIds = await getActiveUserIdsByRoles({ roles: [Role.Admin, Role.BranchManager] });
         await dispatchNotifications(
           {
             userIds: adminIds,
@@ -278,7 +278,7 @@ export async function createCaseWithClientAction(
       }
 
       try {
-        const adminIds = await getActiveUserIdsByRoles([Role.Admin, Role.BranchManager]);
+        const adminIds = await getActiveUserIdsByRoles({ roles: [Role.Admin, Role.BranchManager] });
         await dispatchNotifications(
           {
             userIds: adminIds,
