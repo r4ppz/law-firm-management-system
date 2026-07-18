@@ -3,7 +3,12 @@ import { getActiveUserIdsByRoles } from "@/features/users/queries";
 import { NotificationType, Role } from "@/generated/prisma/browser";
 import { getOptionalInteger } from "@/lib/env";
 
-import { updateConsultationsRemindedAt, updateMilestonesRemindedAt } from "./mutations";
+import {
+  claimConsultationReminder,
+  claimMilestoneReminder,
+  updateConsultationsRemindedAt,
+  updateMilestonesRemindedAt,
+} from "./mutations";
 import { getConsultationsNeedingReminder, getMilestonesNeedingReminder } from "./queries";
 
 const SYSTEM_USER_ID = "00000000-0000-0000-0000-000000000000";
@@ -37,6 +42,8 @@ async function processMilestones(defaultDays: number, now: Date): Promise<void> 
 
     if (!isDueSoon && !isOverdue) continue;
     if (m.assigneeIds.length === 0) continue;
+
+    if (!(await claimMilestoneReminder(m.id))) continue;
 
     const type = isOverdue ? NotificationType.MilestoneOverdue : NotificationType.MilestoneDueSoon;
     const label = isOverdue ? "overdue" : "due soon";
@@ -78,6 +85,8 @@ async function processConsultations(defaultDays: number, now: Date): Promise<voi
     const reminderDays = c.reminderDays ?? defaultDays;
     const remindThreshold = new Date(now.getTime() + reminderDays * 86_400_000);
     if (!(c.booking_datetime <= remindThreshold && c.booking_datetime > now)) continue;
+
+    if (!(await claimConsultationReminder(c.id))) continue;
 
     try {
       await dispatchNotifications(

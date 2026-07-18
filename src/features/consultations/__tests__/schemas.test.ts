@@ -77,9 +77,9 @@ describe("ConsultationCreatePayloadSchema", () => {
   });
 
   it("rejects non-integer reminder_days", () => {
-    expect(
-      ConsultationCreatePayloadSchema.safeParse({ ...base, reminder_days: 3.5 }).success,
-    ).toBe(false);
+    expect(ConsultationCreatePayloadSchema.safeParse({ ...base, reminder_days: 3.5 }).success).toBe(
+      false,
+    );
   });
 });
 
