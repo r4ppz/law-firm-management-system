@@ -66,6 +66,26 @@ export function classifyFileType(fileType: string): FileCategory {
   return "unknown";
 }
 
+/**
+ * Truncates a filename, keeping its extension intact.
+ * Returns the original name if it fits within `maxLen`.
+ *
+ * @param name - The full filename (e.g. "my-document.pdf").
+ * @param maxLen - Maximum total length before truncation (default 45).
+ * @returns The truncated name (e.g. "my-docu...ment.pdf").
+ */
+export function truncateFilename(name: string, maxLen = 45): string {
+  if (name.length <= maxLen) return name;
+
+  const dotIndex = name.lastIndexOf(".");
+  const ext = dotIndex > 0 ? name.slice(dotIndex) : "";
+  const available = maxLen - 3 - ext.length;
+
+  if (available <= 0) return name.slice(0, maxLen);
+
+  return name.slice(0, available) + "..." + ext;
+}
+
 /** Display labels for each {@link FileCategory}. */
 const FILE_TYPE_LABELS: Record<FileCategory, string> = {
   pdf: "PDF",

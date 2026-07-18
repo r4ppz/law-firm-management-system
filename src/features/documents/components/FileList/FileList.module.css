@@ -13,6 +13,7 @@
     padding: var(--space-xs) var(--space-sm);
     border-radius: var(--radius-sm);
     font-size: var(--font-size-sm);
+    overflow: hidden;
 
     .fileIcon {
       flex-shrink: 0;

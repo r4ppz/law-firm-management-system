@@ -4,6 +4,7 @@ import { FaCheck, FaRegFileLines, FaXmark } from "react-icons/fa6";
 
 import { Button } from "@/components/ui/Button/Button";
 import { ProgressCircle } from "@/components/ui/ProgressCircle/ProgressCircle";
+import { truncateFilename } from "@/lib/file-format";
 
 import styles from "./FileList.module.css";
 
@@ -34,7 +35,9 @@ export function FileList({ entries, isBusy, onRemove }: FileListProps) {
       {entries.map((entry) => (
         <div key={entry.id} className={styles.fileRow}>
           <FaRegFileLines className={styles.fileIcon} aria-hidden="true" />
-          <span className={styles.fileName}>{entry.file.name}</span>
+          <span className={styles.fileName} title={entry.file.name}>
+            {truncateFilename(entry.file.name)}
+          </span>
           <span className={styles.fileSize}>{formatFileSize(entry.file.size)}</span>
 
           {entry.status === "pending" && (
