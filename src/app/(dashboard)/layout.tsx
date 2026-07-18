@@ -15,9 +15,14 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const cookieStore = await cookies();
   const initialCollapsed = cookieStore.get("sidebar-collapsed")?.value === "true";
 
-  const initialUnreadCount = session?.user?.id
-    ? await getUnreadNotificationCount(session.user.id)
-    : 0;
+  let initialUnreadCount = 0;
+  if (session?.user?.id) {
+    try {
+      initialUnreadCount = await getUnreadNotificationCount(session.user.id);
+    } catch {
+      initialUnreadCount = 0;
+    }
+  }
 
   return (
     <div className={styles.layout}>
