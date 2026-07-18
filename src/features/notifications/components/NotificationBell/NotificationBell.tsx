@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Dialog, DialogTrigger } from "react-aria-components";
+import { Dialog, DialogTrigger, Heading } from "react-aria-components";
 import { FaBell } from "react-icons/fa6";
 
 import { Button } from "@/components/ui/Button/Button";
@@ -106,7 +106,9 @@ export function NotificationBell({ initialUnreadCount }: NotificationBellProps) 
       <Popover placement="bottom end" className={styles.popover}>
         <Dialog className={styles.dialog}>
           <div className={styles.header}>
-            <span className={styles.headerTitle}>Notifications</span>
+            <Heading slot="title" className={styles.headerTitle}>
+              Notifications
+            </Heading>
             {notifications.length > 0 && (
               <Button variant="ghost" className={styles.markAllButton} onPress={handleMarkAllRead}>
                 Mark all read
