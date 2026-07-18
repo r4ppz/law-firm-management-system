@@ -60,6 +60,8 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
    - `AUTH_SECRET` — generate with `pnpx auth secret`
    - `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` — from [Google OAuth console](https://console.cloud.google.com/apis/credentials)
    - `DEVELOPER_EMAILS` — comma-separated email addresses that bypass Google OAuth in dev
+   - `APP_ORIGIN` — the public URL of the app (e.g. `http://localhost:3000` for local dev). Used to build absolute links in email notifications.
+   - `EMAIL_FROM` — sender address for transactional emails (e.g. `"Anino Law Firm <noreply@example.com>"`). Must be quoted if it contains spaces or `<>`.
    - `MINIO_KMS_SECRET_KEY` — **required** for MinIO server-side encryption; generate with:
 
      ```bash
@@ -142,6 +144,58 @@ The `createbuckets` init container also runs `mc encrypt set sse-s3 local/law-fi
 mc encrypt info local/law-firm-files          # → sse-s3 (lawfirm-sse)
 mc stat local/law-firm-files/OBJECT_KEY       # → Encryption method: AES256
 ```
+
+## Scheduled Reminder System
+
+The app automatically sends reminder notifications for approaching milestone deadlines and upcoming consultations.
+
+### How it works
+
+An hourly background job checks for milestones/consultations that need reminders:
+
+- **Milestones** — queries pending milestones where `due_date` is within `reminder_days` (per-record or env default). Sends `MilestoneDueSoon`. Past-due milestones send `MilestoneOverdue`.
+- **Consultations** — queries scheduled consultations within the same window. Sends `ConsultationReminder` to Admins and Branch Managers.
+
+Each record is only reminded once per day via the `last_reminded_at` field.
+
+### Trigger mechanism
+
+The scheduler supports two deployment models:
+
+| Deployment                        | Trigger                                 | How                                                                        |
+| --------------------------------- | --------------------------------------- | -------------------------------------------------------------------------- |
+| **Docker (local or self-hosted)** | `node-cron` in `src/instrumentation.ts` | Runs hourly inside the long-lived Next.js process. No extra configuration. |
+| **Vercel (serverless)**           | Cron Jobs → `GET /api/cron/reminders`   | Configure in Vercel Dashboard. Requires `CRON_SECRET` env var.             |
+
+### Environment variables
+
+| Variable                | Required   | Default | Description                                                                                                                                                                      |
+| ----------------------- | ---------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DEFAULT_REMINDER_DAYS` | No         | `3`     | Global fallback when a milestone/consultation has no per-record `reminder_days` set                                                                                              |
+| `CRON_SECRET`           | For Vercel | —       | Shared secret used to authenticate cron job requests. Generate with `openssl rand -hex 32`. Set as `Authorization: Bearer <secret>` header in your Vercel Cron Job configuration |
+
+### Setting up on Vercel (optional)
+
+1. Add `CRON_SECRET` to your Vercel project environment variables.
+2. Define the cron job in `vercel.json`:
+
+   ```json
+   {
+     "crons": [
+       {
+         "path": "/api/cron/reminders",
+         "schedule": "0 * * * *"
+       }
+     ]
+   }
+   ```
+
+   Use `0 * * * *` for hourly execution (Pro plan) or `0 0 * * *` for daily (Hobby plan).
+
+3. Redeploy your project for cron changes to take effect.
+
+> Hobby accounts are limited to cron jobs that run once per day. Expressions running more frequently will fail during deployment.
+> The cron endpoint validates requests using the `CRON_SECRET` environment variable automatically.
 
 ## Available Commands
 

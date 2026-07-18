@@ -143,6 +143,20 @@ export function positiveNumber(max: number, label: string) {
 }
 
 /**
+ * Builds a non-negative integer schema with user-facing error messages.
+ * Use for fields like `reminder_days` that accept zero or positive whole numbers.
+ *
+ * @param label - Human-readable field name (capitalized).
+ * @returns A Zod number schema requiring integer >= 0.
+ */
+export function nonNegativeInteger(label: string) {
+  return z
+    .number({ message: `${label} must be a number` })
+    .int(`${label} must be a whole number`)
+    .min(0, `${label} must be 0 or greater`);
+}
+
+/**
  * Builds a required enum schema with a user-facing message when the value is
  * missing or outside the allowed set.
  *

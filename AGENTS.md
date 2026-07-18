@@ -3,6 +3,7 @@
 - Never commit, push, or create PRs unless explicitly asked.
 - Read the actual file first. Don't assume you know what's in it.
 - After making changes, run `pnpm validate` + `pnpm build` and loop (fix issues, re-run until passing).
+- Stop validating/linting/building on trivial changes like DOCS, trivial CSS (e.g. spacing, colors on existing rules), TEXT, maybe format. Do NOT skip validation for substantive CSS changes (new components, layout changes, structural modifications).
 
 ## Commands
 
@@ -37,7 +38,7 @@
 
 - `src/app/page.tsx` — unauthenticated login page.
 - `src/app/(dashboard)/` — authenticated section (Sidebar + Header shared layout). Dashboard routes: `dashboard/`, `case/`, `consultation/`, `user/`.
-- API Routes — Restricted strictly to framework orchestration (`src/app/api/auth/[...nextauth]/route.ts`). Do not create custom REST endpoints under any circumstances.
+- API Routes — Restricted strictly to framework orchestration (`src/app/api/auth/[...nextauth]/route.ts`) and scheduled job webhooks (e.g. `src/app/api/cron/*/route.ts`). Do not create custom REST endpoints for application data under any circumstances.
 - Server Actions (`actions.ts`) — The primary mechanism for all data mutation, form submission, and infrastructure execution (including generating storage presigned URLs). Every structural modification to application state must route through a Server Action.
 - `src/features/` — domain logic organized by feature (`auth/`, `users/`, `consultations/`, `cases/`, etc.).
   - Each domain contains `actions.ts` (orchestration, validation, and authorization), `queries.ts` (Prisma read operations), and `mutations.ts` (Prisma write operations).
@@ -118,7 +119,7 @@
 
 ### Async & Error Handling
 
-- Prefer `async`/`await` with `try-catch` over promise chains (`.then()`/`.catch()`) across the entire codebase, especially in asynchronous code. Avoid `.then()`/`.catch()` method chaining.
+- Default to `async/await` with `try...catch` for asynchronous code. Preserve or use `.then()/.catch()` only when it is the idiomatic, clearer, or required approach for the specific code pattern.
 - Never let a promise rejection go unhandled. In client components, surface failures through the toast `queue` (`queue.add(...)`) or appropriate error UI. In Server Actions, follow the existing Action Response Convention (catch and return a structured `ActionStatusResponse`).
 - Inside `useEffect`, wrap async work in a locally-scoped `async function` and invoke it (use `void` for fire-and-forget calls to keep intent explicit).
 

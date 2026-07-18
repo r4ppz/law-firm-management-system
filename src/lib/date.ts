@@ -82,3 +82,26 @@ export function formatDateTime(date: Date | string): string {
   }).format(d);
   return `${dateStr} at ${timeStr}`;
 }
+
+/**
+ * Formats a `Date` as a compact relative time string.
+ * Examples: "5m ago", "2h ago", "3d ago", "Jul 14, 2026".
+ *
+ * @param date - A Date object or ISO 8601 string.
+ * @returns A relative time string for recent dates, formatted date for older ones.
+ */
+export function timeAgo(date: Date | string): string {
+  const d = toLocalDate(date);
+  const diffMs = Date.now() - d.getTime();
+  const diffSec = Math.max(0, Math.floor(diffMs / 1000));
+
+  if (diffSec < 60) return `${diffSec}s ago`;
+  const diffMin = Math.floor(diffSec / 60);
+  if (diffMin < 60) return `${diffMin}m ago`;
+  const diffHr = Math.floor(diffMin / 60);
+  if (diffHr < 24) return `${diffHr}h ago`;
+  const diffDay = Math.floor(diffHr / 24);
+  if (diffDay < 7) return `${diffDay}d ago`;
+
+  return formatDate(d);
+}
