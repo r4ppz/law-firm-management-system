@@ -15,6 +15,7 @@ export const MilestoneCreatePayloadSchema = z.object({
     .optional()
     .default(CaseMilestoneStatus.Pending),
   case_id: z.uuid(),
+  reminder_days: z.number().int().min(0).nullable().optional(),
 });
 
 export const MilestoneUpdatePayloadSchema = z.object({
@@ -23,4 +24,5 @@ export const MilestoneUpdatePayloadSchema = z.object({
   description: optionalText(10000, "Description"),
   due_date: z.coerce.date(),
   status: requiredEnum(CaseMilestoneStatus, "Status"),
+  reminder_days: z.number().int().min(0).nullable().optional(),
 });

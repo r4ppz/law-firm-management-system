@@ -20,5 +20,5 @@ export async function register() {
 
   const cron = await import("node-cron");
   const { runReminderCheck } = await import("@/features/reminders/scheduler");
-  cron.schedule(REMINDER_CRON_SCHEDULE, runReminderCheck);
+  cron.schedule(REMINDER_CRON_SCHEDULE, runReminderCheck, { noOverlap: true });
 }

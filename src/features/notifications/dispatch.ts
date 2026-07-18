@@ -38,12 +38,18 @@ function pickTemplate(type: NotificationType) {
 export async function dispatchNotifications(
   payload: NotificationDispatchPayload,
   actorUserId: string,
-) {
+): Promise<{ count: number }> {
   const result = await createNotifications(payload);
 
-  const actorName = (await getUserNameById(actorUserId)) ?? "System";
+  let actorName = "System";
+  let recipients: Awaited<ReturnType<typeof getUsersByIds>> = [];
 
-  const recipients = await getUsersByIds(payload.userIds);
+  try {
+    actorName = (await getUserNameById(actorUserId)) ?? "System";
+    recipients = await getUsersByIds(payload.userIds);
+  } catch (err) {
+    console.error("Failed to enrich notification with actor/recipient data:", err);
+  }
 
   const template = pickTemplate(payload.type);
 

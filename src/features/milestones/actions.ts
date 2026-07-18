@@ -40,7 +40,7 @@ export async function createMilestoneAction(
     return { success: false, error: "Invalid milestone data" };
   }
 
-  const { title, description, due_date, status, case_id } = parsed.data;
+  const { title, description, due_date, status, case_id, reminder_days } = parsed.data;
 
   try {
     const milestone = await createMilestone({
@@ -50,6 +50,7 @@ export async function createMilestoneAction(
       status,
       case_id,
       created_by_user_id: session.id,
+      reminder_days,
     });
 
     after(async () => {
@@ -84,7 +85,7 @@ export async function updateMilestoneAction(
     return { success: false, error: "Invalid milestone data" };
   }
 
-  const { milestoneId, title, description, due_date, status } = parsed.data;
+  const { milestoneId, title, description, due_date, status, reminder_days } = parsed.data;
 
   try {
     const existing = await getMilestoneById(milestoneId);
@@ -95,6 +96,7 @@ export async function updateMilestoneAction(
       description: description || undefined,
       due_date,
       status,
+      reminder_days,
     });
 
     after(async () => {

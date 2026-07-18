@@ -160,7 +160,7 @@ export async function createConsultationAction(
     return { success: false, error: "Invalid consultation data" };
   }
 
-  const { client_id, concern, booking_datetime, status } = parsed.data;
+  const { client_id, concern, booking_datetime, status, reminder_days } = parsed.data;
 
   let createdConsultation: { id: string };
   try {
@@ -170,6 +170,7 @@ export async function createConsultationAction(
       booking_datetime,
       status,
       created_by_user_id: session.id,
+      reminder_days,
     });
 
     after(async () => {
@@ -285,13 +286,21 @@ export async function updateConsultationAction(
     return { success: false, error: "Invalid consultation data" };
   }
 
-  const { consultationId, client_id, concern, booking_datetime, status } = parsed.data;
+  const { consultationId, client_id, concern, booking_datetime, status, reminder_days } =
+    parsed.data;
 
   try {
     const existing = await getConsultationEditData(consultationId);
     if (!existing) return { success: false, error: "Consultation not found" };
 
-    await updateConsultation({ consultationId, client_id, concern, booking_datetime, status });
+    await updateConsultation({
+      consultationId,
+      client_id,
+      concern,
+      booking_datetime,
+      status,
+      reminder_days,
+    });
 
     after(async () => {
       try {

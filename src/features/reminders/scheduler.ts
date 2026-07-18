@@ -12,9 +12,17 @@ export async function runReminderCheck(): Promise<void> {
   const defaultDays = getOptionalInteger("DEFAULT_REMINDER_DAYS", 3);
   const now = new Date();
 
-  await processMilestones(defaultDays, now);
+  try {
+    await processMilestones(defaultDays, now);
+  } catch (err) {
+    console.error("[reminders] Milestone processing failed:", err);
+  }
 
-  await processConsultations(defaultDays, now);
+  try {
+    await processConsultations(defaultDays, now);
+  } catch (err) {
+    console.error("[reminders] Consultation processing failed:", err);
+  }
 }
 
 async function processMilestones(defaultDays: number, now: Date): Promise<void> {

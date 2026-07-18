@@ -21,6 +21,7 @@ export const ConsultationCreatePayloadSchema = z.object({
   concern: requiredText(500, "Concern"),
   booking_datetime: z.coerce.date(),
   status: requiredEnum(ConsultationStatus, "Status"),
+  reminder_days: z.number().int().min(0).nullable().optional(),
 });
 
 export const ConsultationUpdatePayloadSchema = ConsultationCreatePayloadSchema.extend({
@@ -35,6 +36,7 @@ const ConsultationDataSchema = z.object({
   concern: requiredText(500, "Concern"),
   booking_datetime: z.coerce.date(),
   status: requiredEnum(ConsultationStatus, "Status"),
+  reminder_days: z.number().int().min(0).nullable().optional(),
 });
 
 export const ConsultationWithClientCreatePayloadSchema = z.object({

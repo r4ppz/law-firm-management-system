@@ -1,6 +1,22 @@
 import { prisma } from "@/lib/prisma";
 
-export async function getMilestonesNeedingReminder() {
+export interface MilestoneReminderCandidate {
+  id: string;
+  title: string;
+  due_date: Date;
+  caseId: string;
+  assigneeIds: string[];
+  reminderDays: number | null;
+}
+
+export interface ConsultationReminderCandidate {
+  id: string;
+  concern: string;
+  booking_datetime: Date;
+  reminderDays: number | null;
+}
+
+export async function getMilestonesNeedingReminder(): Promise<MilestoneReminderCandidate[]> {
   const todayStart = new Date();
   todayStart.setHours(0, 0, 0, 0);
 
@@ -36,7 +52,7 @@ export async function getMilestonesNeedingReminder() {
   }));
 }
 
-export async function getConsultationsNeedingReminder() {
+export async function getConsultationsNeedingReminder(): Promise<ConsultationReminderCandidate[]> {
   const todayStart = new Date();
   todayStart.setHours(0, 0, 0, 0);
 
