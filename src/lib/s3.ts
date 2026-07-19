@@ -36,6 +36,7 @@ function getS3Client() {
     endpoint,
     credentials: { accessKeyId, secretAccessKey },
     forcePathStyle,
+    requestChecksumCalculation: "WHEN_REQUIRED",
   });
 }
 
