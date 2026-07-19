@@ -32,3 +32,16 @@
     }
   }
 }
+
+/* Mobile overrides */
+@media (max-width: 48rem) {
+  .modal {
+    .columns {
+      flex-direction: column;
+    }
+
+    .divider {
+      display: none;
+    }
+  }
+}
