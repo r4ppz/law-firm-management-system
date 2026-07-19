@@ -6,3 +6,12 @@
   padding: var(--space-xl);
   overflow-y: auto;
 }
+
+/* Mobile overrides */
+@media (max-width: 48rem) {
+  .detailPage {
+    height: auto;
+    padding: var(--space-md);
+    gap: var(--space-md);
+  }
+}

@@ -32,17 +32,3 @@
     }
   }
 }
-
-@media (max-width: 48rem) {
-  .modal {
-    width: 92vw;
-
-    .columns {
-      flex-direction: column;
-    }
-
-    .divider {
-      display: none;
-    }
-  }
-}

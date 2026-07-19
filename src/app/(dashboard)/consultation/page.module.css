@@ -4,3 +4,11 @@
   flex-direction: column;
   padding: var(--space-3xl) var(--space-5xl);
 }
+
+/* Mobile overrides */
+@media (max-width: 48rem) {
+  .wrapper {
+    padding: var(--space-lg);
+    height: auto;
+  }
+}

@@ -39,3 +39,10 @@
 .accentOverdue {
   border-top-color: var(--color-danger);
 }
+
+/* Mobile overrides */
+@media (max-width: 48rem) {
+  .card {
+    min-width: calc(50% - var(--space-xl));
+  }
+}

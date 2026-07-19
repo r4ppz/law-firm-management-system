@@ -34,6 +34,7 @@
   font-size: var(--font-size-sm);
   color: var(--color-text-primary);
   word-break: break-word;
+
   forced-color-adjust: none;
 
   &[data-focus-visible] {
@@ -320,5 +321,16 @@
       text-align: center;
       padding: var(--space-md);
     }
+  }
+}
+
+/* Mobile overrides */
+@media (max-width: 48rem) {
+  .resizableTableContainer {
+    overflow-x: auto;
+  }
+
+  .table {
+    min-width: 700px;
   }
 }

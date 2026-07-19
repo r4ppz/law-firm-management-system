@@ -3,8 +3,10 @@
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { FaUser } from "react-icons/fa6";
+import { FaBars, FaUser } from "react-icons/fa6";
 
+import { useSidebar } from "@/components/layout/Sidebar/sidebar-context";
+import { Button } from "@/components/ui/Button/Button";
 import { SignOutButton } from "@/features/auth/components/SignOutButton/SignOutButton";
 import { NotificationBell } from "@/features/notifications/components/NotificationBell/NotificationBell";
 import { roleLabels } from "@/features/users/constants";
@@ -22,6 +24,7 @@ interface HeaderProps {
 export function Header({ userImage, userName, userRole, initialUnreadCount }: HeaderProps) {
   const pathname = usePathname();
   const [imgError, setImgError] = useState(false);
+  const { toggle } = useSidebar();
 
   const getPageTitle = (path: string) => {
     if (path.startsWith("/dashboard")) return "Overview";
@@ -33,8 +36,18 @@ export function Header({ userImage, userName, userRole, initialUnreadCount }: He
 
   return (
     <header className={styles.header}>
-      <h2 className={styles.pageTitle}>{getPageTitle(pathname || "")}</h2>
-      <div className={styles.leftSection}>
+      <div className={styles.leftGroup}>
+        <Button
+          variant="ghost"
+          className={styles.hamburgerButton}
+          aria-label="Open sidebar"
+          onPress={toggle}
+        >
+          <FaBars />
+        </Button>
+        <h2 className={styles.pageTitle}>{getPageTitle(pathname || "")}</h2>
+      </div>
+      <div className={styles.rightSection}>
         <NotificationBell initialUnreadCount={initialUnreadCount} />
         <div className={styles.userSection}>
           <div className={styles.userProfile}>

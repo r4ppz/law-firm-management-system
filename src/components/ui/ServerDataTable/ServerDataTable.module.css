@@ -26,3 +26,20 @@
     background: var(--color-surface-bg);
   }
 }
+
+/* Mobile overrides */
+@media (max-width: 48rem) {
+  .content {
+    min-height: 300px;
+
+    .toolbar {
+      flex-direction: column;
+      align-items: stretch;
+      gap: var(--space-sm);
+
+      .addButton {
+        width: 100%;
+      }
+    }
+  }
+}
