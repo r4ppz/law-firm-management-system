@@ -130,37 +130,39 @@ Each record is only reminded once per day via the `last_reminded_at` field.
 
 ### Trigger mechanism
 
-| Deployment                    | Trigger                                 | Details                                                                    |
-| ----------------------------- | --------------------------------------- | -------------------------------------------------------------------------- |
-| Docker (local or self-hosted) | `node-cron` in `src/instrumentation.ts` | Runs hourly inside the long-lived Next.js process. No extra configuration. |
-| Vercel (serverless)           | Cron Jobs → `GET /api/cron/reminders`   | Configure in Vercel Dashboard. Requires `CRON_SECRET` env var.             |
+| Deployment                    | Trigger                                 | Details                                                                                   |
+| ----------------------------- | --------------------------------------- | ----------------------------------------------------------------------------------------- |
+| Docker (local or self-hosted) | `node-cron` in `src/instrumentation.ts` | Runs on schedule inside the long-lived Next.js process (guarded by `process.env.VERCEL`). |
+| Vercel (serverless)           | GitHub Actions workflow                 | Scheduled via `.github/workflows/reminder-cron.yml`. Sends `GET /api/cron/reminders`.     |
 
 ### Environment variables
 
-| Variable                | Required   | Default | Description                                                                                                                           |
-| ----------------------- | ---------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `DEFAULT_REMINDER_DAYS` | No         | `3`     | Global fallback when a milestone/consultation has no per-record `reminder_days` set                                                   |
-| `CRON_SECRET`           | For Vercel | —       | Shared secret for authenticating cron requests. Generate with `openssl rand -hex 32`. Sent as `Authorization: Bearer <secret>` header |
+| Variable                | Required       | Default | Description                                                                                                                         |
+| ----------------------- | -------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `DEFAULT_REMINDER_DAYS` | No             | `3`     | Global fallback when a milestone/consultation has no per-record `reminder_days` set                                                 |
+| `CRON_SECRET`           | Yes (all envs) | —       | Shared secret for authenticating cron requests. Generate with `openssl rand -hex 32`. Must match between Vercel and GitHub Secrets. |
 
-### Setting up on Vercel
+### Setting up with GitHub Actions
 
-1. Add `CRON_SECRET` to Vercel project environment variables.
-2. Define the cron job in `vercel.json`:
+On Vercel's free (Hobby) plan, native cron jobs are limited to once per day. The project uses a
+**GitHub Actions workflow** to trigger the reminder endpoint on a flexible schedule — no platform
+upgrade required.
 
-```json
-{
-  "crons": [
-    {
-      "path": "/api/cron/reminders",
-      "schedule": "0 * * * *"
-    }
-  ]
-}
-```
+1. **Generate a `CRON_SECRET`** (if you don't have one):
 
-Use `0 * * * *` for hourly (Pro plan) or `0 0 * * *` for daily (Hobby plan).
+   ```bash
+   openssl rand -hex 32
+   ```
 
-3. Redeploy for cron changes to take effect.
+2. **Add it to Vercel** — Project Dashboard → Settings → Environment Variables → add `CRON_SECRET`.
 
-> Hobby accounts are limited to cron jobs that run once per day. More frequent expressions fail during deployment.
-> The cron endpoint validates requests using the `CRON_SECRET` environment variable automatically.
+3. **Add it to GitHub** — Repository → Settings → Secrets and variables → Actions → **New repository secret** → name `CRON_SECRET`, paste the same value.
+
+4. **Set the deployment URL** in `.github/workflows/reminder-cron.yml`:
+
+   Replace `https://your-app.vercel.app` with your actual Vercel production URL.
+
+5. **Push the workflow file** to `main` (or any branch). GitHub Actions registers the schedule automatically.
+
+The workflow is configured at `0 */4 * * *` (every 4 hours). To adjust the cadence or trigger a run
+manually, go to the **Actions** tab → **Reminder Cron** → **Run workflow**.
