@@ -1,3 +1,5 @@
+x-image: &app-image ghcr.io/four4Bytes/law-firm-management-system:latest
+
 services:
   db:
     image: postgres:16-alpine
@@ -15,9 +17,7 @@ services:
       - "5432"
 
   migrate:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: *app-image
     container_name: prisma-migrate
     restart: "no"
     depends_on:
@@ -62,9 +62,7 @@ services:
       "
 
   web:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: *app-image
     container_name: nextjs-prod
     restart: unless-stopped
     depends_on:
