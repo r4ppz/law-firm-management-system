@@ -1,4 +1,4 @@
-x-image: &app-image ghcr.io/four4Bytes/law-firm-management-system:latest
+x-image: &app-image ghcr.io/four4bytes/law-firm-management-system:latest
 
 services:
   db:

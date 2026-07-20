@@ -66,7 +66,7 @@ The project builds and publishes a Docker image automatically on every push to `
 ### Registry
 
 ```
-ghcr.io/four4Bytes/law-firm-management-system
+ghcr.io/four4bytes/law-firm-management-system
 ```
 
 | Tag          | Example         | Description                     |
@@ -79,7 +79,7 @@ ghcr.io/four4Bytes/law-firm-management-system
 The package is **public**:
 
 ```bash
-docker pull ghcr.io/four4Bytes/law-firm-management-system:latest
+docker pull ghcr.io/four4bytes/law-firm-management-system:latest
 ```
 
 ### Build
