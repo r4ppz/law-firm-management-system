@@ -15,3 +15,12 @@
     }
   }
 }
+
+/* Mobile overrides */
+@media (max-width: 48rem) {
+  .layout {
+    .main {
+      width: 100%;
+    }
+  }
+}

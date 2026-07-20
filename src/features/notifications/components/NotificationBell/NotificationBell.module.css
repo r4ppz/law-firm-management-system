@@ -132,3 +132,14 @@
     }
   }
 }
+
+/* Mobile overrides */
+@media (max-width: 48rem) {
+  .popover {
+    width: calc(100vw - 2 * var(--space-sm));
+  }
+
+  .popover .dialog {
+    max-height: 80vh;
+  }
+}

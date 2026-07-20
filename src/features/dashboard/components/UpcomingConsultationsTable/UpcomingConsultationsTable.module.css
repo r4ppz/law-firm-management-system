@@ -24,3 +24,11 @@
     background: var(--color-surface-bg);
   }
 }
+
+/* Mobile overrides */
+@media (max-width: 48rem) {
+  .wrapper {
+    flex: none;
+    min-height: auto;
+  }
+}

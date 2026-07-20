@@ -145,6 +145,7 @@ Plan: add more than one theme later
 
   /* Z index */
   --z-dropdown: 1000;
+  --z-sidebar: 1050;
   --z-modal: 1100;
   --z-toast: 1200;
   --z-progress-bar: 9999;

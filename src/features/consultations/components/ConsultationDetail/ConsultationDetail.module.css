@@ -22,3 +22,14 @@
     color: var(--color-text-primary);
   }
 }
+
+/* Mobile overrides */
+@media (max-width: 48rem) {
+  .detail {
+    flex: none;
+    min-height: auto;
+    overflow-y: visible;
+    padding: 0;
+    gap: var(--space-md);
+  }
+}

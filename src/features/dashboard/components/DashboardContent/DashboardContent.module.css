@@ -40,3 +40,23 @@
     }
   }
 }
+
+/* Mobile overrides */
+@media (max-width: 48rem) {
+  .dashboard {
+    height: auto;
+    min-height: auto;
+    gap: var(--space-xl);
+
+    .tablesWrapper {
+      flex-direction: column;
+      flex: none;
+      min-height: auto;
+
+      .leftTable {
+        flex: none;
+        min-height: auto;
+      }
+    }
+  }
+}

@@ -107,3 +107,19 @@
     }
   }
 }
+
+/* Mobile overrides */
+@media (max-width: 48rem) {
+  .card {
+    .mainContent {
+      padding: var(--space-lg);
+
+      .bodyRow {
+        .grid {
+          grid-template-columns: repeat(2, 1fr);
+          gap: var(--space-md);
+        }
+      }
+    }
+  }
+}

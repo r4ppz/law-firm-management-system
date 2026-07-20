@@ -92,3 +92,16 @@
     opacity: 0;
   }
 }
+
+/* Mobile overrides */
+@media (max-width: 48rem) {
+  .region {
+    right: 0;
+    left: 0;
+    padding: var(--space-sm);
+  }
+
+  .region .toast {
+    width: 100%;
+  }
+}

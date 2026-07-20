@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 
 import { Header } from "@/components/layout/Header/Header";
 import { Sidebar } from "@/components/layout/Sidebar/Sidebar";
+import { SidebarProvider } from "@/components/layout/Sidebar/sidebar-context";
 import { ToastRegion } from "@/components/ui/Toast/Toast";
 import { NavigationProvider } from "@/components/ui/TopProgressBar/navigation-context";
 import { TopProgressBar } from "@/components/ui/TopProgressBar/TopProgressBar";
@@ -28,16 +29,23 @@ export default async function DashboardLayout({ children }: { children: React.Re
     <div className={styles.layout}>
       <NavigationProvider>
         <TopProgressBar />
-        <Sidebar initialCollapsed={initialCollapsed} />
-        <div className={styles.main}>
-          <Header
-            userImage={session?.user?.image ?? null}
+        <SidebarProvider>
+          <Sidebar
+            initialCollapsed={initialCollapsed}
             userName={session?.user?.name}
             userRole={session?.user?.role}
-            initialUnreadCount={initialUnreadCount}
+            userImage={session?.user?.image}
           />
-          <main className={styles.content}>{children}</main>
-        </div>
+          <div className={styles.main}>
+            <Header
+              userImage={session?.user?.image ?? null}
+              userName={session?.user?.name}
+              userRole={session?.user?.role}
+              initialUnreadCount={initialUnreadCount}
+            />
+            <main className={styles.content}>{children}</main>
+          </div>
+        </SidebarProvider>
         <ToastRegion />
       </NavigationProvider>
     </div>

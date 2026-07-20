@@ -64,4 +64,23 @@
       }
     }
   }
+
+  /* Mobile overrides */
+  @media (max-width: 48rem) {
+    .tabList {
+      .tab {
+        padding: var(--space-xs) var(--space-md);
+      }
+    }
+
+    .tabPanels {
+      flex: none;
+      min-height: auto;
+
+      .tabPanel {
+        flex: none;
+        min-height: auto;
+      }
+    }
+  }
 }

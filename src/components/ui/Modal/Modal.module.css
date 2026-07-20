@@ -63,6 +63,21 @@
   }
 }
 
+/* Mobile overrides */
+@media (max-width: 48rem) {
+  .overlay {
+    padding: var(--space-sm);
+  }
+
+  .modal {
+    max-width: 96vw;
+  }
+
+  .dialog {
+    padding: var(--space-lg);
+  }
+}
+
 @keyframes fade-in {
   from {
     opacity: 0;
