@@ -4,16 +4,16 @@ import { getCaseAccessContext } from "@/features/cases/queries";
 import { dispatchNotifications } from "@/features/notifications/dispatch";
 import { NotificationType, ReviewDecision, Role } from "@/generated/prisma/browser";
 import { requireAuth } from "@/lib/auth-guards";
-import { FORBIDDEN_MESSAGE } from "@/lib/rbac";
+import { TaskCancelledError } from "@/lib/errors";
 
 import {
   addTaskReviewerAction,
-  cancelTaskAction,
   createTaskAction,
   deleteTaskAction,
   getTaskDetailRowByIdAction,
   removeTaskReviewerAction,
   reviewTaskAction,
+  setTaskStatusAction,
   submitTaskAction,
   updateTaskAction,
 } from "../actions";
@@ -24,6 +24,7 @@ import {
   createTask,
   deleteTask,
   removeTaskReviewer,
+  reopenTask,
   setAssignmentStatus,
   updateTask,
 } from "../mutations";
@@ -76,6 +77,7 @@ vi.mock("../queries", () => ({
   getTaskAccessContext: vi.fn(),
   getTaskById: vi.fn(),
   getTaskDetailRowById: vi.fn(),
+  getTaskReviewers: vi.fn().mockResolvedValue([]),
 }));
 
 vi.mock("../mutations", () => ({
@@ -87,6 +89,7 @@ vi.mock("../mutations", () => ({
   addTaskReviewer: vi.fn(),
   removeTaskReviewer: vi.fn(),
   cancelTask: vi.fn(),
+  reopenTask: vi.fn(),
 }));
 
 const uuid = "550e8400-e29b-41d4-a716-446655440000";
@@ -179,7 +182,7 @@ describe("getTaskDetailRowByIdAction", () => {
         isReviewer: false,
         canSubmit: false,
         canReview: false,
-        canCancel: false,
+        canSetStatus: false,
         canManageReviewers: false,
         canEdit: false,
       },
@@ -210,7 +213,7 @@ describe("getTaskDetailRowByIdAction", () => {
         isReviewer: false,
         canSubmit: false,
         canReview: false,
-        canCancel: false,
+        canSetStatus: false,
         canManageReviewers: false,
         canEdit: true,
       },
@@ -219,7 +222,7 @@ describe("getTaskDetailRowByIdAction", () => {
 });
 
 describe("createTaskAction", () => {
-  it("returns FORBIDDEN_MESSAGE when task create is denied on the parent case", async () => {
+  it("returns a forbidden envelope when task create is denied on the parent case", async () => {
     const payload = {
       title: "Draft memo",
       description: undefined,
@@ -229,11 +232,15 @@ describe("createTaskAction", () => {
 
     expect(await createTaskAction(payload)).toEqual({
       success: false,
-      error: FORBIDDEN_MESSAGE,
+      error: {
+        code: "forbidden",
+        title: "Access denied",
+        description: "You don't have permission to perform this action.",
+      },
     });
   });
 
-  it("creates a task without dispatching a notification", async () => {
+  it("dispatches TaskAssigned to the initial assignees on creation", async () => {
     vi.mocked(getCaseAccessContext).mockResolvedValue({ assigned: true, own: false });
     vi.mocked(createTask).mockResolvedValue({ id: "t1" });
 
@@ -246,12 +253,20 @@ describe("createTaskAction", () => {
 
     expect(result).toEqual({ success: true, data: { id: "t1" } });
     await flushAfterCallbacks();
-    expect(dispatchNotifications).not.toHaveBeenCalled();
+
+    expect(dispatchNotifications).toHaveBeenCalledTimes(1);
+    const [payload, actorUserId] = vi.mocked(dispatchNotifications).mock.calls[0];
+    expect(payload.type).toBe(NotificationType.TaskAssigned);
+    expect(payload.userIds).toEqual([uuid]);
+    expect(actorUserId).toBe("u2");
+    expect(payload.actionUrl).toBe(`/case/${uuid}`);
+    expect(payload.caseId).toBe(uuid);
+    expect(payload.taskId).toBe("t1");
   });
 });
 
 describe("updateTaskAction", () => {
-  it("returns FORBIDDEN_MESSAGE when task update is denied", async () => {
+  it("returns a forbidden envelope when task update is denied", async () => {
     const payload = {
       taskId: uuid,
       title: "Renamed",
@@ -261,7 +276,11 @@ describe("updateTaskAction", () => {
 
     expect(await updateTaskAction(payload)).toEqual({
       success: false,
-      error: FORBIDDEN_MESSAGE,
+      error: {
+        code: "forbidden",
+        title: "Access denied",
+        description: "You don't have permission to perform this action.",
+      },
     });
   });
 
@@ -279,7 +298,14 @@ describe("updateTaskAction", () => {
       assignee_ids: undefined,
     });
 
-    expect(result).toEqual({ success: false, error: FORBIDDEN_MESSAGE });
+    expect(result).toEqual({
+      success: false,
+      error: {
+        code: "forbidden",
+        title: "Access denied",
+        description: "You don't have permission to perform this action.",
+      },
+    });
   });
 
   it("allows a Lawyer who is attached to the task (assignee/reviewer)", async () => {
@@ -346,13 +372,37 @@ describe("updateTaskAction notification split", () => {
     const types = vi.mocked(dispatchNotifications).mock.calls.map(([payload]) => payload.type);
     expect(types).toEqual([NotificationType.TaskAssigned]);
   });
+
+  it("excludes a new assignee who is already a reviewer", async () => {
+    vi.mocked(getTaskById).mockResolvedValue({
+      ...taskRecord,
+      taskAssignments: [{ user_id: assignee1, user: { name: "n2" }, status: "Pending" as const }],
+      taskReviewers: [
+        { id: "tr2", reviewer_user_id: assignee2, decision: "Pending" as const, reviewed_at: null },
+      ],
+    });
+
+    await updateTaskAction({
+      taskId: uuid,
+      title: "Renamed",
+      description: undefined,
+      assignee_ids: [assignee1, assignee2],
+    });
+    await flushAfterCallbacks();
+
+    expect(dispatchNotifications).not.toHaveBeenCalled();
+  });
 });
 
 describe("deleteTaskAction", () => {
-  it("returns FORBIDDEN_MESSAGE when task delete is denied", async () => {
+  it("returns a forbidden envelope when task delete is denied", async () => {
     expect(await deleteTaskAction({ taskId: uuid })).toEqual({
       success: false,
-      error: FORBIDDEN_MESSAGE,
+      error: {
+        code: "forbidden",
+        title: "Access denied",
+        description: "You don't have permission to perform this action.",
+      },
     });
   });
 
@@ -365,7 +415,11 @@ describe("deleteTaskAction", () => {
 
     expect(await deleteTaskAction({ taskId: uuid })).toEqual({
       success: false,
-      error: FORBIDDEN_MESSAGE,
+      error: {
+        code: "forbidden",
+        title: "Access denied",
+        description: "You don't have permission to perform this action.",
+      },
     });
   });
 
@@ -392,7 +446,11 @@ describe("deleteTaskAction", () => {
 
     expect(await deleteTaskAction({ taskId: uuid })).toEqual({
       success: false,
-      error: "Failed to delete task",
+      error: {
+        code: "unknown",
+        title: "Failed to delete task",
+        description: "Something went wrong on our end. Please try again.",
+      },
     });
   });
 });
@@ -403,11 +461,15 @@ const assigneeRecord = {
 };
 
 describe("submitTaskAction", () => {
-  it("returns FORBIDDEN_MESSAGE when the caller is not an assignee", async () => {
+  it("returns a forbidden envelope when the caller is not an assignee", async () => {
     vi.mocked(getTaskById).mockResolvedValue(taskRecord);
     expect(await submitTaskAction({ taskId: uuid, status: "Submitted" })).toEqual({
       success: false,
-      error: FORBIDDEN_MESSAGE,
+      error: {
+        code: "forbidden",
+        title: "Access denied",
+        description: "You don't have permission to perform this action.",
+      },
     });
   });
 
@@ -434,7 +496,7 @@ describe("submitTaskAction", () => {
 });
 
 describe("reviewTaskAction", () => {
-  it("returns FORBIDDEN_MESSAGE when the caller is not a reviewer", async () => {
+  it("returns a forbidden envelope when the caller is not a reviewer", async () => {
     vi.mocked(getTaskById).mockResolvedValue({
       ...taskRecord,
       status: "Submitted" as const,
@@ -442,7 +504,11 @@ describe("reviewTaskAction", () => {
     });
     expect(await reviewTaskAction({ taskId: uuid, decision: "Accepted" })).toEqual({
       success: false,
-      error: FORBIDDEN_MESSAGE,
+      error: {
+        code: "forbidden",
+        title: "Access denied",
+        description: "You don't have permission to perform this action.",
+      },
     });
   });
 
@@ -472,14 +538,18 @@ describe("reviewTaskAction", () => {
 });
 
 describe("addTaskReviewerAction", () => {
-  it("returns FORBIDDEN_MESSAGE for a stranger", async () => {
+  it("returns a forbidden envelope for a stranger", async () => {
     vi.mocked(getTaskById).mockResolvedValue({
       ...taskRecord,
       taskReviewers: [],
     });
     expect(await addTaskReviewerAction({ taskId: uuid, reviewerUserId: uuid })).toEqual({
       success: false,
-      error: FORBIDDEN_MESSAGE,
+      error: {
+        code: "forbidden",
+        title: "Access denied",
+        description: "You don't have permission to perform this action.",
+      },
     });
   });
 
@@ -501,14 +571,38 @@ describe("addTaskReviewerAction", () => {
     expect(result).toEqual({ success: true });
     expect(addTaskReviewer).toHaveBeenCalledWith(uuid, uuid);
   });
+
+  it("does not dispatch a notification when the reviewer is already an assignee", async () => {
+    vi.mocked(getTaskAccessContext).mockResolvedValue({
+      assigned: true,
+      own: true,
+      taskOnly: true,
+    });
+    vi.mocked(getTaskById).mockResolvedValue({
+      ...taskRecord,
+      taskAssignments: [{ user_id: uuid, user: { name: "n" }, status: "Pending" as const }],
+      taskReviewers: [],
+    });
+    vi.mocked(addTaskReviewer).mockResolvedValue({ id: uuid });
+
+    await addTaskReviewerAction({ taskId: uuid, reviewerUserId: uuid });
+    await flushAfterCallbacks();
+
+    expect(addTaskReviewer).toHaveBeenCalledWith(uuid, uuid);
+    expect(dispatchNotifications).not.toHaveBeenCalled();
+  });
 });
 
 describe("removeTaskReviewerAction", () => {
-  it("returns FORBIDDEN_MESSAGE for a non-creator", async () => {
+  it("returns a forbidden envelope for a non-creator", async () => {
     vi.mocked(getTaskById).mockResolvedValue({ ...taskRecord, created_by_user_id: "u1" });
     expect(await removeTaskReviewerAction({ taskId: uuid, reviewerUserId: uuid2 })).toEqual({
       success: false,
-      error: FORBIDDEN_MESSAGE,
+      error: {
+        code: "forbidden",
+        title: "Access denied",
+        description: "You don't have permission to perform this action.",
+      },
     });
   });
 
@@ -527,7 +621,11 @@ describe("removeTaskReviewerAction", () => {
     vi.mocked(getTaskById).mockResolvedValue({ ...taskRecord, created_by_user_id: uuid });
     expect(await removeTaskReviewerAction({ taskId: uuid, reviewerUserId: uuid })).toEqual({
       success: false,
-      error: "Cannot remove the task creator as a reviewer",
+      error: {
+        code: "conflict",
+        title: "Not allowed",
+        description: "Cannot remove the task creator as a reviewer.",
+      },
     });
   });
 
@@ -546,35 +644,36 @@ describe("removeTaskReviewerAction", () => {
   });
 });
 
-describe("cancelTaskAction", () => {
-  it("returns FORBIDDEN_MESSAGE for a non-creator", async () => {
+describe("setTaskStatusAction", () => {
+  const creatorAccess = { assigned: true, own: true, taskOnly: true };
+  const nonCreatorAccess = { assigned: true, own: false, taskOnly: true };
+
+  it("returns a forbidden envelope for a non-creator", async () => {
+    vi.mocked(getTaskAccessContext).mockResolvedValue(nonCreatorAccess);
     vi.mocked(getTaskById).mockResolvedValue({ ...taskRecord, created_by_user_id: "u1" });
-    expect(await cancelTaskAction({ taskId: uuid })).toEqual({
+    expect(await setTaskStatusAction({ taskId: uuid, status: "Cancelled" })).toEqual({
       success: false,
-      error: FORBIDDEN_MESSAGE,
+      error: {
+        code: "forbidden",
+        title: "Access denied",
+        description: "You don't have permission to perform this action.",
+      },
     });
   });
 
   it("cancels a task for its creator", async () => {
-    vi.mocked(getTaskAccessContext).mockResolvedValue({
-      assigned: true,
-      own: true,
-      taskOnly: true,
-    });
+    vi.mocked(getTaskAccessContext).mockResolvedValue(creatorAccess);
     vi.mocked(getTaskById).mockResolvedValue({ ...taskRecord, created_by_user_id: "u2" });
     vi.mocked(cancelTask).mockResolvedValue({ id: uuid });
 
-    const result = await cancelTaskAction({ taskId: uuid });
+    const result = await setTaskStatusAction({ taskId: uuid, status: "Cancelled" });
     expect(result).toEqual({ success: true });
     expect(cancelTask).toHaveBeenCalledWith(uuid);
+    expect(reopenTask).not.toHaveBeenCalled();
   });
 
   it("allows the creator to cancel a Completed task", async () => {
-    vi.mocked(getTaskAccessContext).mockResolvedValue({
-      assigned: true,
-      own: true,
-      taskOnly: true,
-    });
+    vi.mocked(getTaskAccessContext).mockResolvedValue(creatorAccess);
     vi.mocked(getTaskById).mockResolvedValue({
       ...taskRecord,
       status: "Completed" as const,
@@ -582,9 +681,88 @@ describe("cancelTaskAction", () => {
     });
     vi.mocked(cancelTask).mockResolvedValue({ id: uuid });
 
-    const result = await cancelTaskAction({ taskId: uuid });
+    const result = await setTaskStatusAction({ taskId: uuid, status: "Cancelled" });
     expect(result).toEqual({ success: true });
     expect(cancelTask).toHaveBeenCalledWith(uuid);
+  });
+
+  it("reopens a Submitted task for its creator, resetting decisions and submissions", async () => {
+    vi.mocked(getTaskAccessContext).mockResolvedValue(creatorAccess);
+    vi.mocked(getTaskById).mockResolvedValue({
+      ...taskRecord,
+      status: "Submitted" as const,
+      created_by_user_id: "u2",
+    });
+    vi.mocked(reopenTask).mockResolvedValue({ id: uuid, reopened: true });
+
+    const result = await setTaskStatusAction({ taskId: uuid, status: "Pending" });
+    expect(result).toEqual({ success: true });
+    expect(reopenTask).toHaveBeenCalledWith(uuid);
+    expect(cancelTask).not.toHaveBeenCalled();
+  });
+
+  it("skips the audit entry when reopening is a server-side no-op", async () => {
+    vi.mocked(getTaskAccessContext).mockResolvedValue(creatorAccess);
+    vi.mocked(getTaskById).mockResolvedValue({ ...taskRecord, created_by_user_id: "u2" });
+    vi.mocked(reopenTask).mockResolvedValue({ id: uuid, reopened: false });
+
+    const result = await setTaskStatusAction({ taskId: uuid, status: "Pending" });
+    expect(result).toEqual({ success: true });
+    expect(reopenTask).toHaveBeenCalledWith(uuid);
+    expect(cancelTask).not.toHaveBeenCalled();
+  });
+
+  it("returns a conflict envelope when cancelling an already-cancelled task", async () => {
+    vi.mocked(getTaskAccessContext).mockResolvedValue(creatorAccess);
+    vi.mocked(getTaskById).mockResolvedValue({
+      ...taskRecord,
+      created_by_user_id: "u2",
+    });
+    vi.mocked(cancelTask).mockRejectedValue(new TaskCancelledError());
+
+    const result = await setTaskStatusAction({ taskId: uuid, status: "Cancelled" });
+    expect(result).toEqual({
+      success: false,
+      error: {
+        code: "conflict",
+        title: "Task cancelled",
+        description: "This task has already been cancelled.",
+      },
+    });
+  });
+
+  it("returns a conflict envelope when reopening a cancelled task", async () => {
+    vi.mocked(getTaskAccessContext).mockResolvedValue(creatorAccess);
+    vi.mocked(getTaskById).mockResolvedValue({
+      ...taskRecord,
+      created_by_user_id: "u2",
+    });
+    vi.mocked(reopenTask).mockRejectedValue(new TaskCancelledError());
+
+    const result = await setTaskStatusAction({ taskId: uuid, status: "Pending" });
+    expect(result).toEqual({
+      success: false,
+      error: {
+        code: "conflict",
+        title: "Task cancelled",
+        description: "A cancelled task cannot be reopened.",
+      },
+    });
+  });
+
+  it("returns a validation envelope for an unsupported status", async () => {
+    const result = await setTaskStatusAction({
+      taskId: uuid,
+      status: "Submitted" as never,
+    });
+    expect(result).toEqual({
+      success: false,
+      error: {
+        code: "validation",
+        title: "Invalid task data",
+        description: "Some fields are missing or malformed. Review your input and try again.",
+      },
+    });
   });
 });
 
@@ -622,7 +800,14 @@ describe("updateTaskAction lifecycle lock", () => {
         description: undefined,
         assignee_ids: [uuid],
       }),
-    ).toEqual({ success: false, error: "Only the task creator can change assignees" });
+    ).toEqual({
+      success: false,
+      error: {
+        code: "conflict",
+        title: "Not allowed",
+        description: "Only the task creator can change assignees.",
+      },
+    });
   });
 
   it("lets a non-creator edit details when assignee_ids are unchanged (modal always sends them)", async () => {

@@ -199,6 +199,14 @@ export function uniqueUuidArray(label: string): z.ZodArray<z.ZodUUID> {
     .refine((ids) => new Set(ids).size === ids.length, { message: `${label}s must be unique` });
 }
 
+/** Characters allowed in phone numbers: digits, +, -, (, ), space. */
+const PHONE_REGEX = /[^0-9+\-() ]/g;
+
+/** Strips all characters from a string that are not valid phone-number characters. */
+export function filterPhoneInput(value: string): string {
+  return value.replace(PHONE_REGEX, "");
+}
+
 /**
  * Derives a React Aria `validate` function from a Zod sub-schema. Empty
  * strings are normalized to `undefined` so optional fields validate cleanly,

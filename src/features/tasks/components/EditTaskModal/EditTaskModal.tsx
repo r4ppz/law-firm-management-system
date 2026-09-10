@@ -5,16 +5,14 @@ import { Form } from "react-aria-components";
 import { FaPlus } from "react-icons/fa6";
 
 import { Button } from "@/components/ui/Button/Button";
-import { Checkbox } from "@/components/ui/Checkbox/Checkbox";
 import { DropZone } from "@/components/ui/DropZone/DropZone";
 import { Modal } from "@/components/ui/Modal/Modal";
 import { Select, SelectItem } from "@/components/ui/Select/Select";
-import { StatusBadge, type StatusBadgeVariant } from "@/components/ui/StatusBadge/StatusBadge";
 import { TextField } from "@/components/ui/TextField/TextField";
-import { queue } from "@/components/ui/Toast/Toast";
 import { deleteDocumentAction, getDocumentsPaginatedAction } from "@/features/documents/actions";
 import { FileList } from "@/features/documents/components/FileList/FileList";
 import { ViewAttachmentModal } from "@/features/documents/components/ViewAttachmentModal/ViewAttachmentModal";
+import { useDocumentDownload } from "@/features/documents/hooks/useDocumentDownload";
 import type { DocumentRow } from "@/features/documents/queries";
 import { deleteNoteAction, getTaskNotesAction } from "@/features/notes/actions";
 import { AddNoteModal } from "@/features/notes/components/AddNoteModal/AddNoteModal";
@@ -23,9 +21,9 @@ import { NoteList } from "@/features/notes/components/NoteList/NoteList";
 import type { NoteRow } from "@/features/notes/queries";
 import {
   addTaskReviewerAction,
-  cancelTaskAction,
   removeTaskReviewerAction,
   reviewTaskAction,
+  setTaskStatusAction,
   submitTaskAction,
   updateTaskAction,
   type TaskCapabilities,
@@ -37,16 +35,10 @@ import { UserSelect } from "@/features/users/components/UserSelect/UserSelect";
 import { ReviewDecision, TaskAssignmentStatus, TaskStatus } from "@/generated/prisma/browser";
 import { ACCEPTED_FILE_EXTENSIONS } from "@/lib/file-types";
 import { createFieldValidator, optionalString, requiredString } from "@/lib/form-utils";
+import { toastActionError, toastError, toastSuccess } from "@/lib/toast-utils";
 import { useFileUpload } from "@/lib/useFileUpload";
 
 import styles from "./EditTaskModal.module.css";
-
-const statusVariant: Record<TaskStatus, StatusBadgeVariant> = {
-  [TaskStatus.Pending]: "pending",
-  [TaskStatus.Submitted]: "info",
-  [TaskStatus.Completed]: "done",
-  [TaskStatus.Cancelled]: "cancelled",
-};
 
 interface EditTaskModalProps {
   isOpen: boolean;
@@ -77,12 +69,13 @@ export function EditTaskModal({
     Record<string, TaskAssignmentStatus>
   >(Object.fromEntries(task.assignTo.map((a) => [a.id, a.status])));
   const [decision, setDecision] = useState<"Accepted" | "Rejected" | null>(null);
-  const [cancelChosen, setCancelChosen] = useState(false);
+  const [statusChoice, setStatusChoice] = useState<"Pending" | "Cancelled" | null>(null);
   const [isPending, setIsPending] = useState(false);
   const [documents, setDocuments] = useState<DocumentRow[]>([]);
   const [markedForDeletion, setMarkedForDeletion] = useState<Set<string>>(new Set());
   const [isLoadingDocuments, setIsLoadingDocuments] = useState(true);
   const [previewDocument, setPreviewDocument] = useState<DocumentRow | null>(null);
+  const { handleDownload } = useDocumentDownload();
   const [notes, setNotes] = useState<NoteRow[]>([]);
   const [deletedNoteIds, setDeletedNoteIds] = useState<Set<string>>(new Set());
   const [addNoteOpen, setAddNoteOpen] = useState(false);
@@ -108,7 +101,10 @@ export function EditTaskModal({
         setDocuments(rows);
       } catch {
         if (cancelled) return;
-        queue.add({ title: "Failed to load attachments" }, { timeout: 5000 });
+        toastError(
+          "Failed to load attachments",
+          "We couldn't load the attachments for this task. Please try again.",
+        );
       } finally {
         if (!cancelled) setIsLoadingDocuments(false);
       }
@@ -121,7 +117,10 @@ export function EditTaskModal({
         setNotes(rows);
       } catch {
         if (cancelled) return;
-        queue.add({ title: "Failed to load notes" }, { timeout: 5000 });
+        toastError(
+          "Failed to load notes",
+          "We couldn't load the notes for this task. Please try again.",
+        );
       }
     }
 
@@ -138,7 +137,10 @@ export function EditTaskModal({
       const rows = await getTaskNotesAction(task.id);
       setNotes(rows);
     } catch {
-      queue.add({ title: "Failed to load notes" }, { timeout: 5000 });
+      toastError(
+        "Failed to load notes",
+        "We couldn't load the notes for this task. Please try again.",
+      );
     }
   }
 
@@ -170,12 +172,15 @@ export function EditTaskModal({
         assignee_ids: Array.from(assigneeIds),
       });
       if (!parsed.success) {
-        queue.add({ title: "Failed to update task", description: "Please check the form fields" });
+        toastError(
+          "Failed to update task",
+          "Please review the highlighted form fields and try again.",
+        );
         return false;
       }
       const result = await updateTaskAction(parsed.data);
       if (!result.success) {
-        queue.add({ title: "Failed to update task", description: result.error });
+        toastActionError(result, "update task");
         return false;
       }
       return true;
@@ -198,14 +203,14 @@ export function EditTaskModal({
           const result = await addTaskReviewerAction({ taskId: task.id, reviewerUserId: id });
           if (!result.success) {
             reviewerFailed = true;
-            queue.add({ title: result.error ?? "Failed to add reviewer" });
+            toastActionError(result, "add reviewer");
           }
         }
         for (const id of removed) {
           const result = await removeTaskReviewerAction({ taskId: task.id, reviewerUserId: id });
           if (!result.success) {
             reviewerFailed = true;
-            queue.add({ title: result.error ?? "Failed to remove reviewer" });
+            toastActionError(result, "remove reviewer");
           }
         }
         if (reviewerFailed) {
@@ -214,10 +219,10 @@ export function EditTaskModal({
         }
       }
 
-      if (capabilities.canCancel && cancelChosen) {
-        const result = await cancelTaskAction({ taskId: task.id });
+      if (capabilities.canSetStatus && statusChoice !== null && statusChoice !== task.status) {
+        const result = await setTaskStatusAction({ taskId: task.id, status: statusChoice });
         if (!result.success) {
-          queue.add({ title: "Failed to cancel task", description: result.error });
+          toastActionError(result, "update task status");
           setIsPending(false);
           return;
         }
@@ -233,7 +238,7 @@ export function EditTaskModal({
         if (chosen !== current) {
           const result = await submitTaskAction({ taskId: task.id, status: chosen });
           if (!result.success) {
-            queue.add({ title: "Failed to update submission", description: result.error });
+            toastActionError(result, "submit task");
             setIsPending(false);
             return;
           }
@@ -246,7 +251,7 @@ export function EditTaskModal({
           decision,
         });
         if (!result.success) {
-          queue.add({ title: "Failed to record review", description: result.error });
+          toastActionError(result, "record review");
           setIsPending(false);
           return;
         }
@@ -258,13 +263,13 @@ export function EditTaskModal({
         const { uploaded, failed } = await uploadFiles();
         hasFailedUploads = failed > 0;
         if (failed === 0 && uploaded > 0) {
-          queue.add(
-            { title: `Task updated with ${uploaded} file${uploaded > 1 ? "s" : ""}` },
-            { timeout: 5000 },
+          toastSuccess(
+            `Task updated with ${uploaded} file${uploaded > 1 ? "s" : ""}`,
+            "The task has been updated and the new attachments were uploaded.",
           );
         }
       } else {
-        queue.add({ title: "Task updated" }, { timeout: 5000 });
+        toastSuccess("Task updated", "The task has been updated.");
       }
 
       if (markedForDeletion.size > 0) {
@@ -273,9 +278,10 @@ export function EditTaskModal({
         );
         const failedCount = results.filter((r) => !r.success).length;
         if (failedCount > 0) {
-          queue.add({
-            title: `Failed to delete ${failedCount} document${failedCount > 1 ? "s" : ""}`,
-          });
+          toastError(
+            `Failed to delete ${failedCount} document${failedCount > 1 ? "s" : ""}`,
+            "Some attachments could not be deleted. Please try again.",
+          );
         }
       }
 
@@ -284,9 +290,10 @@ export function EditTaskModal({
         const results = await Promise.all(ids.map((id) => deleteNoteAction({ noteId: id })));
         const failedCount = results.filter((r) => !r.success).length;
         if (failedCount > 0) {
-          queue.add({
-            title: `Failed to delete ${failedCount} note${failedCount > 1 ? "s" : ""}`,
-          });
+          toastError(
+            `Failed to delete ${failedCount} note${failedCount > 1 ? "s" : ""}`,
+            "Some notes could not be deleted. Please try again.",
+          );
           setDeletedNoteIds((prev) => {
             const next = new Set(prev);
             ids.forEach((id, i) => {
@@ -306,10 +313,10 @@ export function EditTaskModal({
       onOpenChange(false);
       onSuccess();
     } catch {
-      queue.add({
-        title: "Failed to update task",
-        description: "An unexpected error occurred. Please try again.",
-      });
+      toastError(
+        "Unexpected error",
+        "Something went wrong while updating the task. Please try again.",
+      );
     } finally {
       setIsPending(false);
     }
@@ -317,7 +324,7 @@ export function EditTaskModal({
 
   return (
     <Modal title="Task" isOpen={isOpen} onOpenChange={handleCancel} className={styles.modal}>
-      <Form onSubmit={handleSave}>
+      <Form onSubmit={handleSave} className={styles.form}>
         <div className={styles.columns}>
           <div className={styles.column}>
             <TextField
@@ -360,14 +367,30 @@ export function EditTaskModal({
               users={task.reviewers.map((r) => ({ id: r.id, name: r.name, status: r.decision }))}
             />
 
-            <StatusBadge className={styles.statusBadge} variant={statusVariant[task.status]}>
-              {task.status}
-            </StatusBadge>
-
-            {capabilities.canCancel && (
-              <Checkbox isSelected={cancelChosen} onChange={setCancelChosen}>
-                Cancel task
-              </Checkbox>
+            {capabilities.canSetStatus && (
+              <div className={styles.section}>
+                <Select
+                  label="Status"
+                  aria-label="Change task status"
+                  value={statusChoice ?? task.status}
+                  isDisabled={task.status === TaskStatus.Cancelled}
+                  disabledKeys={[TaskStatus.Submitted, TaskStatus.Completed]}
+                  onChange={(key) =>
+                    setStatusChoice(
+                      key === TaskStatus.Pending
+                        ? "Pending"
+                        : key === TaskStatus.Cancelled
+                          ? "Cancelled"
+                          : null,
+                    )
+                  }
+                >
+                  <SelectItem id={TaskStatus.Pending}>Pending</SelectItem>
+                  <SelectItem id={TaskStatus.Submitted}>Submitted</SelectItem>
+                  <SelectItem id={TaskStatus.Completed}>Completed</SelectItem>
+                  <SelectItem id={TaskStatus.Cancelled}>Cancelled</SelectItem>
+                </Select>
+              </div>
             )}
 
             {isCurrentUserAssignee && (
@@ -425,8 +448,10 @@ export function EditTaskModal({
               onRemove={removeFile}
               existingDocuments={documents}
               onView={setPreviewDocument}
+              onDownload={handleDownload}
               onDelete={capabilities.canEdit ? handleRemoveDocument : undefined}
               isLoading={isLoadingDocuments}
+              showSize={false}
             />
           </div>
 

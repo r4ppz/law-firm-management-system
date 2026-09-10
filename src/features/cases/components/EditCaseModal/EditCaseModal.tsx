@@ -17,6 +17,7 @@ import { UserSelect } from "@/features/users/components/UserSelect/UserSelect";
 import { CaseStatus } from "@/generated/prisma/browser";
 import {
   createFieldValidator,
+  filterPhoneInput,
   optionalString,
   requiredString,
   selectEnumHandler,
@@ -62,6 +63,7 @@ export function EditCaseModal({
       onOpenChange,
       onSuccess,
       successMessage: "Case updated",
+      successDescription: "The case has been updated.",
       failureMessage: "Failed to update case. Please try again.",
       schema: CaseWithClientUpdatePayloadSchema,
     },
@@ -122,7 +124,9 @@ export function EditCaseModal({
             <TextField
               label="Phone"
               value={clientPhone}
-              onChange={setClientPhone}
+              onChange={(v) => setClientPhone(filterPhoneInput(v))}
+              type="tel"
+              inputMode="tel"
               placeholder="Optional"
               validate={createFieldValidator(
                 CaseWithClientUpdatePayloadSchema.shape.client.shape.phone_number,

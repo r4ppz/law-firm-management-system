@@ -19,6 +19,7 @@ import { ConsultationStatus } from "@/generated/prisma/browser";
 import { combineDateTime } from "@/lib/date";
 import {
   createFieldValidator,
+  filterPhoneInput,
   optionalString,
   requiredString,
   selectEnumHandler,
@@ -32,7 +33,7 @@ const STATUS_OPTIONS = Object.values(ConsultationStatus);
 interface AddConsultationModalProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
-  onSuccess: () => void;
+  onSuccess: (consultationId: string) => void;
   users: ActiveUserSummary[];
 }
 
@@ -77,12 +78,16 @@ export function AddConsultationModal({
   const { concern, date, time, status } = consultation;
 
   const { isPending, submitForm, handleCancel } = useModalForm<
-    z.input<typeof ConsultationWithClientCreatePayloadSchema>
+    z.input<typeof ConsultationWithClientCreatePayloadSchema>,
+    { id: string }
   >({
     submit: createConsultationWithClientAction,
     onOpenChange,
-    onSuccess,
+    onSuccess: (data) => {
+      if (data) onSuccess(data.id);
+    },
     successMessage: "Consultation created",
+    successDescription: "The consultation has been created.",
     failureMessage: "Failed to create consultation. Please try again.",
     schema: ConsultationWithClientCreatePayloadSchema,
     reset: () => {
@@ -149,7 +154,9 @@ export function AddConsultationModal({
             <TextField
               label="Phone"
               value={phone}
-              onChange={(v) => setClientField("phone", v)}
+              onChange={(v) => setClientField("phone", filterPhoneInput(v))}
+              type="tel"
+              inputMode="tel"
               placeholder="Optional"
               validate={createFieldValidator(
                 ConsultationWithClientCreatePayloadSchema.shape.client.shape.phone_number,

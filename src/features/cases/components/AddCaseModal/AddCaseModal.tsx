@@ -15,6 +15,7 @@ import { UserSelect } from "@/features/users/components/UserSelect/UserSelect";
 import { CaseStatus } from "@/generated/prisma/browser";
 import {
   createFieldValidator,
+  filterPhoneInput,
   optionalString,
   requiredString,
   selectEnumHandler,
@@ -28,7 +29,7 @@ const STATUS_OPTIONS = Object.values(CaseStatus);
 interface AddCaseModalProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
-  onSuccess: () => void;
+  onSuccess: (caseId: string) => void;
   users: ActiveUserSummary[];
 }
 
@@ -68,12 +69,16 @@ export function AddCaseModal({ isOpen, onOpenChange, onSuccess, users }: AddCase
   const { caseTitle, caseType, status, partiesInvolved } = caseFields;
 
   const { isPending, submitForm, handleCancel } = useModalForm<
-    z.input<typeof CaseWithClientCreatePayloadSchema>
+    z.input<typeof CaseWithClientCreatePayloadSchema>,
+    { id: string }
   >({
     submit: createCaseWithClientAction,
     onOpenChange,
-    onSuccess,
+    onSuccess: (data) => {
+      if (data) onSuccess(data.id);
+    },
     successMessage: "Case created",
+    successDescription: "The case has been created.",
     failureMessage: "Failed to create case. Please try again.",
     schema: CaseWithClientCreatePayloadSchema,
     reset: () => {
@@ -140,7 +145,9 @@ export function AddCaseModal({ isOpen, onOpenChange, onSuccess, users }: AddCase
             <TextField
               label="Phone"
               value={phone}
-              onChange={(v) => setClientField("phone", v)}
+              onChange={(v) => setClientField("phone", filterPhoneInput(v))}
+              type="tel"
+              inputMode="tel"
               placeholder="Optional"
               validate={createFieldValidator(
                 CaseWithClientCreatePayloadSchema.shape.client.shape.phone_number,

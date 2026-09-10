@@ -7,7 +7,9 @@ import {
 } from "@/features/consultations/queries";
 import { dispatchNotifications } from "@/features/notifications/dispatch";
 import { NotificationType, Role, type Consultation } from "@/generated/prisma/browser";
-import { requireAuth, requirePermissionOrNull } from "@/lib/auth-guards";
+import { Prisma } from "@/generated/prisma/client";
+import { requireAuth, requirePermission } from "@/lib/auth-guards";
+import { ForbiddenError } from "@/lib/errors";
 import { prisma } from "@/lib/prisma";
 import { can, FORBIDDEN_MESSAGE } from "@/lib/rbac";
 import { deleteDocumentFiles } from "@/lib/storage-cleanup";
@@ -34,7 +36,7 @@ afterEach(async () => {
 
 vi.mock("@/lib/auth-guards", () => ({
   requireAuth: vi.fn().mockResolvedValue({ id: "u1", email: "e", role: Role.Admin, name: "n" }),
-  requirePermissionOrNull: vi
+  requirePermission: vi
     .fn()
     .mockResolvedValue({ id: "u1", email: "e", role: Role.Admin, name: "n" }),
   assertRecordPermission: vi.fn((session, permission, context) => {
@@ -155,7 +157,11 @@ describe("createConsultationAction", () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expect(await createConsultationAction({} as any)).toEqual({
       success: false,
-      error: "Invalid consultation data",
+      error: {
+        code: "validation",
+        title: "Invalid consultation data",
+        description: "Some fields are missing or malformed. Review your input and try again.",
+      },
     });
   });
 
@@ -179,7 +185,11 @@ describe("createConsultationAction", () => {
 
     expect(await createConsultationAction(validPayload)).toEqual({
       success: false,
-      error: "Failed to create consultation",
+      error: {
+        code: "unknown",
+        title: "Failed to create consultation",
+        description: "Something went wrong on our end. Please try again.",
+      },
     });
   });
 
@@ -202,6 +212,25 @@ describe("createConsultationAction", () => {
       }),
     );
   });
+
+  it("dispatches ConsultationAssigned to the assignees on creation", async () => {
+    vi.mocked(prisma.consultation.create).mockResolvedValue(consultationRecord);
+
+    const result = await createConsultationAction({
+      ...validPayload,
+      assignee_ids: [uuid, "550e8400-e29b-41d4-a716-446655440001"],
+    });
+
+    expect(result).toEqual({ success: true });
+    await flushAfterCallbacks();
+
+    expect(dispatchNotifications).toHaveBeenCalledTimes(1);
+    const [payload, actorUserId] = vi.mocked(dispatchNotifications).mock.calls[0];
+    expect(payload.type).toBe(NotificationType.ConsultationAssigned);
+    expect(payload.userIds).toEqual([uuid, "550e8400-e29b-41d4-a716-446655440001"]);
+    expect(actorUserId).toBe("u1");
+    expect(payload.consultationId).toBe(consultationRecord.id);
+  });
 });
 
 describe("updateConsultationAction", () => {
@@ -217,7 +246,11 @@ describe("updateConsultationAction", () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expect(await updateConsultationAction({ consultationId: uuid } as any)).toEqual({
       success: false,
-      error: "Invalid consultation data",
+      error: {
+        code: "validation",
+        title: "Invalid consultation data",
+        description: "Some fields are missing or malformed. Review your input and try again.",
+      },
     });
   });
 
@@ -226,7 +259,11 @@ describe("updateConsultationAction", () => {
 
     expect(await updateConsultationAction(validPayload)).toEqual({
       success: false,
-      error: "Consultation not found",
+      error: {
+        code: "not_found",
+        title: "Consultation not found",
+        description: "The consultation may have been deleted by another user.",
+      },
     });
   });
 
@@ -283,7 +320,11 @@ describe("updateConsultationAction", () => {
 
     expect(await updateConsultationAction(validPayload)).toEqual({
       success: false,
-      error: "Failed to update consultation",
+      error: {
+        code: "unknown",
+        title: "Failed to update consultation",
+        description: "Something went wrong on our end. Please try again.",
+      },
     });
   });
 });
@@ -292,7 +333,11 @@ describe("deleteConsultationAction", () => {
   it("returns an error for an invalid payload", async () => {
     expect(await deleteConsultationAction({ consultationId: "abc" })).toEqual({
       success: false,
-      error: "Invalid consultation ID",
+      error: {
+        code: "validation",
+        title: "Invalid consultation data",
+        description: "Some fields are missing or malformed. Review your input and try again.",
+      },
     });
   });
 
@@ -301,7 +346,11 @@ describe("deleteConsultationAction", () => {
 
     expect(await deleteConsultationAction({ consultationId: uuid })).toEqual({
       success: false,
-      error: "Consultation not found",
+      error: {
+        code: "not_found",
+        title: "Consultation not found",
+        description: "The consultation may have been deleted by another user.",
+      },
     });
   });
 
@@ -338,7 +387,38 @@ describe("deleteConsultationAction", () => {
 
     expect(await deleteConsultationAction({ consultationId: uuid })).toEqual({
       success: false,
-      error: "Failed to delete consultation",
+      error: {
+        code: "unknown",
+        title: "Failed to delete consultation",
+        description: "Something went wrong on our end. Please try again.",
+      },
+    });
+  });
+
+  it("returns not_found when the consultation is deleted concurrently", async () => {
+    vi.mocked(getConsultationEditData).mockResolvedValue({
+      id: "1",
+      client_id: uuid,
+      concern: "Legal advice",
+      booking_datetime: consultationRecord.booking_datetime,
+      status: "Scheduled",
+      reminder_days: null,
+      assignee_ids: [],
+    });
+    vi.mocked(prisma.consultation.delete).mockRejectedValue(
+      new Prisma.PrismaClientKnownRequestError("Record not found", {
+        code: "P2025",
+        clientVersion: "test",
+      }),
+    );
+
+    expect(await deleteConsultationAction({ consultationId: uuid })).toEqual({
+      success: false,
+      error: {
+        code: "not_found",
+        title: "Consultation not found",
+        description: "The consultation may have been deleted by another user.",
+      },
     });
   });
 });
@@ -400,33 +480,33 @@ describe("authorization guards for non-Admin users", () => {
     });
   });
 
-  it("returns FORBIDDEN_MESSAGE from updateConsultationAction when not assigned and not the owner", async () => {
+  it("returns forbidden envelope from updateConsultationAction when not assigned and not the owner", async () => {
     expect(await updateConsultationAction(updatePayload)).toEqual({
       success: false,
-      error: FORBIDDEN_MESSAGE,
+      error: { code: "forbidden", title: "Access denied", description: FORBIDDEN_MESSAGE },
     });
   });
 
-  it("returns FORBIDDEN_MESSAGE from updateConsultationWithClientAction when not assigned and not the owner", async () => {
+  it("returns forbidden envelope from updateConsultationWithClientAction when not assigned and not the owner", async () => {
     expect(await updateConsultationWithClientAction(updateWithClientPayload)).toEqual({
       success: false,
-      error: FORBIDDEN_MESSAGE,
+      error: { code: "forbidden", title: "Access denied", description: FORBIDDEN_MESSAGE },
     });
   });
 
-  it("returns FORBIDDEN_MESSAGE from deleteConsultationAction when not assigned and not the owner", async () => {
+  it("returns forbidden envelope from deleteConsultationAction when not assigned and not the owner", async () => {
     expect(await deleteConsultationAction({ consultationId: uuid })).toEqual({
       success: false,
-      error: FORBIDDEN_MESSAGE,
+      error: { code: "forbidden", title: "Access denied", description: FORBIDDEN_MESSAGE },
     });
   });
 
-  it("returns FORBIDDEN_MESSAGE from createConsultationWithClientAction when the role lacks consultation.create", async () => {
-    vi.mocked(requirePermissionOrNull).mockResolvedValue(null);
+  it("returns forbidden envelope from createConsultationWithClientAction when the role lacks consultation.create", async () => {
+    vi.mocked(requirePermission).mockRejectedValue(new ForbiddenError());
 
     expect(await createConsultationWithClientAction(createWithClientPayload)).toEqual({
       success: false,
-      error: FORBIDDEN_MESSAGE,
+      error: { code: "forbidden", title: "Access denied", description: FORBIDDEN_MESSAGE },
     });
   });
 });
